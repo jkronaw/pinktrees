@@ -47,6 +47,9 @@ namespace engine
 		Matrix2 operator+(const Matrix2&) const;
 		Matrix2 operator-(const Matrix2&) const;
 
+		// subscript operator
+		float& operator[](int index);
+
 		float determinant() const;
 
 		Matrix2 inversed() const;
@@ -106,6 +109,9 @@ namespace engine
 		// matrix operations
 		Matrix3 operator+(const Matrix3&) const;
 		Matrix3 operator-(const Matrix3&) const;
+
+		// subscript operator
+		float& operator[](int index);
 
 		float determinant() const;
 
@@ -169,6 +175,9 @@ namespace engine
 		Matrix4 operator+(const Matrix4&) const;
 		Matrix4 operator-(const Matrix4&) const;
 
+		// subscript operator
+		float& operator[](int index);
+
 		Matrix4 transposed() const;
 		void transpose();
 
@@ -179,6 +188,8 @@ namespace engine
 		// special matrices
 		static Matrix4 CreateIdentity();
 		static Matrix4 CreateScale(float, float, float);
+		static Matrix4 CreateScale(float);
+		static Matrix4 CreateScale(const Vector3&);
 		static Matrix4 CreateTranslation(float, float, float);
 		static Matrix4 CreateTranslation(const Vector3&);
 		static Matrix4 CreateRotationX(float);

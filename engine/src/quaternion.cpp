@@ -1,5 +1,5 @@
 #include "quaternion.h"
-#include<math.h>
+#include <math.h>
 
 namespace engine
 {
