@@ -1,5 +1,6 @@
 #include "matrix.h"
 #include "math.h"
+#include "exceptions.h"
 
 namespace engine
 {
@@ -1058,7 +1059,7 @@ namespace engine
 		}
 		else
 		{
-			throw "Matrix is not invertible";
+			throw MatrixNotInvertibleException();
 		}
 	}
 

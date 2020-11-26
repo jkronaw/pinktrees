@@ -16,4 +16,9 @@ namespace engine
 	{
 		explicit FileCouldNotBeOpenedException(const char* message);
 	};
+
+	struct MatrixNotInvertibleException : Exception
+	{
+		MatrixNotInvertibleException() = default;
+	};
 }

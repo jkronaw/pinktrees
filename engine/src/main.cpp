@@ -474,7 +474,6 @@ void run(GLFWwindow* win)
 
 int main(int argc, char* argv[])
 {
-
 	int gl_major = 4, gl_minor = 3;
 	int is_fullscreen = 0;
 	int is_vsync = 1;

@@ -15,6 +15,7 @@ namespace engine
 
 		createObject();
 	}
+
 	std::vector<Mesh*> WavefrontLoader::getObjects() { return objects; }
 
 	void WavefrontLoader::parseLine(std::stringstream& sin)
