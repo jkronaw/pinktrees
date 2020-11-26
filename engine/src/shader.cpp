@@ -1,7 +1,8 @@
 #include "shader.h"
 
-
 #include <fstream>
+
+#include <stdexcept>
 
 namespace engine
 {

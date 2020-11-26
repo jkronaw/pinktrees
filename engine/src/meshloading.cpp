@@ -124,22 +124,22 @@ namespace engine
 			glGenBuffers(3, vboIds);
 			glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
 			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vector3), &vertices[0], GL_STATIC_DRAW);
-			glEnableVertexAttribArray(0);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
+			glEnableVertexAttribArray(VERTICES);
+			glVertexAttribPointer(VERTICES, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
 
 			if (texcoords.size() > 0)
 			{
 				glBindBuffer(GL_ARRAY_BUFFER, vboIds[1]);
 				glBufferData(GL_ARRAY_BUFFER, texcoords.size() * sizeof(Vector2), &texcoords[0], GL_STATIC_DRAW);
-				glEnableVertexAttribArray(1);
-				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vector2), 0);
+				glEnableVertexAttribArray(TEXCOORDS);
+				glVertexAttribPointer(TEXCOORDS, 2, GL_FLOAT, GL_FALSE, sizeof(Vector2), 0);
 			}
 			if (normals.size() > 0)
 			{
 				glBindBuffer(GL_ARRAY_BUFFER, vboIds[2]);
 				glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(Vector3), &normals[0], GL_STATIC_DRAW);
-				glEnableVertexAttribArray(2);
-				glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
+				glEnableVertexAttribArray(NORMALS);
+				glVertexAttribPointer(NORMALS, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
 			}
 		}
 
