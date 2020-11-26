@@ -335,7 +335,7 @@ void setupOpenGL(int winx, int winy)
 }
 
 void createShaderProgram() {
-	shaderProgram.init("shaders/vertex.glsl", "shaders/fragment.glsl");
+	shaderProgram.init("shaders/vertex.vert", "shaders/fragment.frag");
 	shaderProgram.bindAttribLocation(Mesh::VERTICES, "inPosition");
 	shaderProgram.bindAttribLocation(Mesh::TEXCOORDS, "inTexcoord");
 	shaderProgram.bindAttribLocation(Mesh::NORMALS, "inNormal");
@@ -350,7 +350,7 @@ class SceneNodeCallback : public ISceneNodeCallback
 {
 	void beforeDraw(SceneNode* node) override
 	{
-		
+
 	}
 
 	void afterDraw(SceneNode* node) override {
@@ -413,31 +413,31 @@ void update(GLFWwindow* win, double elapsedSecs)
 		diff *= CAMERA_ROTATE_SPEED;
 
 		if (isEulerMode) {
-			Vector3 oldCameraSide = oldCameraViewMatrixInversed.multiply(Vector3(1, 0, 0));
+			Vector3 oldCameraSide = oldCameraViewMatrixInversed * Vector3(1, 0, 0);
 
 			Matrix4 rotationSide = Matrix4::CreateRotationY(diff.x);
-			Matrix4 rotationUp = Matrix4::CreateRotation(diff.y, oldCameraSide);
+			Matrix4 rotationUp = Matrix4::CreateRotation(-diff.y, oldCameraSide);
 
-			camera.setViewMatrix(oldCameraViewMatrix.multiply(rotationUp).multiply(rotationSide));
+			camera.setViewMatrix(oldCameraViewMatrix * rotationUp * rotationSide);
 		}
 		else // Quaternion
 		{
 			if (diff.magnitude() > 0)
 			{
-				Vector3 oldCameraAxis = oldCameraViewMatrixInversed.multiply(Vector3(-diff.y, -diff.x, 0));
+				Vector3 oldCameraAxis = oldCameraViewMatrixInversed * Vector3(-diff.y, -diff.x, 0);
 
 				Quaternion q = Quaternion(oldCameraAxis.magnitude(), oldCameraAxis);
 				Matrix4 mat = q.GLRotationMatrix();
 
-				camera.setViewMatrix(oldCameraViewMatrix.multiply(mat));
+				camera.setViewMatrix(oldCameraViewMatrix * mat);
 			}
 		}
 	}
 	else // camera translation using keys
 	{
-		Matrix4 translationMatrix = Matrix4::CreateTranslation(
-			camera.getViewMatrixInversed().multiply(cameraVelocity * elapsedSecs));
-		camera.setViewMatrix(camera.getViewMatrix().multiply(translationMatrix));
+		Matrix4 translationMatrix = Matrix4::CreateTranslation(camera.getViewMatrixInversed() * cameraVelocity * elapsedSecs);
+		Matrix4 out = camera.getViewMatrix() * translationMatrix;
+		camera.setViewMatrix(out);
 	}
 
 	shaderProgram.use();
@@ -474,6 +474,7 @@ void run(GLFWwindow* win)
 
 int main(int argc, char* argv[])
 {
+
 	int gl_major = 4, gl_minor = 3;
 	int is_fullscreen = 0;
 	int is_vsync = 1;

@@ -72,9 +72,7 @@ namespace engine
 	void ShaderProgram::setUniform(const char* name, const Matrix4& matrix)
 	{
 		GLuint id = glGetUniformLocation(programId, name);
-		float tmp[16];
-		matrix.convertToOpenGL(tmp);
-		glUniformMatrix4fv(id, 1, GL_FALSE, tmp);
+		glUniformMatrix4fv(id, 1, GL_FALSE, (GLfloat*) &matrix);
 	}
 
 	GLuint ShaderProgram::getUniformBlockBinding(const char* name, GLuint bp)

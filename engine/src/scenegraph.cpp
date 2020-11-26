@@ -25,7 +25,7 @@ namespace engine
 	SceneNode::SceneNode(SceneNode* parent)
 	{
 		this->parent = parent;
-		this->matrix = Matrix4::IdentityMatrix();
+		this->matrix = Matrix4::CreateIdentity();
 
 		if (parent != nullptr)
 		{
@@ -118,7 +118,7 @@ namespace engine
 		}
 		else
 		{
-			return parent->getModelMatrix().multiply(matrix);
+			return parent->getModelMatrix() * matrix;
 		}
 	}
 }

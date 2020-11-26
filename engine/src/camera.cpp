@@ -25,12 +25,8 @@ namespace engine
 	{
 		glBindBuffer(GL_UNIFORM_BUFFER, vboId);
 		{
-			float mat[16];
-			getViewMatrix().convertToOpenGL(mat);
-			glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Matrix4), mat);
-
-			getProjectionMatrix().convertToOpenGL(mat);
-			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Matrix4), sizeof(Matrix4), mat);
+			glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Matrix4), &viewMatrix);
+			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Matrix4), sizeof(Matrix4), &projectionMatrix);
 		}
 	}
 
@@ -88,7 +84,7 @@ namespace engine
 	{
 		if (!viewMatrixInversedUpToDate)
 		{
-			Matrix3 mat3 = getViewMatrix();
+			Matrix3 mat3 = Matrix3(getViewMatrix());
 			viewMatrixInversed = mat3.inversed();
 
 			viewMatrixInversedUpToDate = true;

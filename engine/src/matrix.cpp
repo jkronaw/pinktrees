@@ -795,15 +795,15 @@ namespace engine
 		return Matrix2(
 			data[0] * m.data[0] + data[2] * m.data[1],
 			data[0] * m.data[2] + data[2] * m.data[3],
-			data[1] * m.data[2] + data[3] * m.data[3],
+			data[1] * m.data[0] + data[3] * m.data[1],
 			data[1] * m.data[2] + data[3] * m.data[3]);
 	}
 
 	Vector3 Matrix3::operator*(const Vector3& v) const
 	{
 		return Vector3(Vector3(data[0], data[3], data[6]).dot(v),
-					   Vector3(data[1], data[4], data[7]).dot(v),
-					   Vector3(data[2], data[5], data[8]).dot(v));
+			Vector3(data[1], data[4], data[7]).dot(v),
+			Vector3(data[2], data[5], data[8]).dot(v));
 	}
 	Matrix3 Matrix3::operator*(const Matrix3& m) const
 	{
@@ -815,22 +815,22 @@ namespace engine
 		Vector3 trow2(t.data[1], t.data[4], t.data[7]);
 		Vector3 trow3(t.data[2], t.data[5], t.data[8]);
 		return Matrix3(row1.dot(trow1),
-					   row2.dot(trow1),
-					   row3.dot(trow1),
-					   row1.dot(trow2),
-					   row2.dot(trow2),
-					   row3.dot(trow2),
-					   row1.dot(trow3),
-					   row2.dot(trow3),
-					   row3.dot(trow3));
+			row1.dot(trow2),
+			row1.dot(trow3),
+			row2.dot(trow1),
+			row2.dot(trow2),
+			row2.dot(trow3),
+			row3.dot(trow1),
+			row3.dot(trow2),
+			row3.dot(trow3));
 	}
 
 	Vector4 Matrix4::operator*(const Vector4& v) const
 	{
 		return Vector4(Vector4(data[0], data[4], data[8], data[12]).dot(v),
-					   Vector4(data[1], data[5], data[9], data[13]).dot(v),
-					   Vector4(data[2], data[6], data[10], data[14]).dot(v),
-					   Vector4(data[3], data[7], data[11], data[15]).dot(v));
+			Vector4(data[1], data[5], data[9], data[13]).dot(v),
+			Vector4(data[2], data[6], data[10], data[14]).dot(v),
+			Vector4(data[3], data[7], data[11], data[15]).dot(v));
 	}
 	Matrix4 Matrix4::operator*(const Matrix4& m) const
 	{
@@ -843,22 +843,23 @@ namespace engine
 		Vector4 trow2(t.data[1], t.data[5], t.data[9], t.data[13]);
 		Vector4 trow3(t.data[2], t.data[6], t.data[10], t.data[14]);
 		Vector4 trow4(t.data[3], t.data[7], t.data[11], t.data[15]);
-		return Matrix4(row1.dot(trow1),
-					   row2.dot(trow1),
-					   row3.dot(trow1),
-					   row4.dot(trow1),
-					   row1.dot(trow2),
-					   row2.dot(trow2),
-					   row3.dot(trow2),
-					   row4.dot(trow2),
-					   row1.dot(trow3),
-					   row2.dot(trow3),
-					   row4.dot(trow3),
-					   row3.dot(trow3),
-					   row1.dot(trow4),
-					   row2.dot(trow4),
-					   row3.dot(trow4),
-					   row4.dot(trow4));
+		return Matrix4(
+			row1.dot(trow1),
+			row1.dot(trow2),
+			row1.dot(trow3),
+			row1.dot(trow4),
+			row2.dot(trow1),
+			row2.dot(trow2),
+			row2.dot(trow3),
+			row2.dot(trow4),
+			row3.dot(trow1),
+			row3.dot(trow2),
+			row3.dot(trow3),
+			row3.dot(trow4),
+			row4.dot(trow1),
+			row4.dot(trow2),
+			row4.dot(trow3),
+			row4.dot(trow4));
 	}
 
 	/* ------ matrix operations ------*/
@@ -953,57 +954,60 @@ namespace engine
 		);
 	}
 
-/* subscript operators */
-	float& Matrix2::operator[](int index){
+	/* subscript operators */
+	float& Matrix2::operator[](int index)
+	{
 		float value;
-		switch(index)
+		switch (index)
 		{
-			case 0: value = data[0];
-			case 1: value = data[2];
-			case 2: value = data[1];
-			case 3: value = data[3];
-			default: throw("Matrix Index out of bounds: Use 0-3");
+		case 0: value = data[0];
+		case 1: value = data[2];
+		case 2: value = data[1];
+		case 3: value = data[3];
+		default: throw("Matrix Index out of bounds: Use 0-3");
 		}
 		return value;
 	}
-	float& Matrix4::operator[](int index){
+	float& Matrix3::operator[](int index)
+	{
 		float value;
-		switch(index)
+		switch (index)
 		{
-			case 0: value = data[0];
-			case 1: value = data[3];
-			case 2: value = data[6];
-			case 3: value = data[1];
-			case 4: value = data[4];
-			case 5: value = data[7];
-			case 6: value = data[2];
-			case 7: value = data[5];
-			case 8: value = data[8];
-			default: throw("Matrix Index out of bounds: Use 0-8");
+		case 0: value = data[0];
+		case 1: value = data[3];
+		case 2: value = data[6];
+		case 3: value = data[1];
+		case 4: value = data[4];
+		case 5: value = data[7];
+		case 6: value = data[2];
+		case 7: value = data[5];
+		case 8: value = data[8];
+		default: throw("Matrix Index out of bounds: Use 0-8");
 		}
 		return value;
 	}
-	float& Matrix4::operator[](int index){
+	float& Matrix4::operator[](int index)
+	{
 		float value;
-		switch(index)
+		switch (index)
 		{
-			case 0: value = data[0];
-			case 1: value = data[4];
-			case 2: value = data[8];
-			case 3: value = data[12];
-			case 4: value = data[1];
-			case 5: value = data[5];
-			case 6: value = data[9];
-			case 7: value = data[13];
-			case 8: value = data[2];
-			case 9: value = data[6];
-			case 10: value = data[10];
-			case 11: value = data[14];
-			case 12: value = data[3];
-			case 13: value = data[7];
-			case 14: value = data[11];
-			case 15: value = data[15];
-			default: throw("Matrix Index out of bounds: Use 0-15");
+		case 0: value = data[0];
+		case 1: value = data[4];
+		case 2: value = data[8];
+		case 3: value = data[12];
+		case 4: value = data[1];
+		case 5: value = data[5];
+		case 6: value = data[9];
+		case 7: value = data[13];
+		case 8: value = data[2];
+		case 9: value = data[6];
+		case 10: value = data[10];
+		case 11: value = data[14];
+		case 12: value = data[3];
+		case 13: value = data[7];
+		case 14: value = data[11];
+		case 15: value = data[15];
+		default: throw("Matrix Index out of bounds: Use 0-15");
 		}
 		return value;
 	}
@@ -1013,7 +1017,7 @@ namespace engine
 		return data[0] * data[3] - data[2] * data[1];
 	}
 	float Matrix3::determinant() const
-	{	
+	{
 		return data[0] * Matrix2(data[4], data[7], data[5], data[8]).determinant()
 			- data[3] * Matrix2(data[1], data[7], data[2], data[8]).determinant()
 			+ data[6] * Matrix2(data[1], data[4], data[2], data[5]).determinant();
@@ -1023,7 +1027,7 @@ namespace engine
 	{
 		float d = determinant();
 		if (d != 0)
-		{	
+		{
 			return Matrix2(data[3], -data[2], -data[1], data[0]) / d;
 		}
 		else
@@ -1035,7 +1039,7 @@ namespace engine
 	{
 		float de = determinant();
 		if (de != 0)
-		{	
+		{
 			float c1 = Matrix2(data[4], data[7], data[5], data[8]).determinant();
 			float c2 = Matrix2(data[1], data[7], data[2], data[8]).determinant();
 			float c3 = Matrix2(data[1], data[4], data[2], data[5]).determinant();
@@ -1050,7 +1054,7 @@ namespace engine
 				-c4, c5, -c6,
 				c7, -c8, c9);
 
-			return adjugate.transposed() / de;
+			return adjugate / de;
 		}
 		else
 		{
@@ -1062,22 +1066,22 @@ namespace engine
 	void Matrix3::inverse() { (*this) = inversed(); }
 
 	Matrix2 Matrix2::transposed() const
-	{	
+	{
 		return Matrix2(data[0], data[1],
-					   data[2], data[3]);
+			data[2], data[3]);
 	}
 	Matrix3 Matrix3::transposed() const
 	{
 		return Matrix3(data[0], data[1], data[2],
-					   data[3], data[4], data[5],
-					   data[6], data[7], data[8]);
+			data[3], data[4], data[5],
+			data[6], data[7], data[8]);
 	}
 	Matrix4 Matrix4::transposed() const
 	{
 		return Matrix4(data[0], data[1], data[2], data[3],
-					   data[4], data[5], data[6], data[7],
-					   data[8], data[9], data[10], data[11],
-					   data[12], data[13], data[14], data[15]);
+			data[4], data[5], data[6], data[7],
+			data[8], data[9], data[10], data[11],
+			data[12], data[13], data[14], data[15]);
 	}
 
 	void Matrix2::transpose() { (*this) = transposed(); }
@@ -1086,23 +1090,23 @@ namespace engine
 
 	/* ------ IO ------ */
 	std::istream& operator>>(std::istream& is, Matrix2& m)
-	{	
+	{
 		is >> m.data[0] >> m.data[2] >> m.data[1] >> m.data[3];
 		return is;
 	}
 	std::istream& operator>>(std::istream& is, Matrix3& m)
-	{	
+	{
 		is >> m.data[0] >> m.data[3] >> m.data[6]
-		   >> m.data[1] >> m.data[4] >> m.data[7]
-		   >> m.data[2] >> m.data[5] >> m.data[8];
+			>> m.data[1] >> m.data[4] >> m.data[7]
+			>> m.data[2] >> m.data[5] >> m.data[8];
 		return is;
 	}
 	std::istream& operator>>(std::istream& is, Matrix4& m)
-	{	
+	{
 		is >> m.data[0] >> m.data[4] >> m.data[8] >> m.data[12]
-		   >> m.data[1] >> m.data[5] >> m.data[9] >> m.data[13]
-		   >> m.data[2] >> m.data[6] >> m.data[10] >> m.data[14]
-		   >> m.data[3] >> m.data[7] >> m.data[11] >> m.data[15];
+			>> m.data[1] >> m.data[5] >> m.data[9] >> m.data[13]
+			>> m.data[2] >> m.data[6] >> m.data[10] >> m.data[14]
+			>> m.data[3] >> m.data[7] >> m.data[11] >> m.data[15];
 		return is;
 	}
 
@@ -1169,7 +1173,8 @@ namespace engine
 	{
 		return CreateScale(s, s, s);
 	}
-	Matrix4 Matrix4::CreateScale(const Vector3& v){
+	Matrix4 Matrix4::CreateScale(const Vector3& v)
+	{
 		return CreateScale(v.x, v.y, v.z);
 	}
 	Matrix4 Matrix4::CreateTranslation(float tx, float ty, float tz)
@@ -1216,7 +1221,7 @@ namespace engine
 	{
 		Vector3 k = axis.normalized();
 		Matrix3 dualMatrix = Matrix3::CreateDual(k);
-		Matrix3 rotation = Matrix3::CreateIdentity() + sin(theta) * dualMatrix + (1 - cos(theta)) * dualMatrix * dualMatrix;
+		Matrix3 rotation = Matrix3::CreateIdentity() + sin(theta) * dualMatrix + (1 - cos(theta)) * (dualMatrix * dualMatrix);
 		return Matrix4(rotation);
 	}
 }

@@ -40,7 +40,7 @@
     <ClInclude Include="src\vector.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\fragment.glsl" />
+    <None Include="shaders\fragment.frag" />
     <None Include="shaders\vertex.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
