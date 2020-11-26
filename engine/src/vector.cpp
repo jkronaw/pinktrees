@@ -2,12 +2,6 @@
 
 namespace engine
 {
-	/* ------ helper ------ */
-	bool floatEquals(float s1, float s2)
-	{
-		return fabs(s1 - s2) < EPSILON;
-	}
-
 	/* ------ constructors ------ */
 	Vector2::Vector2(float x, float y) : x(x), y(y) {}
 	Vector3::Vector3(float x, float y, float z) : x(x), y(y), z(z) {}
@@ -477,5 +471,11 @@ namespace engine
 	Vector3 Vector3::up()
 	{
 		return Vector3(0, 1, 0);
+	}
+
+	/* ------ helper ------ */
+	bool floatEquals(float s1, float s2)
+	{
+		return fabs(s1 - s2) < EPSILON;
 	}
 }

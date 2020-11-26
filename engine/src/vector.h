@@ -217,4 +217,6 @@ namespace engine
 			float w, a = 0.0;
 		};
 	};
+
+	bool floatEquals(float s1, float s2);
 }
