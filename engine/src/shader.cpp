@@ -19,6 +19,9 @@ namespace engine
 
 	void ShaderProgram::init(const char* vertexShaderFilename, const char* fragmentShaderFilename)
 	{
+		int  success;
+		char infoLog[512];
+
 		std::string vertexShaderSource = readStringFromFile(vertexShaderFilename);
 		std::string fragmentShaderSource = readStringFromFile(fragmentShaderFilename);
 
@@ -29,13 +32,34 @@ namespace engine
 		glShaderSource(vertexShaderId, 1, &vertexShaderSourceC, 0);
 		glCompileShader(vertexShaderId);
 
+		glGetShaderiv(vertexShaderId, GL_COMPILE_STATUS, &success);
+		if (!success)
+		{
+			glGetShaderInfoLog(vertexShaderId, 512, NULL, infoLog);
+			throw ShaderCompilationException(infoLog);
+		}
+
 		fragmentShaderId = glCreateShader(GL_FRAGMENT_SHADER);
 		glShaderSource(fragmentShaderId, 1, &fragmentShaderSourceC, 0);
 		glCompileShader(fragmentShaderId);
 
+		glGetShaderiv(fragmentShaderId, GL_COMPILE_STATUS, &success);
+		if (!success)
+		{
+			glGetShaderInfoLog(fragmentShaderId, 512, NULL, infoLog);
+			throw ShaderCompilationException(infoLog);
+		}
+
 		programId = glCreateProgram();
 		glAttachShader(programId, vertexShaderId);
 		glAttachShader(programId, fragmentShaderId);
+
+		glGetProgramiv(programId, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			glGetProgramInfoLog(programId, 512, NULL, infoLog);
+			throw ShaderProgramLinkageException(infoLog);
+		}
 	}
 
 	void ShaderProgram::bindAttribLocation(GLuint id, const char* str)

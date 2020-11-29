@@ -335,7 +335,15 @@ void setupOpenGL(int winx, int winy)
 }
 
 void createShaderProgram() {
-	shaderProgram.init("shaders/vertex.vert", "shaders/fragment.frag");
+	try
+	{
+		shaderProgram.init("shaders/vertex.vert", "shaders/fragment.frag");
+	}
+	catch (Exception e)
+	{
+		std::cout << e.message << std::endl;
+		exit(EXIT_FAILURE);
+	}
 	shaderProgram.bindAttribLocation(Mesh::VERTICES, "inPosition");
 	shaderProgram.bindAttribLocation(Mesh::TEXCOORDS, "inTexcoord");
 	shaderProgram.bindAttribLocation(Mesh::NORMALS, "inNormal");

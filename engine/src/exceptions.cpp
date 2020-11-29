@@ -13,4 +13,18 @@ namespace engine
 		ss << "File '" << filename << "' could not be openend.";
 		message = ss.str();
 	}
+
+	ShaderCompilationException::ShaderCompilationException(const char* filename)
+	{
+		std::stringstream ss;
+		ss << "Shader could not be compiled. Log output: \n" << filename;
+		message = ss.str();
+	}
+
+	ShaderProgramLinkageException::ShaderProgramLinkageException(const char* filename)
+	{
+		std::stringstream ss;
+		ss << "Shader program could not be linked. Log output: \n" << filename;
+		message = ss.str();
+	}
 }

@@ -17,6 +17,16 @@ namespace engine
 		explicit FileCouldNotBeOpenedException(const char* message);
 	};
 
+	struct ShaderCompilationException : Exception
+	{
+		explicit ShaderCompilationException(const char* message);
+	};
+
+	struct ShaderProgramLinkageException : Exception
+	{
+		explicit ShaderProgramLinkageException(const char* message);
+	};
+
 	struct MatrixNotInvertibleException : Exception
 	{
 		MatrixNotInvertibleException() = default;
