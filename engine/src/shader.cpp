@@ -53,13 +53,6 @@ namespace engine
 		programId = glCreateProgram();
 		glAttachShader(programId, vertexShaderId);
 		glAttachShader(programId, fragmentShaderId);
-
-		glGetProgramiv(programId, GL_LINK_STATUS, &success);
-		if (!success)
-		{
-			glGetProgramInfoLog(programId, 512, NULL, infoLog);
-			throw ShaderProgramLinkageException(infoLog);
-		}
 	}
 
 	void ShaderProgram::bindAttribLocation(GLuint id, const char* str)
@@ -69,11 +62,22 @@ namespace engine
 
 	void ShaderProgram::link()
 	{
+		int  success;
+		char infoLog[512];
+
 		glLinkProgram(programId);
+
 		glDetachShader(programId, vertexShaderId);
 		glDeleteShader(vertexShaderId);
 		glDetachShader(programId, fragmentShaderId);
 		glDeleteShader(fragmentShaderId);
+
+		glGetProgramiv(programId, GL_LINK_STATUS, &success);
+		if (!success)
+		{
+			glGetProgramInfoLog(programId, 512, NULL, infoLog);
+			throw ShaderProgramLinkageException(infoLog);
+		}
 	}
 
 	GLuint ShaderProgram::getUniformLocation(const char* name)

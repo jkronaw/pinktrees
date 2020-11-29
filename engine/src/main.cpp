@@ -338,17 +338,17 @@ void createShaderProgram() {
 	try
 	{
 		shaderProgram.init("shaders/vertex.vert", "shaders/fragment.frag");
+		shaderProgram.bindAttribLocation(Mesh::VERTICES, "inPosition");
+		shaderProgram.bindAttribLocation(Mesh::TEXCOORDS, "inTexcoord");
+		shaderProgram.bindAttribLocation(Mesh::NORMALS, "inNormal");
+		shaderProgram.link();
 	}
 	catch (Exception e)
 	{
 		std::cout << e.message << std::endl;
 		exit(EXIT_FAILURE);
 	}
-	shaderProgram.bindAttribLocation(Mesh::VERTICES, "inPosition");
-	shaderProgram.bindAttribLocation(Mesh::TEXCOORDS, "inTexcoord");
-	shaderProgram.bindAttribLocation(Mesh::NORMALS, "inNormal");
-	shaderProgram.link();
-	
+
 #ifndef ERROR_CALLBACK
 	checkOpenGLError("ERROR: Could not create shader program.");
 #endif
