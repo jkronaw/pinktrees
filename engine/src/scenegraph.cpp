@@ -70,6 +70,11 @@ namespace engine
 		this->nodes.push_back(newNode);
 	}
 
+	void SceneNode::addTexture(TextureInfo* textureInfo)
+	{
+		textures.push_back(textureInfo);
+	}
+
 	void SceneNode::removeNode(SceneNode* toRemove)
 	{
 		nodes.erase(std::remove(nodes.begin(), nodes.end(), toRemove));
@@ -96,6 +101,12 @@ namespace engine
 		{
 			Matrix4 modelMatrix = getModelMatrix();
 			shaderProgram->setUniform("ModelMatrix", modelMatrix);
+
+			for (TextureInfo* tInfo : textures)
+			{
+				tInfo->updateShader(shaderProgram);
+			}
+
 			mesh->draw();
 		}
 

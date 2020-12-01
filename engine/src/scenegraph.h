@@ -1,9 +1,11 @@
 #pragma once
 
 #include <vector>
+
+#include "matrix.h"
 #include "shader.h"
 #include "meshloading.h"
-#include "matrix.h"
+#include "texture.h"
 
 namespace engine
 {
@@ -38,6 +40,7 @@ namespace engine
 		Matrix4 getMatrix();
 		void setMesh(Mesh*);
 		void addNode(SceneNode*);
+		void addTexture(TextureInfo*);
 		SceneNode* createNode();
 		void removeNode(SceneNode*);
 		void clearNodes();
@@ -46,6 +49,7 @@ namespace engine
 		void setCallback(ISceneNodeCallback*);
 	private:
 		std::vector<SceneNode*> nodes;
+		std::vector<TextureInfo*> textures;
 		SceneNode* parent = nullptr;
 		ShaderProgram* shaderProgram = nullptr;
 		Matrix4 matrix;

@@ -87,20 +87,27 @@ namespace engine
 
 	void ShaderProgram::setUniform(const char* name, const Vector3& vector)
 	{
-		GLuint id = glGetUniformLocation(programId, name);
-		glUniform3fv(id, 1, (GLfloat*)&vector);
+		GLuint location = glGetUniformLocation(programId, name);
+		glUniform3fv(location, 1, (GLfloat*)&vector);
 	}
 
 	void ShaderProgram::setUniform(const char* name, const Vector4& vector)
 	{
-		GLuint id = glGetUniformLocation(programId, name);
-		glUniform4fv(id, 1, (GLfloat*)&vector);
+		GLuint location = glGetUniformLocation(programId, name);
+		glUniform4fv(location, 1, (GLfloat*)&vector);
 	}
 
 	void ShaderProgram::setUniform(const char* name, const Matrix4& matrix)
 	{
-		GLuint id = glGetUniformLocation(programId, name);
-		glUniformMatrix4fv(id, 1, GL_FALSE, (GLfloat*) &matrix);
+		GLuint location = glGetUniformLocation(programId, name);
+		glUniformMatrix4fv(location, 1, GL_FALSE, (GLfloat*) &matrix);
+	}
+
+
+	void ShaderProgram::setUniform(const char* name, int value)
+	{
+		GLuint location = glGetUniformLocation(programId, name);
+		glUniform1i(location, value);
 	}
 
 	GLuint ShaderProgram::getUniformBlockBinding(const char* name, GLuint bp)

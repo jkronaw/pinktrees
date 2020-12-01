@@ -28,6 +28,7 @@
     <ClCompile Include="src\scenegraph.cpp" />
     <ClCompile Include="src\shader.cpp" />
     <ClCompile Include="src\vector.cpp" />
+    <ClCompile Include="src\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\camera.h" />
@@ -37,7 +38,9 @@
     <ClInclude Include="src\quaternion.h" />
     <ClInclude Include="src\scenegraph.h" />
     <ClInclude Include="src\shader.h" />
+    <ClInclude Include="src\stb_image.h" />
     <ClInclude Include="src\vector.h" />
+    <ClInclude Include="src\texture.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\fragment.frag" />

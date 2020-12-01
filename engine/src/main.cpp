@@ -382,6 +382,16 @@ void setupScene() {
 	cube->setup();
 	root->setMesh(cube);
 
+	Texture2D* tex = new Texture2D();
+	tex->load("assets/blender.png");
+	
+	Sampler* s = new NearestSampler();
+	s->create();
+
+	TextureInfo* tInfo = new TextureInfo(GL_TEXTURE0, 0, "Texture0", tex, nullptr);
+
+	root->addTexture(tInfo);
+
 	camera.lookAt(
 		Vector3(0, 0, 25),
 		Vector3(0, 0, 0),
