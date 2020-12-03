@@ -1,4 +1,4 @@
-#version 430 core
+#version 330 core
 
 in vec3 exPosition;
 in vec2 exTexcoord;

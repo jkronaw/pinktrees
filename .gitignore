@@ -11,7 +11,12 @@ engine/intermediate/
 # MacOS
 *.config
 *.DSStore
+*.DS_Store
 *..DS_Store
+
+#Mac Implementation files
+mainMac.cpp
+mainMac*
 
 # Prerequisites
 *.d

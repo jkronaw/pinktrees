@@ -73,8 +73,8 @@ namespace engine
 		};
 	};
 
-	const Vector2 AXIS2D_X = { 1.0f, 0.0f };
-	const Vector2 AXIS2D_Y = { 0.0f, 0.1f };
+	//const Vector2 AXIS2D_X = { 1.0f, 0.0f };
+	//const Vector2 AXIS2D_Y = { 0.0f, 0.1f };
 
 	struct Vector3
 	{
@@ -148,9 +148,9 @@ namespace engine
 		};
 	};
 
-	const Vector3 AXIS3D_X = {1.0f, 0.0f, 0.0f};
-	const Vector3 AXIS3D_Y = {0.0f, 1.0f, 0.0f};
-	const Vector3 AXIS3D_Z = {0.0f, 0.0f, 1.0f};
+	//const Vector3 AXIS3D_X = {1.0f, 0.0f, 0.0f};
+	//const Vector3 AXIS3D_Y = {0.0f, 1.0f, 0.0f};
+	//const Vector3 AXIS3D_Z = {0.0f, 0.0f, 1.0f};
 
 	struct Vector4
 	{
@@ -225,10 +225,10 @@ namespace engine
 		};
 	};
 
-	const Vector4 AXIS4D_X = {1.0f, 0.0f, 0.0f, 0.0f};
-	const Vector4 AXIS4D_Y = {0.0f, 1.0f, 0.0f, 0.0f};
-	const Vector4 AXIS4D_Z = {0.0f, 0.0f, 1.0f, 0.0f};
-	const Vector4 AXIS4D_W = {0.0f, 0.0f, 0.0f, 1.0f};
+	//const Vector4 AXIS4D_X = {1.0f, 0.0f, 0.0f, 0.0f};
+	//const Vector4 AXIS4D_Y = {0.0f, 1.0f, 0.0f, 0.0f};
+	//const Vector4 AXIS4D_Z = {0.0f, 0.0f, 1.0f, 0.0f};
+	//const Vector4 AXIS4D_W = {0.0f, 0.0f, 0.0f, 1.0f};
 	
 	bool floatEquals(float s1, float s2);
 }
