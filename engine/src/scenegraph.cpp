@@ -12,14 +12,25 @@ namespace engine
 		delete root;
 	}
 
-	SceneNode* SceneGraph::getRoot()
+	Camera* SceneGraph::getCamera()
 	{
-		return root;
+		return camera;
+	}
+
+	void SceneGraph::setCamera(Camera* camera)
+	{
+		this->camera = camera;
 	}
 
 	void SceneGraph::draw()
 	{
+		if (camera != nullptr) camera->bind();
 		root->draw();
+	}
+
+	SceneNode* SceneGraph::getRoot()
+	{
+		return root;
 	}
 
 	SceneNode::SceneNode(SceneNode* parent)
@@ -97,6 +108,7 @@ namespace engine
 			callback->beforeDraw(this);
 		}
 
+		shaderProgram->use();
 		if (mesh != nullptr)
 		{
 			Matrix4 modelMatrix = getModelMatrix();
@@ -109,6 +121,7 @@ namespace engine
 
 			mesh->draw();
 		}
+		shaderProgram->unuse();
 
 		for (SceneNode* sn : nodes)
 		{

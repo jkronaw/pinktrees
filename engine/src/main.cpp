@@ -14,7 +14,6 @@
 #include "quaternion.h"
 
 #include "shader.h"
-#include "camera.h"
 #include "meshloading.h"
 #include "scenegraph.h"
 
@@ -22,16 +21,10 @@ using namespace engine;
 
 const GLuint VIEWPORT_SIZE = 640;
 
-ShaderProgram shaderProgram;
-
 GLuint vaoId, vboId[2];
-GLint uniformModelId, uniformDarkenId, uboId;
-
-GLfloat m[16];
 
 bool isOrtho;
 bool isEulerMode;
-Camera camera;
 
 const float CAMERA_SPEED = 15.0f;
 const float CAMERA_ROTATE_SPEED = 6.0f;
@@ -161,7 +154,7 @@ static void checkOpenGLError(std::string error)
 
 void window_close_callback(GLFWwindow* win)
 {
-	shaderProgram.~ShaderProgram();
+	delete sceneGraph;
 	std::cout << "closing..." << std::endl;
 
 #ifndef ERROR_CALLBACK
@@ -181,11 +174,11 @@ void key_callback(GLFWwindow* win, int key, int scancode, int action, int mods)
 	{
 		if (isOrtho) {
 			// M_PI / 3 is aproximately 60 degrees FOV
-			camera.setPerspective(M_PI / 3, 1, 1, 50);
+			sceneGraph->getCamera()->setPerspective(M_PI / 3, 1, 1, 50);
 			std::cout << "Projection: Perspective" << std::endl;
 		}
 		else {
-			camera.setOrtho(-4.5, 4.5, -4.5, 4.5, 1, 50);
+			sceneGraph->getCamera()->setOrtho(-4.5, 4.5, -4.5, 4.5, 1, 50);
 			std::cout << "Projection: Ortho" << std::endl;
 		}
 
@@ -228,8 +221,8 @@ void mouse_button_callback(GLFWwindow* win, int button, int action, int mods)
 		mouseButtonPressed = true;
 		mouseStartingPos = mouseCurrentPos;
 
-		oldCameraViewMatrix = camera.getViewMatrix();
-		oldCameraViewMatrixInversed = camera.getViewMatrixInversed();
+		oldCameraViewMatrix = sceneGraph->getCamera()->getViewMatrix();
+		oldCameraViewMatrixInversed = sceneGraph->getCamera()->getViewMatrixInversed();
 	}
 
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
@@ -337,11 +330,14 @@ void setupOpenGL(int winx, int winy)
 void createShaderProgram() {
 	try
 	{
-		shaderProgram.init("shaders/vertex.vert", "shaders/fragment.frag");
-		shaderProgram.bindAttribLocation(Mesh::VERTICES, "inPosition");
-		shaderProgram.bindAttribLocation(Mesh::TEXCOORDS, "inTexcoord");
-		shaderProgram.bindAttribLocation(Mesh::NORMALS, "inNormal");
-		shaderProgram.link();
+		ShaderProgram* program = new ShaderProgram();
+		program->init("shaders/vertex.vert", "shaders/fragment.frag");
+		program->bindAttribLocation(Mesh::VERTICES, "inPosition");
+		program->bindAttribLocation(Mesh::TEXCOORDS, "inTexcoord");
+		program->bindAttribLocation(Mesh::NORMALS, "inNormal");
+		program->link();
+		program->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+		sceneGraph->getRoot()->setShaderProgram(program);
 	}
 	catch (Exception e)
 	{
@@ -372,7 +368,6 @@ void setupScene() {
 	sceneGraph = new SceneGraph();
 
 	SceneNode* root = sceneGraph->getRoot();
-	root->setShaderProgram(&shaderProgram);
 
 	WavefrontLoader loaderGround;
 	loaderGround.loadFile("assets/cube.obj");
@@ -392,18 +387,20 @@ void setupScene() {
 
 	root->addTexture(tInfo);
 
-	camera.lookAt(
+	Camera* camera = new Camera(1);
+
+	camera->lookAt(
 		Vector3(0, 0, 25),
 		Vector3(0, 0, 0),
 		Vector3(0, 1, 0)
 	);
 
 	isOrtho = false;
-	camera.setPerspective(M_PI / 3, 1, 1, 50);
+	camera->setPerspective(M_PI / 3, 1, 1, 50);
 
 	isEulerMode = true;
 
-	camera.init(&shaderProgram);
+	sceneGraph->setCamera(camera);
 }
 
 
@@ -416,8 +413,8 @@ GLFWwindow* setup(int major, int minor, int winx, int winy, const char* title, i
 #ifdef ERROR_CALLBACK
 	setupErrorCallback();
 #endif
-	createShaderProgram();
 	setupScene();
+	createShaderProgram();
 	return win;
 }
 
@@ -425,6 +422,8 @@ GLFWwindow* setup(int major, int minor, int winx, int winy, const char* title, i
 
 void update(GLFWwindow* win, double elapsedSecs) 
 {
+	Camera* camera = sceneGraph->getCamera();
+
 	if (mouseButtonPressed) // camera rotation using mouse
 	{
 		Vector2 diff = (mouseCurrentPos - mouseStartingPos) / VIEWPORT_SIZE;
@@ -436,7 +435,7 @@ void update(GLFWwindow* win, double elapsedSecs)
 			Matrix4 rotationSide = Matrix4::CreateRotationY(diff.x);
 			Matrix4 rotationUp = Matrix4::CreateRotation(-diff.y, oldCameraSide);
 
-			camera.setViewMatrix(oldCameraViewMatrix * rotationUp * rotationSide);
+			camera->setViewMatrix(oldCameraViewMatrix * rotationUp * rotationSide);
 		}
 		else // Quaternion
 		{
@@ -447,21 +446,18 @@ void update(GLFWwindow* win, double elapsedSecs)
 				Quaternion q = Quaternion(oldCameraAxis.magnitude(), oldCameraAxis);
 				Matrix4 mat = q.GLRotationMatrix();
 
-				camera.setViewMatrix(oldCameraViewMatrix * mat);
+				camera->setViewMatrix(oldCameraViewMatrix * mat);
 			}
 		}
 	}
 	else // camera translation using keys
 	{
-		Matrix4 translationMatrix = Matrix4::CreateTranslation(camera.getViewMatrixInversed() * cameraVelocity * elapsedSecs);
-		Matrix4 out = camera.getViewMatrix() * translationMatrix;
-		camera.setViewMatrix(out);
+		Matrix4 translationMatrix = Matrix4::CreateTranslation(camera->getViewMatrixInversed() * cameraVelocity * elapsedSecs);
+		Matrix4 out = camera->getViewMatrix() * translationMatrix;
+		camera->setViewMatrix(out);
 	}
 
-	shaderProgram.use();
-	camera.convert();
 	sceneGraph->draw();
-	shaderProgram.unuse();
 
 #ifndef ERROR_CALLBACK
 	checkOpenGLError("ERROR: Could not draw scene.");

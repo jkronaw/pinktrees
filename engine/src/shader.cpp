@@ -110,11 +110,10 @@ namespace engine
 		glUniform1i(location, value);
 	}
 
-	GLuint ShaderProgram::getUniformBlockBinding(const char* name, GLuint bp)
+	void ShaderProgram::setUniformBlockBinding(const char* name, GLuint uboBP)
 	{
 		GLuint uboId = glGetUniformBlockIndex(programId, "SharedMatrices");
-		glUniformBlockBinding(programId, uboId, bp);
-		return uboId;
+		glUniformBlockBinding(programId, uboId, uboBP);
 	}
 
 	void ShaderProgram::use()

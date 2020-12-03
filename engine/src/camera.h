@@ -6,13 +6,15 @@
 
 namespace engine
 {
-	const GLuint UBO_BP = 0;
-
 	class Camera
 	{
 	public:
-		void init(ShaderProgram* program);
-		void convert();
+		Camera(GLuint uboBP);
+		~Camera();
+
+		GLuint getUboBP();
+
+		void bind();
 
 		void lookAt(Vector3 eye, Vector3 center, Vector3 up);
 		void setOrtho(float l, float r, float b, float t, float n, float f);
@@ -31,5 +33,8 @@ namespace engine
 		Matrix4 projectionMatrix;
 
 		bool viewMatrixInversedUpToDate = false;
+
+		GLuint uboId;
+		GLuint uboBP;
 	};
 }

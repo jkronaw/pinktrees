@@ -21,7 +21,7 @@ namespace engine
 		void setUniform(const char*, const Vector4&);
 		void setUniform(const char*, const Matrix4&);
 		void setUniform(const char*, int);
-		GLuint getUniformBlockBinding(const char*, GLuint);
+		void setUniformBlockBinding(const char* name, GLuint uboBP);
 
 		void use();
 		void unuse();

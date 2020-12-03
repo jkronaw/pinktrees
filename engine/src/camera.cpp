@@ -7,23 +7,30 @@
 
 namespace engine
 {
-	GLuint vboId;
-	void Camera::init(ShaderProgram* program)
+	Camera::Camera(GLuint uboBP) : uboBP(uboBP)
 	{
-		GLuint uboId = program->getUniformBlockBinding("SharedMatrices", UBO_BP);
-
-		glGenBuffers(1, &vboId);
-		glBindBuffer(GL_UNIFORM_BUFFER, vboId);
+		glGenBuffers(1, &uboId);
+		glBindBuffer(GL_UNIFORM_BUFFER, uboId);
 		{
 			glBufferData(GL_UNIFORM_BUFFER, sizeof(Matrix4) * 2, 0, GL_STREAM_DRAW);
-			glBindBufferBase(GL_UNIFORM_BUFFER, UBO_BP, vboId);
+			glBindBufferBase(GL_UNIFORM_BUFFER, uboBP, uboId);
 		}
 		glBindBuffer(GL_UNIFORM_BUFFER, 0);
 	}
 
-	void Camera::convert()
+	Camera::~Camera()
 	{
-		glBindBuffer(GL_UNIFORM_BUFFER, vboId);
+		glDeleteBuffers(1, &uboId);
+	}
+
+	GLuint Camera::getUboBP()
+	{
+		return uboBP;
+	}
+
+	void Camera::bind()
+	{
+		glBindBuffer(GL_UNIFORM_BUFFER, uboId);
 		{
 			glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(Matrix4), &viewMatrix);
 			glBufferSubData(GL_UNIFORM_BUFFER, sizeof(Matrix4), sizeof(Matrix4), &projectionMatrix);

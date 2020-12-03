@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "matrix.h"
+#include "camera.h"
 #include "shader.h"
 #include "meshloading.h"
 #include "texture.h"
@@ -18,9 +19,14 @@ namespace engine
 	public:
 		SceneGraph();
 		~SceneGraph();
+
+		Camera* getCamera();
+		void setCamera(Camera* camera);
+
 		SceneNode* getRoot();
 		void draw();
 	private:
+		Camera* camera = nullptr;
 		SceneNode* root;
 	};
 
@@ -36,8 +42,10 @@ namespace engine
 	public:
 		SceneNode(SceneNode* parent);
 		void setShaderProgram(ShaderProgram*);
+
 		void setMatrix(Matrix4);
 		Matrix4 getMatrix();
+
 		void setMesh(Mesh*);
 		void addNode(SceneNode*);
 		void addTexture(TextureInfo*);
