@@ -112,7 +112,7 @@ namespace engine
 
 	void ShaderProgram::setUniformBlockBinding(const char* name, GLuint uboBP)
 	{
-		GLuint uboId = glGetUniformBlockIndex(programId, "SharedMatrices");
+		GLuint uboId = glGetUniformBlockIndex(programId, name);
 		glUniformBlockBinding(programId, uboId, uboBP);
 	}
 
