@@ -25,6 +25,11 @@ namespace engine {
     class Engine
     {
     public:
+        static Engine& getInstance();
+
+        Engine(Engine const&) = delete;
+        void operator=(Engine const&) = delete;
+
         void setOpenGL(int glMajor, int glMinor);
         void setWindow(int width, int height, const char* title, bool fullscreen, bool vsync);
         void setApp(IApp* app);
@@ -32,14 +37,16 @@ namespace engine {
         void run();
 
     private:
+        Engine() = default;
+
         IApp* app = nullptr;
 
-        int glMajor, glMinor;
+        int glMajor = 3, glMinor = 3;
 
-        GLFWwindow* window;
-        int windowWidth, windowHeight;
-        const char* windowTitle;
-        bool fullscreen, vysnc;
+        GLFWwindow* window = nullptr;
+        int windowWidth = 640, windowHeight = 480;
+        const char* windowTitle = "Powered by the Jakob's Engine";
+        bool fullscreen = false, vysnc = true;
 
         void setupGLFW();
         void setupWindow();

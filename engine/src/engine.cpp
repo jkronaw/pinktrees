@@ -3,6 +3,10 @@
 #include "errorhandling.h"
 
 namespace engine {
+	Engine& Engine::getInstance() {
+		static Engine instance;
+		return instance;
+	}
 
 	void Engine::setOpenGL(int glMajor, int glMinor)
 	{
@@ -99,9 +103,6 @@ namespace engine {
 		//glfwSetWindowCloseCallback(window, window_close_callback);
 		//glfwSetWindowSizeCallback(window, window_size_callback);
 	}
-
-
-
 
 	void Engine::setupGLEW()
 	{

@@ -213,11 +213,10 @@ class App : public IApp
 
 int main(int argc, char* argv[])
 {
-	Engine engine;
+	Engine& engine = Engine::getInstance();
 	engine.setOpenGL(4, 1);
 	engine.setWindow(640, 640, "Test", false, true);
 	engine.setApp(new App());
-
 	engine.start();
 	engine.run();
 
