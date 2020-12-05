@@ -64,70 +64,56 @@ namespace engine
 		stbi_image_free(data);
 	}
 
-	Sampler::Sampler()
-	{
-		glGenSamplers(1, &id);
-	}
+	Sampler::Sampler() { glGenSamplers(1, &id); }
+	Sampler::~Sampler() { glDeleteSamplers(1, &id); }
 
-	Sampler::~Sampler()
-	{
-		glDeleteSamplers(1, &id);
-	}
+	void Sampler::bind(GLuint unit) { glBindSampler(unit, id); }
+	void Sampler::unbind(GLuint unit) { glBindSampler(unit, 0); }
 
-	void Sampler::bind(GLuint unit)
-	{
-		glBindSampler(unit, id);
-	}
-
-	void Sampler::unbind(GLuint unit)
-	{
-		glBindSampler(unit, 0);
-	}
-
-	void NearestSampler::create()
+	NearestSampler::NearestSampler()
 	{
 		glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 	}
 
-	void LinearSampler::create()
+	LinearSampler::LinearSampler()
 	{
 		glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	}
 
-	void NearestMipmapNearestSampler::create()
+	NearestMipmapNearestSampler::NearestMipmapNearestSampler()
 	{
 		glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
 	}
 
-	void NearestMipmapLinearSampler::create()
+	NearestMipmapLinearSampler::NearestMipmapLinearSampler()
 	{
 		glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
 	}
 
-	void LinearMipmapNearestSampler::create()
+	LinearMipmapNearestSampler::LinearMipmapNearestSampler()
 	{
 		glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
 	}
 
-	void LinearMipmapLinearSampler::create()
+	LinearMipmapLinearSampler::LinearMipmapLinearSampler()
 	{
 		glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	}
 
-	void LinearAnisotropicSampler::create()
+	LinearAnisotropicSampler::LinearAnisotropicSampler()
 	{
 		glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glSamplerParameterf(id, GL_TEXTURE_MAX_ANISOTROPY_EXT, 4.0f);
 	}
 
-	void MaxAnisotropicSampler::create()
+	MaxAnisotropicSampler::MaxAnisotropicSampler()
 	{
 		glSamplerParameteri(id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glSamplerParameteri(id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);

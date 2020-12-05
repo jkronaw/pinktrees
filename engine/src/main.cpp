@@ -126,9 +126,8 @@ class App : public IApp
 		tex->load("assets/blender.png");
 
 		Sampler* s = new NearestSampler();
-		s->create();
 
-		TextureInfo* tInfo = new TextureInfo(GL_TEXTURE0, 0, "Texture0", tex, nullptr);
+		TextureInfo* tInfo = new TextureInfo(GL_TEXTURE0, 0, "Texture0", tex, s);
 
 		root->addTexture(tInfo);
 

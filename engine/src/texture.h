@@ -4,7 +4,8 @@
 
 #include "shader.h"
 
-namespace engine {
+namespace engine
+{
 
 	class Texture;
 	class Texture2D;
@@ -39,7 +40,7 @@ namespace engine {
 		std::string uniformName;
 		Texture* texture = nullptr;
 		Sampler* sampler = nullptr;
-	
+
 		TextureInfo(GLenum unit, GLuint index, const std::string& uniformName, Texture* texture, Sampler* sampler);
 		void updateShader(ShaderProgram* program);
 	};
@@ -48,21 +49,20 @@ namespace engine {
 	{
 	protected:
 		GLuint id = -1;
-	public:
 		Sampler();
+	public:
 		~Sampler();
-		virtual void create() = 0;
 		virtual void bind(GLuint unit);
 		virtual void unbind(GLuint unit);
 	};
 
-	class NearestSampler : public Sampler { public: void create() override; };
-	class LinearSampler : public Sampler { public: void create() override; };
-	class NearestMipmapNearestSampler : public Sampler { public: void create() override; };
-	class NearestMipmapLinearSampler : public Sampler { public: void create() override; };
-	class LinearMipmapNearestSampler : public Sampler { public: void create() override; };
-	class LinearMipmapLinearSampler : public Sampler { public: void create() override; };
-	class LinearAnisotropicSampler : public Sampler { public: void create() override; };
-	class MaxAnisotropicSampler : public Sampler { public: void create() override; };
+	class NearestSampler : public Sampler { public: NearestSampler(); };
+	class LinearSampler : public Sampler { public: LinearSampler(); };
+	class NearestMipmapNearestSampler : public Sampler { public: NearestMipmapNearestSampler(); };
+	class NearestMipmapLinearSampler : public Sampler { public: NearestMipmapLinearSampler(); };
+	class LinearMipmapNearestSampler : public Sampler { public:	LinearMipmapNearestSampler(); };
+	class LinearMipmapLinearSampler : public Sampler { public: LinearMipmapLinearSampler(); };
+	class LinearAnisotropicSampler : public Sampler { public: LinearAnisotropicSampler(); };
+	class MaxAnisotropicSampler : public Sampler { public: MaxAnisotropicSampler(); };
 }
 

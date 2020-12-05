@@ -157,9 +157,6 @@ namespace engine {
 			glfwSwapBuffers(window);
 			glfwPollEvents();
 
-			int i = 4;
-			int& p = i;
-
 #ifndef ERROR_CALLBACK
 			checkOpenGLError("ERROR: MAIN/RUN");
 #endif
