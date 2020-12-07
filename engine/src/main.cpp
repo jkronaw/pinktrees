@@ -11,7 +11,7 @@ class App : public IApp
 	bool isOrtho;
 	bool isEulerMode;
 
-	const float CAMERA_SPEED = 15.0f;
+	const float CAMERA_SPEED = 5.0f;
 	const float CAMERA_ROTATE_SPEED = 6.0f;
 	const float GROUND_SPEED = 5.0f;
 
@@ -115,26 +115,30 @@ class App : public IApp
 		SceneNode* root = sceneGraph->getRoot();
 
 		WavefrontLoader loaderGround;
-		loaderGround.loadFile("assets/cube.obj");
+		loaderGround.loadFile("assets/sphere.obj");
 
 		// Ground
 		Mesh* cube = loaderGround.getObjects()[0];
 		cube->setup();
 		root->setMesh(cube);
 
-		Texture2D* tex = new Texture2D();
-		tex->load("assets/blender.png");
+		Texture2D* albedo = new Texture2D();
+		albedo->load("assets/textures/bricks_albedo.png");
 
-		Sampler* s = new NearestSampler();
+		Texture2D* normal = new Texture2D();
+		normal->load("assets/textures/bricks_normal.png");
 
-		TextureInfo* tInfo = new TextureInfo(GL_TEXTURE0, 0, "Texture0", tex, s);
+		Sampler* s = new LinearMipmapLinearSampler();
+		TextureInfo* albedoInfo = new TextureInfo(GL_TEXTURE0, "albedo", albedo, s);
+		TextureInfo* normalInfo = new TextureInfo(GL_TEXTURE1, "normal", normal, s);
 
-		root->addTexture(tInfo);
+		root->addTexture(albedoInfo);
+		root->addTexture(normalInfo);
 
 		Camera* camera = new Camera(1);
 
 		camera->lookAt(
-			Vector3(0, 0, 25),
+			Vector3(0, 0, 3),
 			Vector3(0, 0, 0),
 			Vector3(0, 1, 0)
 		);
@@ -206,6 +210,13 @@ class App : public IApp
 			camera->setViewMatrix(out);
 		}
 
+		Matrix4 viewMatrix = camera->getViewMatrix();
+		Matrix3 viewMatrixInversed = camera->getViewMatrixInversed();
+		Vector3 translation = viewMatrixInversed * Vector3(viewMatrix * Vector4(0,0,0,1)) * -1;
+
+		sceneGraph->getRoot()->getShaderProgram()->use();
+		sceneGraph->getRoot()->getShaderProgram()->setUniform("viewPos", translation);
+		sceneGraph->getRoot()->getShaderProgram()->unuse();
 		sceneGraph->draw();
 	}
 };

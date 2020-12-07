@@ -36,12 +36,11 @@ namespace engine
 	struct TextureInfo
 	{
 		GLenum unit;
-		GLuint index;
 		std::string uniformName;
 		Texture* texture = nullptr;
 		Sampler* sampler = nullptr;
 
-		TextureInfo(GLenum unit, GLuint index, const std::string& uniformName, Texture* texture, Sampler* sampler);
+		TextureInfo(GLenum unit, const std::string& uniformName, Texture* texture, Sampler* sampler);
 		void updateShader(ShaderProgram* program);
 	};
 

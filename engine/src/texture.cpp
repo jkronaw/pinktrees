@@ -5,16 +5,16 @@
 
 namespace engine
 {
-	TextureInfo::TextureInfo(GLenum unit, GLuint index, const std::string& uniformName, Texture* texture, Sampler* sampler) : unit(unit), index(index), uniformName(uniformName), texture(texture), sampler(sampler) {}
+	TextureInfo::TextureInfo(GLenum unit, const std::string& uniformName, Texture* texture, Sampler* sampler) : unit(unit), uniformName(uniformName), texture(texture), sampler(sampler) {}
 
 	void TextureInfo::updateShader(ShaderProgram* program)
 	{
 		glActiveTexture(unit);
 		texture->bind();
-		program->setUniform(uniformName.c_str(), index);
+		program->setUniform(uniformName.c_str(), unit - GL_TEXTURE0);
 		if (sampler)
 		{
-			sampler->bind(index);
+			sampler->bind(unit - GL_TEXTURE0);
 		}
 	}
 
