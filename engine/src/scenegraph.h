@@ -41,6 +41,8 @@ namespace engine
 	{
 	public:
 		SceneNode(SceneNode* parent);
+
+		ShaderProgram* getShaderProgram();
 		void setShaderProgram(ShaderProgram*);
 
 		void setMatrix(Matrix4);

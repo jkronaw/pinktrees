@@ -44,6 +44,11 @@ namespace engine
 		}
 	}
 
+	ShaderProgram* SceneNode::getShaderProgram()
+	{
+		return shaderProgram;
+	}
+
 	void SceneNode::setShaderProgram(ShaderProgram* shaderProgram)
 	{
 		this->shaderProgram = shaderProgram;
