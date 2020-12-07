@@ -10,7 +10,7 @@ namespace engine
 
 	Vector3::Vector3(const Vector4& v)
 	{
-		if (floatEquals(v.z, 0.0))
+		if (floatEquals(v.w, 0.0))
 		{
 			y = v.y;
 			x = v.x;
