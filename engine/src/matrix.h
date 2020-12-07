@@ -197,6 +197,8 @@ namespace engine
 		static Matrix4 CreateRotationZ(float);
 		static Matrix4 CreateRotation(float, const Vector3&);
 		static Matrix4 CreateLookAt(Vector3 eye, Vector3 center, Vector3 up);
+		static Matrix4 CreateOrthographicProjection(float left, float right, float bottom, float top, float near, float far);
+		static Matrix4 CreatePerspectiveProjection(float fov, float aspect, float near, float far);
 
 		// fields
 		float data[16] = { 0 };

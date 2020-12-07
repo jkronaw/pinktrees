@@ -1243,4 +1243,23 @@ namespace engine
 			0, 0, 0, 1
 		);
 	}
+	Matrix4 Matrix4::CreateOrthographicProjection(float l, float r, float b, float t, float n, float f)
+	{
+		return Matrix4(
+			2 / (r - l), 0, 0, (l + r) / (l - r),
+			0, 2 / (t - b), 0, (b + t) / (b - t),
+			0, 0, 2 / (n - f), (n + f) / (n - f),
+			0, 0, 0, 1
+		);
+	}
+	Matrix4 Matrix4::CreatePerspectiveProjection(float fov, float aspect, float n, float f)
+	{
+		float d = 1 / tan(fov / 2);
+		return Matrix4(
+			d / aspect, 0, 0, 0,
+			0, d, 0, 0,
+			0, 0, (n + f) / (n - f), 2 * n * f / (n - f),
+			0, 0, -1, 0
+		);
+	}
 }

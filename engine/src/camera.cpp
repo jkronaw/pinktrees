@@ -51,23 +51,12 @@ namespace engine
 
 	void Camera::setOrtho(float l, float r, float b, float t, float n, float f)
 	{
-		projectionMatrix = Matrix4(
-			2 / (r - l), 0, 0, (l + r) / (l - r),
-			0, 2 / (t - b), 0, (b + t) / (b - t),
-			0, 0, 2 / (n - f), (n + f) / (n - f),
-			0, 0, 0, 1
-		);
+		projectionMatrix = Matrix4::CreateOrthographicProjection(l, r, b, t, n, f);
 	}
 
 	void Camera::setPerspective(float fov, float aspect, float n, float f)
 	{
-		float d = 1 / tan(fov / 2);
-		projectionMatrix = Matrix4(
-			d / aspect, 0, 0, 0,
-			0, d, 0, 0,
-			0, 0, (n + f) / (n - f), 2 * n * f / (n - f),
-			0, 0, -1, 0
-		);
+		projectionMatrix = Matrix4::CreatePerspectiveProjection(fov, aspect, n, f);
 	}
 
 	Matrix4 Camera::getViewMatrix() { return viewMatrix; }
