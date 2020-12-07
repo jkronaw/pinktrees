@@ -1,5 +1,7 @@
 #include "meshloading.h"
 
+#include "exceptions.h"
+
 namespace engine
 {
 	void WavefrontLoader::loadFile(const char* path)
@@ -115,14 +117,44 @@ namespace engine
 		this->normals = normals;
 	}
 
+	void Mesh::calculateTangents()
+	{
+		tangents.clear();
+
+		if (texcoords.empty())
+		{
+			throw Exception("Texcoords must be available to calculate tangent information");
+		}
+
+		for (unsigned int i = 0; i < vertices.size() / 3; i++)
+		{
+			unsigned int index = i * 3;
+			Vector3 edge1 = vertices[index + 1] - vertices[index];
+			Vector3 edge2 = vertices[index + 2] - vertices[index];
+
+			Vector2 deltaUV1 = texcoords[index + 1] - texcoords[index];
+			Vector2 deltaUV2 = texcoords[index + 2] - texcoords[index];
+
+			float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+
+			Vector3 tangent;
+			tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
+			tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
+			tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+			tangents.push_back(tangent);
+			tangents.push_back(tangent);
+			tangents.push_back(tangent);
+		}
+	}
+
 	void Mesh::setup()
 	{
-		GLuint vboIds[3];
+		GLuint vboIds[4];
 
 		glGenVertexArrays(1, &vaoId);
 		glBindVertexArray(vaoId);
 		{
-			glGenBuffers(3, vboIds);
+			glGenBuffers(4, vboIds);
 			glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
 			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vector3), &vertices[0], GL_STATIC_DRAW);
 			glEnableVertexAttribArray(VERTICES);
@@ -142,11 +174,18 @@ namespace engine
 				glEnableVertexAttribArray(NORMALS);
 				glVertexAttribPointer(NORMALS, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
 			}
+			if (tangents.size() > 0)
+			{
+				glBindBuffer(GL_ARRAY_BUFFER, vboIds[3]);
+				glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(Vector3), &tangents[0], GL_STATIC_DRAW);
+				glEnableVertexAttribArray(TANGENTS);
+				glVertexAttribPointer(TANGENTS, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
+			}
 		}
 
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDeleteBuffers(3, vboIds);
+		glDeleteBuffers(4, vboIds);
 	}
 
 	void Mesh::draw()

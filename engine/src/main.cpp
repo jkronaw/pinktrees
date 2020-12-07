@@ -115,10 +115,11 @@ class App : public IApp
 		SceneNode* root = sceneGraph->getRoot();
 
 		WavefrontLoader loaderGround;
-		loaderGround.loadFile("assets/sphere.obj");
+		loaderGround.loadFile("assets/sphere_smooth.obj");
 
 		// Ground
 		Mesh* cube = loaderGround.getObjects()[0];
+		cube->calculateTangents();
 		cube->setup();
 		root->setMesh(cube);
 
@@ -129,8 +130,8 @@ class App : public IApp
 		normal->load("assets/textures/bricks_normal.png");
 
 		Sampler* s = new LinearMipmapLinearSampler();
-		TextureInfo* albedoInfo = new TextureInfo(GL_TEXTURE0, "albedo", albedo, s);
-		TextureInfo* normalInfo = new TextureInfo(GL_TEXTURE1, "normal", normal, s);
+		TextureInfo* albedoInfo = new TextureInfo(GL_TEXTURE0, "texAlbedo", albedo, s);
+		TextureInfo* normalInfo = new TextureInfo(GL_TEXTURE1, "texNormal", normal, s);
 
 		root->addTexture(albedoInfo);
 		root->addTexture(normalInfo);
@@ -144,7 +145,7 @@ class App : public IApp
 		);
 
 		isOrtho = false;
-		camera->setPerspective(M_PI / 3, 1, 1, 50);
+		camera->setPerspective(M_PI / 3, 1, 0.1, 50);
 
 		isEulerMode = true;
 
@@ -157,6 +158,7 @@ class App : public IApp
 			program->bindAttribLocation(Mesh::VERTICES, "inPosition");
 			program->bindAttribLocation(Mesh::TEXCOORDS, "inTexcoord");
 			program->bindAttribLocation(Mesh::NORMALS, "inNormal");
+			program->bindAttribLocation(Mesh::TANGENTS, "inTangent");
 			program->link();
 			program->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 			sceneGraph->getRoot()->setShaderProgram(program);
