@@ -45,22 +45,7 @@ namespace engine
 
 	void Camera::lookAt(Vector3 eye, Vector3 center, Vector3 up)
 	{
-		Vector3 v = center - eye;
-		v.normalize();
-
-		Vector3 s = v.cross(up);
-		s.normalize();
-
-		Vector3 u = s.cross(v);
-		u.normalize();
-
-		viewMatrix = Matrix4(
-			s.x, s.y, s.z, -s.dot(eye),
-			u.x, u.y, u.z, -u.dot(eye),
-			-v.x, -v.y, -v.z, v.dot(eye),
-			0, 0, 0, 1
-		);
-
+		viewMatrix = Matrix4::CreateLookAt(eye, center, up);
 		viewMatrixInversedUpToDate = false;
 	}
 
