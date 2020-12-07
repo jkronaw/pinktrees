@@ -48,7 +48,7 @@ namespace engine
 		Matrix2 operator-(const Matrix2&) const;
 
 		// subscript operator
-		float& operator[](int index);
+		float operator[](int index);
 
 		float determinant() const;
 
@@ -111,7 +111,7 @@ namespace engine
 		Matrix3 operator-(const Matrix3&) const;
 
 		// subscript operator
-		float& operator[](int index);
+		float operator[](int index);
 
 		float determinant() const;
 
@@ -176,7 +176,7 @@ namespace engine
 		Matrix4 operator-(const Matrix4&) const;
 
 		// subscript operator
-		float& operator[](int index);
+		float operator[](int index);
 
 		Matrix4 transposed() const;
 		void transpose();

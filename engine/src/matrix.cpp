@@ -956,58 +956,58 @@ namespace engine
 	}
 
 	/* subscript operators */
-	float& Matrix2::operator[](int index)
+	float Matrix2::operator[](int index)
 	{
 		float value;
 		switch (index)
 		{
-		case 0: value = data[0];
-		case 1: value = data[2];
-		case 2: value = data[1];
-		case 3: value = data[3];
+		case 0: value = data[0]; break;
+		case 1: value = data[2]; break;
+		case 2: value = data[1]; break;
+		case 3: value = data[3]; break;
 		default: throw("Matrix Index out of bounds: Use 0-3");
 		}
 		return value;
 	}
-	float& Matrix3::operator[](int index)
+	float Matrix3::operator[](int index)
 	{
 		float value;
 		switch (index)
 		{
-		case 0: value = data[0];
-		case 1: value = data[3];
-		case 2: value = data[6];
-		case 3: value = data[1];
-		case 4: value = data[4];
-		case 5: value = data[7];
-		case 6: value = data[2];
-		case 7: value = data[5];
-		case 8: value = data[8];
+		case 0: value = data[0]; break;
+		case 1: value = data[3]; break;
+		case 2: value = data[6]; break;
+		case 3: value = data[1]; break;
+		case 4: value = data[4]; break;
+		case 5: value = data[7]; break;
+		case 6: value = data[2]; break;
+		case 7: value = data[5]; break;
+		case 8: value = data[8]; break;
 		default: throw("Matrix Index out of bounds: Use 0-8");
 		}
 		return value;
 	}
-	float& Matrix4::operator[](int index)
+	float Matrix4::operator[](int index)
 	{
 		float value;
 		switch (index)
 		{
-		case 0: value = data[0];
-		case 1: value = data[4];
-		case 2: value = data[8];
-		case 3: value = data[12];
-		case 4: value = data[1];
-		case 5: value = data[5];
-		case 6: value = data[9];
-		case 7: value = data[13];
-		case 8: value = data[2];
-		case 9: value = data[6];
-		case 10: value = data[10];
-		case 11: value = data[14];
-		case 12: value = data[3];
-		case 13: value = data[7];
-		case 14: value = data[11];
-		case 15: value = data[15];
+		case 0: value = data[0]; break;
+		case 1: value = data[4]; break;
+		case 2: value = data[8]; break;
+		case 3: value = data[12]; break;
+		case 4: value = data[1]; break;
+		case 5: value = data[5]; break;
+		case 6: value = data[9]; break;
+		case 7: value = data[13]; break;
+		case 8: value = data[2]; break;
+		case 9: value = data[6]; break;
+		case 10: value = data[10]; break;
+		case 11: value = data[14]; break;
+		case 12: value = data[3]; break;
+		case 13: value = data[7]; break;
+		case 14: value = data[11]; break;
+		case 15: value = data[15]; break;
 		default: throw("Matrix Index out of bounds: Use 0-15");
 		}
 		return value;
