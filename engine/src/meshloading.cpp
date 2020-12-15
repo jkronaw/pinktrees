@@ -119,31 +119,42 @@ namespace engine
 
 	void Mesh::calculateTangents()
 	{
-		tangents.clear();
-
-		if (texcoords.empty())
+		if (normals.empty() || texcoords.empty())
 		{
-			throw Exception("Texcoords must be available to calculate tangent information");
+			throw Exception("Normals and texcoords must be available to calculate tangent information.");
 		}
 
-		for (unsigned int i = 0; i < vertices.size() / 3; i++)
+		// clear any existing tangent information
+		tangents.clear();
+
+		for (unsigned int i = 0; i < vertices.size(); i += 3)
 		{
-			unsigned int index = i * 3;
-			Vector3 edge1 = vertices[index + 1] - vertices[index];
-			Vector3 edge2 = vertices[index + 2] - vertices[index];
+			Vector3 edge1 = vertices[i + 1] - vertices[i];
+			Vector3 edge2 = vertices[i + 2] - vertices[i];
 
-			Vector2 deltaUV1 = texcoords[index + 1] - texcoords[index];
-			Vector2 deltaUV2 = texcoords[index + 2] - texcoords[index];
+			Vector2 deltaUV1 = texcoords[i + 1] - texcoords[i];
+			Vector2 deltaUV2 = texcoords[i + 2] - texcoords[i];
 
-			float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+			// float f = 1.0f / (deltaUV1.x * deltaUV2.y - deltaUV2.x * deltaUV1.y);
+			// multiplication by f is omitted to gain performance
+			// it is not required since tangent is normalized later anyway
+			Vector3 tangent = deltaUV2.y * edge1 - deltaUV1.y * edge2;
 
-			Vector3 tangent;
-			tangent.x = f * (deltaUV2.y * edge1.x - deltaUV1.y * edge2.x);
-			tangent.y = f * (deltaUV2.y * edge1.y - deltaUV1.y * edge2.y);
-			tangent.z = f * (deltaUV2.y * edge1.z - deltaUV1.y * edge2.z);
+			// use same tangent for each of a face's three vertices
 			tangents.push_back(tangent);
 			tangents.push_back(tangent);
 			tangents.push_back(tangent);
+
+			// bitangent is computed in vertex shader to save memory
+		}
+
+		for (unsigned int i = 0; i < vertices.size(); i += 3)
+		{
+			Vector3 normal = normals[i].normalized();
+			Vector3 tangent = tangents[i].normalized();
+
+			// re-orthogonalize tangent vector using Gram-Schmidt
+			tangents[i] = (tangent - tangent.dot(normal) * normal).normalized();
 		}
 	}
 
