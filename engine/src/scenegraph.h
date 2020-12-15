@@ -40,6 +40,9 @@ namespace engine
 	class SceneNode
 	{
 	public:
+		const char* MODEL_MATRIX_NAME_IN_SHADER = "ModelMatrix";
+		const char* NORMAL_MATRIX_NAME_IN_SHADER = "NormalMatrix";
+
 		SceneNode(SceneNode* parent);
 
 		ShaderProgram* getShaderProgram();

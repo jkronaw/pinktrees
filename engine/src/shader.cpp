@@ -97,12 +97,17 @@ namespace engine
 		glUniform4fv(location, 1, (GLfloat*)&vector);
 	}
 
+	void ShaderProgram::setUniform(const char* name, const Matrix3& matrix)
+	{
+		GLuint location = glGetUniformLocation(programId, name);
+		glUniformMatrix3fv(location, 1, GL_FALSE, (GLfloat*)&matrix);
+	}
+
 	void ShaderProgram::setUniform(const char* name, const Matrix4& matrix)
 	{
 		GLuint location = glGetUniformLocation(programId, name);
-		glUniformMatrix4fv(location, 1, GL_FALSE, (GLfloat*) &matrix);
+		glUniformMatrix4fv(location, 1, GL_FALSE, (GLfloat*)&matrix);
 	}
-
 
 	void ShaderProgram::setUniform(const char* name, int value)
 	{

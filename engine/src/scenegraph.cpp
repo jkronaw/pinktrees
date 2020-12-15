@@ -117,7 +117,10 @@ namespace engine
 		if (mesh != nullptr)
 		{
 			Matrix4 modelMatrix = getModelMatrix();
-			shaderProgram->setUniform("ModelMatrix", modelMatrix);
+			shaderProgram->setUniform(MODEL_MATRIX_NAME_IN_SHADER, modelMatrix);
+
+			Matrix3 normalMatrix = Matrix3(modelMatrix).inversed().transposed();
+			shaderProgram->setUniform(NORMAL_MATRIX_NAME_IN_SHADER, normalMatrix);
 
 			for (TextureInfo* tInfo : textures)
 			{
