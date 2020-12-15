@@ -115,7 +115,7 @@ class App : public IApp
 		SceneNode* root = sceneGraph->getRoot();
 
 		WavefrontLoader loaderGround;
-		loaderGround.loadFile("assets/sphere_smooth.obj");
+		loaderGround.loadFile("assets/car.obj");
 
 		// Ground
 		Mesh* cube = loaderGround.getObjects()[0];
@@ -124,32 +124,32 @@ class App : public IApp
 		root->setMesh(cube);
 
 		Texture2D* albedo = new Texture2D();
-		albedo->load("assets/textures/rustediron_albedo.png");
+		albedo->load("assets/textures/car_albedo.png");
 
 		Texture2D* normal = new Texture2D();
-		normal->load("assets/textures/rustediron_normal.png");
+		normal->load("assets/textures/car_normal.png");
 
 		Texture2D* roughness = new Texture2D();
-		roughness->load("assets/textures/rustediron_roughness.png");
+		roughness->load("assets/textures/car_roughness.png");
 
 		Texture2D* metallic = new Texture2D();
-		metallic->load("assets/textures/rustediron_metallic.png");
+		metallic->load("assets/textures/car_metallic.png");
 
-		//Texture2D* ao = new Texture2D();
-		//ao->load("assets/textures/bricks_ao.png");
+		Texture2D* ao = new Texture2D();
+	    ao->load("assets/textures/car_ao.png");
 
 		Sampler* s = new LinearMipmapLinearSampler();
 		TextureInfo* albedoInfo = new TextureInfo(GL_TEXTURE0, "texAlbedo", albedo, s);
 		TextureInfo* normalInfo = new TextureInfo(GL_TEXTURE1, "texNormal", normal, s);
 		TextureInfo* roughnessInfo = new TextureInfo(GL_TEXTURE2, "texRoughness", roughness, s);
 		TextureInfo* metallicInfo = new TextureInfo(GL_TEXTURE3, "tex", metallic, s);
-		//TextureInfo* aoInfo = new TextureInfo(GL_TEXTURE4, "texAO", ao, s);
+		TextureInfo* aoInfo = new TextureInfo(GL_TEXTURE4, "texAO", ao, s);
 
 		root->addTexture(albedoInfo);
 		root->addTexture(normalInfo);
 		root->addTexture(roughnessInfo);
 		root->addTexture(metallicInfo);
-		//root->addTexture(aoInfo);
+		root->addTexture(aoInfo);
 
 		Camera* camera = new Camera(1);
 
@@ -169,7 +169,7 @@ class App : public IApp
 		try
 		{
 			ShaderProgram* program = new ShaderProgram();
-			program->init("shaders/vertex.vert", "shaders/fragmentPBR.frag");
+			program->init("shaders/vertex.vert", "shaders/fragment.frag");
 			program->bindAttribLocation(Mesh::VERTICES, "inPosition");
 			program->bindAttribLocation(Mesh::TEXCOORDS, "inTexcoord");
 			program->bindAttribLocation(Mesh::NORMALS, "inNormal");
