@@ -33,11 +33,11 @@ namespace engine {
 		setupCallbacks();
 		setupGLEW();
 		setupOpenGL();
-
 #ifdef ERROR_CALLBACK
 		setupErrorCallback();
 #endif
-
+		app->windowWidth = windowWidth;
+		app->windowHeight = windowHeight;
 		app->start();
     }
 
@@ -52,8 +52,6 @@ namespace engine {
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, glMajor);
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, glMinor);
 		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
-
-
 #if _DEBUG
 		std::cout << "GLFW " << glfwGetVersionString() << std::endl;
 #endif
@@ -78,30 +76,33 @@ namespace engine {
 
 		auto windowCloseCallback = [](GLFWwindow* w)
 		{
-			static_cast<IApp*>(glfwGetWindowUserPointer(w))->windowCloseCallback();
+			static_cast<IApp*>(glfwGetWindowUserPointer(w))->windowCloseCallback(w);
 		};
 		glfwSetWindowCloseCallback(window, windowCloseCallback);
 
+		auto windowSizeCallback = [](GLFWwindow* w, int newWidth, int newHeight)
+		{
+			static_cast<IApp*>(glfwGetWindowUserPointer(w))->windowSizeCallback(w, newWidth, newHeight);
+		};
+		glfwSetWindowSizeCallback(window, windowSizeCallback);
+
 		auto keyCallback = [](GLFWwindow* w, int key, int scanCode, int action, int mods)
 		{
-			static_cast<IApp*>(glfwGetWindowUserPointer(w))->keyCallback(key, scanCode, action, mods);
+			static_cast<IApp*>(glfwGetWindowUserPointer(w))->keyCallback(w, key, scanCode, action, mods);
 		};
 		glfwSetKeyCallback(window, keyCallback);
 		
 		auto mouseCallback = [](GLFWwindow* w, double x, double y)
 		{
-			static_cast<IApp*>(glfwGetWindowUserPointer(w))->mouseCallback(Vector2(x,y));
+			static_cast<IApp*>(glfwGetWindowUserPointer(w))->mouseCallback(w, Vector2(x,y));
 		};
 		glfwSetCursorPosCallback(window, mouseCallback);
 
 		auto mouseButtonCallback = [](GLFWwindow* w, int button, int action, int mods)
 		{
-			static_cast<IApp*>(glfwGetWindowUserPointer(w))->mouseButtonCallback(button, action, mods);
+			static_cast<IApp*>(glfwGetWindowUserPointer(w))->mouseButtonCallback(w, button, action, mods);
 		};
 		glfwSetMouseButtonCallback(window, mouseButtonCallback);
-
-		//glfwSetWindowCloseCallback(window, window_close_callback);
-		//glfwSetWindowSizeCallback(window, window_size_callback);
 	}
 
 	void Engine::setupGLEW()
@@ -156,7 +157,6 @@ namespace engine {
 
 			glfwSwapBuffers(window);
 			glfwPollEvents();
-
 #ifndef ERROR_CALLBACK
 			checkOpenGLError("ERROR: MAIN/RUN");
 #endif
@@ -169,22 +169,5 @@ namespace engine {
 	{
 		std::cerr << "GLFW Error: " << description << std::endl;
 	}
-
-	//void mouse_button_callback(GLFWwindow* win, int button, int action, int mods)
-	//{
-	//	/*if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
-	//	{
-	//		mouseButtonPressed = true;
-	//		mouseStartingPos = mouseCurrentPos;
-
-	//		oldCameraViewMatrix = sceneGraph->getCamera()->getViewMatrix();
-	//		oldCameraViewMatrixInversed = sceneGraph->getCamera()->getViewMatrixInversed();
-	//	}
-
-	//	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-	//	{
-	//		mouseButtonPressed = false;
-	//	}*/
-	//}
 }
 

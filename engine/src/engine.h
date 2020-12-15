@@ -37,17 +37,15 @@ namespace engine {
         void run();
 
     private:
-        Engine() = default;
-
-        IApp* app = nullptr;
-
         int glMajor = 3, glMinor = 3;
-
         GLFWwindow* window = nullptr;
         int windowWidth = 640, windowHeight = 480;
         const char* windowTitle = "Powered by the Jakob's Engine";
         bool fullscreen = false, vysnc = true;
 
+        IApp* app = nullptr;
+
+        Engine() = default;
         void setupGLFW();
         void setupWindow();
         void setupCallbacks();
@@ -58,13 +56,16 @@ namespace engine {
     class IApp
     {
     public:
+        int windowWidth, windowHeight;
+
         virtual void start() = 0;
         virtual void update(double elapsedSecs) = 0;
 
-        virtual void windowCloseCallback() { };
-        virtual void keyCallback(int key, int scanCode, int action, int mods) { };
-        virtual void mouseCallback(Vector2 mousePosition) { };
-        virtual void mouseButtonCallback(int button, int action, int mods) { };
+        virtual void windowCloseCallback(GLFWwindow* window) { };
+        virtual void windowSizeCallback(GLFWwindow* window, int newWidth, int newHeight) { };
+        virtual void keyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods) { };
+        virtual void mouseCallback(GLFWwindow* window, Vector2 mousePosition) { };
+        virtual void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) { };
     };
 
     void glfwErrorCallback(int error, const char* description);
