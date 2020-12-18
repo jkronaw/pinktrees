@@ -66,7 +66,7 @@ void main()
 {   
     
 	//vec3 color = texture(gShaded, texcoord).rgb;
-	////vec3 bloom = texture(gBloom, texcoord).rgb;
+	//vec3 bloom = texture(gBloom, texcoord).rgb;
 	//FragmentColor = vec4(color, 1.0);
 
 	// DOF:
@@ -76,7 +76,7 @@ void main()
 	float z = -(ViewMatrix * vec4(position ,1.0)).z;
 	
 	float depth_diff = abs(z - 4);
-	float disc_radius = depth_diff * 0.005;
+	float disc_radius = depth_diff * 0.0005;
 	vec4 color_sum = vec4(0.0);
 	float num_valid = 0;
 	
