@@ -25,6 +25,8 @@ class App : public IApp
 
 	ShaderProgram* geoProgram;
 	ShaderProgram* lightProgram;
+	ShaderProgram* postProcessProgram;
+
 
 	bool useTextures = false;
 	bool showGbufferContent = false;
@@ -172,6 +174,12 @@ class App : public IApp
 			lightProgram->init("shaders/LIGHT_vertex.vert", "shaders/LIGHT_fragment.frag");
 			lightProgram->link();
 			lightProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+
+			postProcessProgram = new ShaderProgram();
+			postProcessProgram->init("shaders/LIGHT_vertex.vert", "shaders/POSTPROCESS_fragment.frag");
+			postProcessProgram->bindAttribLocation(Mesh::VERTICES, "inPosition");
+			postProcessProgram->link();
+			postProcessProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 		}
 		catch (Exception e)
 		{
@@ -202,7 +210,15 @@ class App : public IApp
 		glEnable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
-		gbuffer.bindRead();
+		gbuffer.bindWritePostProcess();
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+
+	void setupPostProcessPass(GBuffer& gbuffer) {
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_ONE, GL_ONE);
+		gbuffer.bindReadPostProcess();
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
 
@@ -290,6 +306,20 @@ class App : public IApp
 			setupLightPass(gbuffer);
 			quad.drawQuad();
 			lightProgram->unuse();
+
+			postProcessProgram->use();
+			postProcessProgram->setUniform("gScreenSize", Vector2(windowWidth, windowHeight));
+			postProcessProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
+			postProcessProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
+			postProcessProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
+			postProcessProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
+			postProcessProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
+			postProcessProgram->setUniform("gShaded", GBuffer::GB_NUMBER_OF_TEXTURES + GBuffer::GB_SHADED);
+			postProcessProgram->setUniform("gBloom", GBuffer::GB_NUMBER_OF_TEXTURES + GBuffer::GB_BLOOM);
+			postProcessProgram->setUniform("viewPos", translation);
+			setupPostProcessPass(gbuffer);
+			quad.drawQuad();
+			postProcessProgram->unuse();
 		}
 	}
 };

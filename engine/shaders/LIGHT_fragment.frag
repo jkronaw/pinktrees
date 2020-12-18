@@ -1,6 +1,7 @@
 #version 430 core
 
-out vec4 FragmentColor;
+out vec3 outColor;
+out vec3 outBloom;
 
 in vec2 texcoord;
 
@@ -118,5 +119,13 @@ void main()
     // gamma correct
     color = pow(color, vec3(1.0/2.2));
 
-    FragmentColor = vec4(color, 1.0);
+    // bloom separation
+    vec3 threshold = vec3(0.7, 0.7152, 0.7);
+    float brightness = dot(color, threshold);
+    if(brightness > 1.0)
+        outBloom = vec3(color);
+    else
+        outBloom = vec3(0.0, 0.0, 0.0);
+
+    outColor = vec3(color);
 }

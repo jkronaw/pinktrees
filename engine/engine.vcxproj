@@ -57,6 +57,7 @@
     <None Include="shaders\GEO_vertex.vert" />
     <None Include="shaders\LIGHT_fragment.frag" />
     <None Include="shaders\LIGHT_vertex.vert" />
+    <None Include="shaders\POSTPROCESS_fragment.frag" />
     <None Include="shaders\vertex.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
