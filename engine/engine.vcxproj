@@ -26,9 +26,11 @@
     <ClCompile Include="src\errorhandling.cpp" />
     <ClCompile Include="src\camera.cpp" />
     <ClCompile Include="src\exceptions.cpp" />
+    <ClCompile Include="src\geometrybuffer.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\matrix.cpp" />
     <ClCompile Include="src\meshloading.cpp" />
+    <ClCompile Include="src\quad2d.cpp" />
     <ClCompile Include="src\quaternion.cpp" />
     <ClCompile Include="src\scenegraph.cpp" />
     <ClCompile Include="src\shader.cpp" />
@@ -40,8 +42,10 @@
     <ClInclude Include="src\errorhandling.h" />
     <ClInclude Include="src\camera.h" />
     <ClInclude Include="src\exceptions.h" />
+    <ClInclude Include="src\geometrybuffer.h" />
     <ClInclude Include="src\matrix.h" />
     <ClInclude Include="src\meshloading.h" />
+    <ClInclude Include="src\quad2d.h" />
     <ClInclude Include="src\quaternion.h" />
     <ClInclude Include="src\scenegraph.h" />
     <ClInclude Include="src\shader.h" />
@@ -50,6 +54,10 @@
     <ClInclude Include="src\texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\GEO_fragment.frag" />
+    <None Include="shaders\GEO_vertex.vert" />
+    <None Include="shaders\LIGHT_fragment.frag" />
+    <None Include="shaders\LIGHT_vertex.vert" />
     <None Include="shaders\vertex.vert" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

@@ -17,6 +17,7 @@ namespace engine
 		void bindAttribLocation(GLuint, const char*);
 		void link();
 		GLuint getUniformLocation(const char*);
+		void setUniform(const char*, const Vector2&);
 		void setUniform(const char*, const Vector3&);
 		void setUniform(const char*, const Vector4&);
 		void setUniform(const char*, const Matrix3&);

@@ -17,7 +17,12 @@ namespace engine
 			sampler->bind(unit - GL_TEXTURE0);
 		}
 	}
-
+	void TextureInfo::unbindSampler() {
+		if (sampler)
+		{
+			sampler->unbind(unit - GL_TEXTURE0);
+		}
+	}
 	Texture::~Texture()
 	{
 		if (glIsTexture(id))

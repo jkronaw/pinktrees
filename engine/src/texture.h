@@ -42,6 +42,7 @@ namespace engine
 
 		TextureInfo(GLenum unit, const std::string& uniformName, Texture* texture, Sampler* sampler);
 		void updateShader(ShaderProgram* program);
+		void unbindSampler();
 	};
 
 	class Sampler

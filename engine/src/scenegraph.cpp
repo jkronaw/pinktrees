@@ -128,6 +128,9 @@ namespace engine
 			}
 
 			mesh->draw();
+			for (TextureInfo* tInfo : textures) {
+				tInfo->unbindSampler();
+			}
 		}
 		shaderProgram->unuse();
 
