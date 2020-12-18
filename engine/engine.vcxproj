@@ -19,9 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="shaders\fragment.frag">
-      <FileType>Document</FileType>
-    </None>
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\errorhandling.cpp" />
     <ClCompile Include="src\camera.cpp" />

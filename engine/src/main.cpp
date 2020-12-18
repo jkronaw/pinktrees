@@ -169,17 +169,12 @@ class App : public IApp
 		{
 			geoProgram = new ShaderProgram();
 			geoProgram->init("shaders/GEO_vertex.vert", "shaders/GEO_fragment.frag");
-			geoProgram->bindAttribLocation(Mesh::VERTICES, "inPosition");
-			geoProgram->bindAttribLocation(Mesh::TEXCOORDS, "inTexcoord");
-			geoProgram->bindAttribLocation(Mesh::NORMALS, "inNormal");
-			geoProgram->bindAttribLocation(Mesh::TANGENTS, "inTangent");
 			geoProgram->link();
 			geoProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 			sceneGraph->getRoot()->setShaderProgram(geoProgram);
 
 			lightProgram = new ShaderProgram();
 			lightProgram->init("shaders/LIGHT_vertex.vert", "shaders/LIGHT_fragment.frag");
-			lightProgram->bindAttribLocation(Mesh::VERTICES, "inPosition");
 			lightProgram->link();
 			lightProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 		}
