@@ -63,6 +63,7 @@ void main()
     vec3 position = texture(gPosition, texcoord).rgb;
     vec3 V = normalize(viewPos - position);
     vec3 albedo  = texture(gAlbedo, texcoord).rgb;
+    albedo = pow(albedo, vec3(2.2));
     float metallic = texture(gMetallicRoughnessAO, texcoord).r;
     float roughness = texture(gMetallicRoughnessAO, texcoord).g;
     float ao = texture(gMetallicRoughnessAO, texcoord).b;

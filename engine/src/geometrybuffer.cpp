@@ -55,7 +55,6 @@ namespace engine {
 	void GBuffer::bindRead() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		for (unsigned int i = 0; i < sizeof(m_textures) / sizeof(m_textures[0]); i++) {
-			std::cout << GL_TEXTURE0 + i << std::endl;
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, m_textures[GB_POSITION + i]);
 		}
