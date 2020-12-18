@@ -6,6 +6,7 @@ namespace engine {
 
 	GBuffer::GBuffer() {
 		m_fbo = 0;
+		m_fboPostProcess = 0;
 		m_depthTexture = 0;
 	}
 
@@ -13,20 +14,27 @@ namespace engine {
 		if (m_fbo != 0)
 			glDeleteFramebuffers(1, &m_fbo);
 		if (m_textures[0] != 0)
-			glDeleteTextures(sizeof(m_textures) / sizeof(m_textures[0]), m_textures);
+			glDeleteTextures(GBuffer::GB_NUMBER_OF_TEXTURES, m_textures);
 		if (m_depthTexture != 0) {
 			glDeleteTextures(1, &m_depthTexture);
 		}
+		if (m_fboPostProcess != 0)
+			glDeleteFramebuffers(1, &m_fboPostProcess);
+		if (m_postProcessTextures[0] != 0)
+			glDeleteTextures(GBuffer::GB_NUMBER_OF_PP_TEXTURES, m_postProcessTextures);
 	}
 
 	void GBuffer::initialize(unsigned int windowWidth, unsigned int windowHeight) {
+		
+		// Geometry FBO
+
 		glGenFramebuffers(1, &m_fbo);
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 		float texturesSize = sizeof(m_textures) / sizeof(m_textures[0]);
-		glGenTextures(texturesSize, m_textures);
+		glGenTextures(GBuffer::GB_NUMBER_OF_TEXTURES, m_textures);
 		glGenTextures(1, &m_depthTexture);
 
-		for (unsigned int i = 0; i < texturesSize; i++) {
+		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
 			glBindTexture(GL_TEXTURE_2D, m_textures[i]);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -43,25 +51,76 @@ namespace engine {
 		glDrawBuffers(drawBuffersSize, DrawBuffers);
 
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+
+		// Shade and Postprocess FBO
+		glGenFramebuffers(1, &m_fboPostProcess);
+		glGenTextures(GBuffer::GB_NUMBER_OF_PP_TEXTURES, m_postProcessTextures);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPostProcess);
+		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_PP_TEXTURES; i++) {
+			glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[i]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, m_postProcessTextures[i], 0);
+		}
+		GLenum DrawBuffersPostProcess[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
+		float drawBuffersPostProcessSize = sizeof(DrawBuffersPostProcess) / sizeof(DrawBuffersPostProcess[0]);
+		glDrawBuffers(drawBuffersPostProcessSize, DrawBuffersPostProcess);
+
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		
+		// Bloom Ping Pong FBO
+		//glGenFramebuffers(2, m_fboPingPong);
+		//glGenTextures(2, m_pingPongTextures);
+		//for (unsigned int i = 0; i < 2; i++)
+		//{
+		//	glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[i]);
+		//	glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[i]);
+		//	glTexImage2D(
+		//		GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL
+		//	);
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		//	glFramebufferTexture2D(
+		//		GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_pingPongTextures[i], 0
+		//	);
+		//}
 	}
 
 	void GBuffer::bindWrite() {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	}
+	void GBuffer::bindWritePostProcess() {
+		bindRead();
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPostProcess);
+	}
 
 	void GBuffer::bindReadDebug() {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
 	}
+
 	void GBuffer::bindRead() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		for (unsigned int i = 0; i < sizeof(m_textures) / sizeof(m_textures[0]); i++) {
+		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
 			glBindTexture(GL_TEXTURE_2D, m_textures[GB_POSITION + i]);
 		}
 	}
 
+	void GBuffer::bindReadPostProcess() {
+		bindRead();
+		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_PP_TEXTURES; i++) {
+			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + i);
+			glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED + i]);
+		}
+	}
+
+
 	void GBuffer::setBufferToRead(GB_TEX_TYPE texType) {
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + texType);
+
 	}
 
 }
