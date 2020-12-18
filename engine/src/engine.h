@@ -14,6 +14,9 @@
 #include "shader.h"
 #include "meshloading.h"
 
+#include "geometrybuffer.h"
+#include "quad2d.h"  
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 

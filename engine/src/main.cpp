@@ -5,6 +5,7 @@ using namespace engine;
 class App : public IApp
 {
 	GLuint vaoId, vboId[2];
+	Quad2D quad;
 
 	bool isEulerMode;
 
@@ -22,11 +23,16 @@ class App : public IApp
 
 	SceneGraph* sceneGraph;
 
+	ShaderProgram* geoProgram;
+	ShaderProgram* lightProgram;
+
+	bool showGbufferContent = false;
+
 	void updateProjection()
 	{
 		float aspectRatio = windowWidth / (float)windowHeight;
 		// M_PI / 3 is aproximately 60 degrees FOV
-		sceneGraph->getCamera()->setPerspective(M_PI / 3, aspectRatio, 1, 50);
+		sceneGraph->getCamera()->setPerspective(M_PI / 3, aspectRatio, 0.1, 50);
 	}
 
 	void windowCloseCallback(GLFWwindow* window) override
@@ -75,6 +81,11 @@ class App : public IApp
 		{
 			cameraVelocity.z = 0;
 		}
+
+		if (key == GLFW_KEY_C && action == GLFW_PRESS)
+		{
+			showGbufferContent = !showGbufferContent;
+		}
 	}
 
 	void mouseCallback(GLFWwindow* window, Vector2 mousePosition) override { mouseCurrentPos = mousePosition; }
@@ -98,12 +109,14 @@ class App : public IApp
 
 	void start() override
 	{
+		quad.setupQuad();
+
 		sceneGraph = new SceneGraph();
 
 		SceneNode* root = sceneGraph->getRoot();
 
 		WavefrontLoader loaderGround;
-		loaderGround.loadFile("assets/car.obj");
+		loaderGround.loadFile("assets/teapot.obj");
 
 		// Ground
 		Mesh* cube = loaderGround.getObjects()[0];
@@ -112,19 +125,19 @@ class App : public IApp
 		root->setMesh(cube);
 
 		Texture2D* albedo = new Texture2D();
-		albedo->load("assets/textures/car_albedo.png");
+		albedo->load("assets/textures/teapot_albedo.png");
 
 		Texture2D* normal = new Texture2D();
-		normal->load("assets/textures/car_normal.png");
+		normal->load("assets/textures/teapot_normal.png");
 
 		Texture2D* roughness = new Texture2D();
-		roughness->load("assets/textures/car_roughness.png");
+		roughness->load("assets/textures/teapot_roughness.png");
 
 		Texture2D* metallic = new Texture2D();
-		metallic->load("assets/textures/car_metallic.png");
+		metallic->load("assets/textures/teapot_metallic.png");
 
 		Texture2D* ao = new Texture2D();
-	    ao->load("assets/textures/car_ao.png");
+		ao->load("assets/textures/teapot_ao.png");
 
 		Sampler* s = new LinearMipmapLinearSampler();
 		TextureInfo* albedoInfo = new TextureInfo(GL_TEXTURE0, "texAlbedo", albedo, s);
@@ -154,15 +167,21 @@ class App : public IApp
 
 		try
 		{
-			ShaderProgram* program = new ShaderProgram();
-			program->init("shaders/vertex.vert", "shaders/fragment.frag");
-			program->bindAttribLocation(Mesh::VERTICES, "inPosition");
-			program->bindAttribLocation(Mesh::TEXCOORDS, "inTexcoord");
-			program->bindAttribLocation(Mesh::NORMALS, "inNormal");
-			program->bindAttribLocation(Mesh::TANGENTS, "inTangent");
-			program->link();
-			program->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
-			sceneGraph->getRoot()->setShaderProgram(program);
+			geoProgram = new ShaderProgram();
+			geoProgram->init("shaders/GEO_vertex.vert", "shaders/GEO_fragment.frag");
+			geoProgram->bindAttribLocation(Mesh::VERTICES, "inPosition");
+			geoProgram->bindAttribLocation(Mesh::TEXCOORDS, "inTexcoord");
+			geoProgram->bindAttribLocation(Mesh::NORMALS, "inNormal");
+			geoProgram->bindAttribLocation(Mesh::TANGENTS, "inTangent");
+			geoProgram->link();
+			geoProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+			sceneGraph->getRoot()->setShaderProgram(geoProgram);
+
+			lightProgram = new ShaderProgram();
+			lightProgram->init("shaders/LIGHT_vertex.vert", "shaders/LIGHT_fragment.frag");
+			lightProgram->bindAttribLocation(Mesh::VERTICES, "inPosition");
+			lightProgram->link();
+			lightProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 		}
 		catch (Exception e)
 		{
@@ -175,8 +194,53 @@ class App : public IApp
 	#endif*/
 	}
 
+	void setupGeoPass(GBuffer& gbuffer) {
+		gbuffer.bindWrite();
+		glClearColor(0.0, 0.0, 0.0, 1.0);
+		glDepthMask(GL_TRUE);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+	}
+
+	void afterGeoPass() {
+		glDepthMask(GL_FALSE);
+		glDisable(GL_DEPTH_TEST);
+	}
+
+	void setupLightPass(GBuffer& gbuffer) {
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_ONE, GL_ONE);
+		gbuffer.bindRead();
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+
+	void ShowGbuffer(GBuffer& gbuffer) {
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		gbuffer.bindReadDebug();
+
+		GLsizei HalfWidth = (GLsizei)(windowWidth / 2.0f);
+		GLsizei HalfHeight = (GLsizei)(windowHeight / 2.0f);
+
+		gbuffer.setBufferToRead(GBuffer::GB_POSITION);
+		glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+		gbuffer.setBufferToRead(GBuffer::GB_ALBEDO);
+		glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, HalfHeight, HalfWidth, windowHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+		gbuffer.setBufferToRead(GBuffer::GB_METALLIC_ROUGHNESS_AO);
+		glBlitFramebuffer(0, 0, windowWidth, windowHeight, HalfWidth, HalfHeight, windowWidth, windowHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+		gbuffer.setBufferToRead(GBuffer::GB_NORMAL);
+		glBlitFramebuffer(0, 0, windowWidth, windowHeight, HalfWidth, 0, windowWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+	}
+
 	void update(double elapsedSecs) override
 	{
+		GBuffer gbuffer;
+		gbuffer.initialize(windowWidth, windowHeight);
 		Camera* camera = sceneGraph->getCamera();
 
 		if (mouseButtonPressed) // camera rotation using mouse
@@ -215,12 +279,28 @@ class App : public IApp
 
 		Matrix4 viewMatrix = camera->getViewMatrix();
 		Matrix3 viewMatrixInversed = camera->getViewMatrixInversed();
-		Vector3 translation = viewMatrixInversed * Vector3(viewMatrix * Vector4(0,0,0,1)) * -1;
+		Vector3 translation = viewMatrixInversed * Vector3(viewMatrix * Vector4(0, 0, 0, 1)) * -1;
 
-		sceneGraph->getRoot()->getShaderProgram()->use();
-		sceneGraph->getRoot()->getShaderProgram()->setUniform("viewPos", translation);
-		sceneGraph->getRoot()->getShaderProgram()->unuse();
+		setupGeoPass(gbuffer);
+		sceneGraph->getRoot()->setShaderProgram(geoProgram);
 		sceneGraph->draw();
+		afterGeoPass();
+		if (showGbufferContent) {
+			ShowGbuffer(gbuffer);
+		}
+		else {
+			lightProgram->use();
+			lightProgram->setUniform("gScreenSize", Vector2(windowWidth, windowHeight));
+			lightProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
+			lightProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
+			lightProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
+			lightProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
+			lightProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
+			lightProgram->setUniform("viewPos", translation);
+			setupLightPass(gbuffer);
+			quad.drawQuad();
+			lightProgram->unuse();
+		}
 	}
 };
 

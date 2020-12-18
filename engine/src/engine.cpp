@@ -131,7 +131,7 @@ namespace engine {
 		std::cerr << "OpenGL version " << version << std::endl;
 		std::cerr << "GLSL version " << glslVersion << std::endl;
 #endif
-		glClearColor(0.1f, 0.1f, 0.3f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 		glDepthMask(GL_TRUE);
