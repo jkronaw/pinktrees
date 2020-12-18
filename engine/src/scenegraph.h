@@ -5,8 +5,7 @@
 #include "matrix.h"
 #include "camera.h"
 #include "shader.h"
-#include "meshloading.h"
-#include "texture.h"
+#include "model.h"
 
 namespace engine
 {
@@ -51,7 +50,7 @@ namespace engine
 		void setMatrix(Matrix4);
 		Matrix4 getMatrix();
 
-		void setMesh(Mesh*);
+		void setModel(Model*);
 		void addNode(SceneNode*);
 		void addTexture(TextureInfo*);
 		SceneNode* createNode();
@@ -62,11 +61,10 @@ namespace engine
 		void setCallback(ISceneNodeCallback*);
 	private:
 		std::vector<SceneNode*> nodes;
-		std::vector<TextureInfo*> textures;
 		SceneNode* parent = nullptr;
 		ShaderProgram* shaderProgram = nullptr;
 		Matrix4 matrix;
-		Mesh* mesh = nullptr;
+		Model* model = nullptr;
 		ISceneNodeCallback* callback = nullptr;
 		Matrix4 getModelMatrix();
 	};

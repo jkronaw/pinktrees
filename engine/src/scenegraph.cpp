@@ -64,9 +64,9 @@ namespace engine
 		this->matrix = matrix;
 	}
 
-	void SceneNode::setMesh(Mesh* mesh)
+	void SceneNode::setModel(Model* model)
 	{
-		this->mesh = mesh;
+		this->model = model;
 	}
 
 	void SceneNode::setCallback(ISceneNodeCallback* callback)
@@ -84,11 +84,6 @@ namespace engine
 	void SceneNode::addNode(SceneNode* newNode)
 	{
 		this->nodes.push_back(newNode);
-	}
-
-	void SceneNode::addTexture(TextureInfo* textureInfo)
-	{
-		textures.push_back(textureInfo);
 	}
 
 	void SceneNode::removeNode(SceneNode* toRemove)
@@ -114,7 +109,7 @@ namespace engine
 		}
 
 		shaderProgram->use();
-		if (mesh != nullptr)
+		if (model != nullptr)
 		{
 			Matrix4 modelMatrix = getModelMatrix();
 			shaderProgram->setUniform(MODEL_MATRIX_NAME_IN_SHADER, modelMatrix);
@@ -122,15 +117,7 @@ namespace engine
 			Matrix3 normalMatrix = Matrix3(modelMatrix).inversed().transposed();
 			shaderProgram->setUniform(NORMAL_MATRIX_NAME_IN_SHADER, normalMatrix);
 
-			for (TextureInfo* tInfo : textures)
-			{
-				tInfo->updateShader(shaderProgram);
-			}
-
-			mesh->draw();
-			for (TextureInfo* tInfo : textures) {
-				tInfo->unbindSampler();
-			}
+			model->draw(shaderProgram);
 		}
 		shaderProgram->unuse();
 

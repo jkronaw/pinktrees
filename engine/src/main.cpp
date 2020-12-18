@@ -26,7 +26,13 @@ class App : public IApp
 	ShaderProgram* geoProgram;
 	ShaderProgram* lightProgram;
 
+	bool useTextures = false;
 	bool showGbufferContent = false;
+
+	Model* modelLantern;
+	Model* modelTeapot;
+	Model* modelCar;
+	Model* modelSphere;
 
 	void updateProjection()
 	{
@@ -86,6 +92,22 @@ class App : public IApp
 		{
 			showGbufferContent = !showGbufferContent;
 		}
+
+		if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
+			sceneGraph->getRoot()->setModel(modelTeapot);
+		}
+
+		if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
+			sceneGraph->getRoot()->setModel(modelCar);
+		}
+
+		if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
+			sceneGraph->getRoot()->setModel(modelSphere);
+		}
+
+		if (key == GLFW_KEY_4 && action == GLFW_PRESS) {
+			sceneGraph->getRoot()->setModel(modelLantern);
+		}
 	}
 
 	void mouseCallback(GLFWwindow* window, Vector2 mousePosition) override { mouseCurrentPos = mousePosition; }
@@ -111,46 +133,19 @@ class App : public IApp
 	{
 		quad.setupQuad();
 
+		modelLantern = new Model();
+		modelSphere = new Model();
+		modelTeapot = new Model();
+		modelCar = new Model();
+
+		modelLantern->load(std::string("assets/models/lantern"));
+		modelSphere->load(std::string("assets/models/sphere"));
+		modelTeapot->load(std::string("assets/models/teapot"));
+		modelCar->load(std::string("assets/models/car"));
+
 		sceneGraph = new SceneGraph();
-
 		SceneNode* root = sceneGraph->getRoot();
-
-		WavefrontLoader loaderGround;
-		loaderGround.loadFile("assets/teapot.obj");
-
-		// Ground
-		Mesh* cube = loaderGround.getObjects()[0];
-		cube->calculateTangents();
-		cube->setup();
-		root->setMesh(cube);
-
-		Texture2D* albedo = new Texture2D();
-		albedo->load("assets/textures/teapot_albedo.png");
-
-		Texture2D* normal = new Texture2D();
-		normal->load("assets/textures/teapot_normal.png");
-
-		Texture2D* roughness = new Texture2D();
-		roughness->load("assets/textures/teapot_roughness.png");
-
-		Texture2D* metallic = new Texture2D();
-		metallic->load("assets/textures/teapot_metallic.png");
-
-		Texture2D* ao = new Texture2D();
-		ao->load("assets/textures/teapot_ao.png");
-
-		Sampler* s = new LinearMipmapLinearSampler();
-		TextureInfo* albedoInfo = new TextureInfo(GL_TEXTURE0, "texAlbedo", albedo, s);
-		TextureInfo* normalInfo = new TextureInfo(GL_TEXTURE1, "texNormal", normal, s);
-		TextureInfo* roughnessInfo = new TextureInfo(GL_TEXTURE2, "texRoughness", roughness, s);
-		TextureInfo* metallicInfo = new TextureInfo(GL_TEXTURE3, "tex", metallic, s);
-		TextureInfo* aoInfo = new TextureInfo(GL_TEXTURE4, "texAO", ao, s);
-
-		root->addTexture(albedoInfo);
-		root->addTexture(normalInfo);
-		root->addTexture(roughnessInfo);
-		root->addTexture(metallicInfo);
-		root->addTexture(aoInfo);
+		root->setModel(modelTeapot);
 
 		Camera* camera = new Camera(1);
 

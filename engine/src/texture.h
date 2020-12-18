@@ -19,7 +19,7 @@ namespace engine
 	protected:
 		GLuint id = -1;
 	public:
-		Texture() = default;
+		Texture();
 		~Texture();
 		virtual void bind() = 0;
 		virtual void unbind() = 0;
@@ -31,6 +31,7 @@ namespace engine
 		void bind() override;
 		void unbind() override;
 		void load(const std::string& filename);
+		void createFromSingleColor(Vector3 color);
 	};
 
 	struct TextureInfo

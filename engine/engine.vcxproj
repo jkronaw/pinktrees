@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\model.cpp" />
     <ClCompile Include="src\engine.cpp" />
     <ClCompile Include="src\errorhandling.cpp" />
     <ClCompile Include="src\camera.cpp" />
@@ -35,6 +36,7 @@
     <ClCompile Include="src\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\model.h" />
     <ClInclude Include="src\engine.h" />
     <ClInclude Include="src\errorhandling.h" />
     <ClInclude Include="src\camera.h" />
