@@ -116,14 +116,10 @@ namespace engine {
 
 	void GBuffer::bindReadPostProcess() {
 		bindRead();
-		//for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_PP_TEXTURES; i++) {
-		//	glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + i);
-		//	glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED + i]);
-		//}
-		glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES);
-		glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[0]);
-		glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 1);
-		glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED + 1]);
+		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_PP_TEXTURES; i++) {
+			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + i);
+			glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED + i]);
+		}
 	}
 
 	void GBuffer::setBufferToRead(GB_TEX_TYPE texType) {
@@ -145,12 +141,6 @@ namespace engine {
 	}
 
 	void GBuffer::bindPong() {
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboPingPong[1]);
-		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, m_pingPongTextures[1], 0); 
-		glDrawBuffer(GL_COLOR_ATTACHMENT1);
-		GLuint clearColor[4] = { 0, 0, 0, 0 };
-		glClearBufferuiv(GL_COLOR, 0, clearColor);
-
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[1]);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[0]);
@@ -158,12 +148,7 @@ namespace engine {
 	}
 
 	void GBuffer::bindBloom() {
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[0]);
-		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_pingPongTextures[0], 0); 
-		glDrawBuffer(GL_COLOR_ATTACHMENT0); 
-		GLuint clearColor[4] = { 0, 0, 0, 0 };
-		glClearBufferuiv(GL_COLOR, 0, clearColor);
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[0]);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPostProcess);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED]);
 		glActiveTexture(GL_TEXTURE1);

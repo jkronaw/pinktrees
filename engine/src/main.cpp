@@ -31,7 +31,7 @@ class MyApp : public App
 	float ao = 1;
 
 	float blurExposure = 0.5f;
-	bool useBlur = true;
+	bool useBloom = true;
 
 	bool useDOF = true;
 
@@ -85,12 +85,12 @@ class MyApp : public App
 			}
 		}
 		if (key == GLFW_KEY_B && action == GLFW_PRESS) {
-			useBlur = !useBlur;
-			if (useBlur) 
+			useBloom = !useBloom;
+			if (useBloom) 
 				blurExposure = 0.5;
 			else
 				blurExposure = 0.0;
-			std::cout << "Use Blur: " << (useBlur ? "Yes" : "No") << std::endl;
+			std::cout << "Use Blur: " << (useBloom ? "Yes" : "No") << std::endl;
 		}
 		if (key == GLFW_KEY_D && action == GLFW_PRESS) {
 			useDOF = !useDOF;
@@ -270,14 +270,14 @@ class MyApp : public App
 			camera->setViewMatrix(out);
 		}
 
-		if (useBlur) {
+		if (useBloom) {
 			int multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1 : 1;
 			if (engine.getKey(GLFW_KEY_E) == GLFW_PRESS)
 			{	
 				blurExposure += 0.02 * multiplier;
 				if (blurExposure > 1) blurExposure = 1;
 				if (blurExposure < 0) blurExposure = 0;
-				std::cout << "Blur Exposure: " << blurExposure << std::endl;
+				std::cout << "Bloom Exposure: " << blurExposure << std::endl;
 			}	
 		}
 	
@@ -359,6 +359,7 @@ class MyApp : public App
 			quad.drawQuad();
 			lightProgram->unuse();
 
+			glDisable(GL_BLEND);
 			bool firstBlurIteration = true;
 			int numBlurIterations = 20;
 			for (int i = 0; i < numBlurIterations; i++) {

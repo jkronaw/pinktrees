@@ -14,7 +14,7 @@ void main()
     const float gamma = 2.2;
     vec3 hdrColor = texture(gShaded, texcoord).rgb;      
     vec3 bloomColor = texture(gBloom, texcoord).rgb;
-    bloomColor = bloomColor * exposure;
+    bloomColor = bloomColor * 10.0 * exposure;
     vec3 result = hdrColor + bloomColor;
    
     OutShaded = vec4(result,1.0);
