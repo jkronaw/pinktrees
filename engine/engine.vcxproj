@@ -53,6 +53,9 @@
     <ClInclude Include="src\texture.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\bloom_blend.frag" />
+    <None Include="shaders\blur_horizontal.frag" />
+    <None Include="shaders\blur_vertikal.frag" />
     <None Include="shaders\GEO_fragment.frag" />
     <None Include="shaders\GEO_vertex.vert" />
     <None Include="shaders\LIGHT_fragment.frag" />

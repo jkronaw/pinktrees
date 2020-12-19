@@ -36,6 +36,12 @@ namespace engine {
 		void bindReadDebug();
 		void setBufferToRead(GB_TEX_TYPE texType);
 
+		void bindPingFirstIteration();
+		void bindPing();
+		void bindPong();
+
+		void bindBloom();
+
 	private:
 		GLuint m_fbo;
 		GLuint m_fboPostProcess;

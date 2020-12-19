@@ -92,6 +92,7 @@ namespace engine {
 	void GBuffer::bindWrite() {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	}
+
 	void GBuffer::bindWritePostProcess() {
 		bindRead();
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPostProcess);
@@ -117,10 +118,34 @@ namespace engine {
 		}
 	}
 
-
 	void GBuffer::setBufferToRead(GB_TEX_TYPE texType) {
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + texType);
 
 	}
 
+	void GBuffer::bindPingFirstIteration() {
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[0]);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED]);
+	}
+
+	void GBuffer::bindPing() {
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[0]);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[1]);
+	}
+
+	void GBuffer::bindPong() {
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[1]);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[0]);
+	}
+
+	void GBuffer::bindBloom() {
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPostProcess);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED]);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[0]);
+	}
 }
