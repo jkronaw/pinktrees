@@ -91,6 +91,22 @@ namespace engine
 		stbi_image_free(data);
 	}
 
+	void Texture2D::createFromSingleColor(float color)
+	{
+		glBindTexture(GL_TEXTURE_2D, id);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+		// load a 1x1 pixel texture
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 1, 1, 0, GL_RED, GL_FLOAT, &color);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
 	void Texture2D::createFromSingleColor(Vector3 color)
 	{
 		glBindTexture(GL_TEXTURE_2D, id);
@@ -102,7 +118,7 @@ namespace engine
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
 		// load a 1x1 pixel texture
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_UNSIGNED_BYTE, &color);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 1, 1, 0, GL_RGB, GL_FLOAT, &color);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}

@@ -30,48 +30,28 @@ namespace engine {
 
 		loadedTextures[0] = new Texture2D();
 		loadedTextures[0]->load(directoryName + "/albedo.png");
-		activeTextures[0]->texture = loadedTextures[0];
 
 		loadedTextures[1] = new Texture2D();
 		loadedTextures[1]->load(directoryName + "/normal.png");
-		activeTextures[1]->texture = loadedTextures[1];
 
 		loadedTextures[2] = new Texture2D();
 		loadedTextures[2]->load(directoryName + "/roughness.png");
-		activeTextures[2]->texture = loadedTextures[2];
+		
 
 		loadedTextures[3] = new Texture2D();
 		loadedTextures[3]->load(directoryName + "/metallic.png");
-		activeTextures[3]->texture = loadedTextures[3];
 
 		loadedTextures[4] = new Texture2D();
 		loadedTextures[4]->load(directoryName + "/ao.png");
-		activeTextures[4]->texture = loadedTextures[4];
+
+		useLoadedTextures();
 	}
 
-	void Model::setAlbedo(Texture2D* texture)
+	void Model::useLoadedTextures()
 	{
-		activeTextures[0]->texture = texture;
-	}
-
-	void Model::setNormal(Texture2D* texture)
-	{
-		activeTextures[1]->texture = texture;
-	}
-
-	void Model::setRoughness(Texture2D* texture)
-	{
-		activeTextures[2]->texture = texture;
-	}
-
-	void Model::setMetallic(Texture2D* texture)
-	{
-		activeTextures[3]->texture = texture;
-	}
-
-	void Model::setAO(Texture2D* texture)
-	{
-		activeTextures[4]->texture = texture;
+		for (int i = 0; i < 5; i++) {
+			activeTextures[i]->texture = loadedTextures[i];
+		}
 	}
 
 	void Model::draw(ShaderProgram* program)

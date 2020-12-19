@@ -22,14 +22,14 @@ class MyApp : public App
 	ShaderProgram* lightProgram;
 	ShaderProgram* postProcessProgram;
 
+	bool useTextures = true;
+	float roughness = 0.5;
+	float metallic = 0.4;
+	float ao = 1;
 
-	bool useTextures = false;
 	bool showGbufferContent = false;
 
-	Model* modelLantern;
-	Model* modelTeapot;
-	Model* modelCar;
-	Model* modelSphere;
+	Model* models[4];
 
 	void updateProjection()
 	{
@@ -61,10 +61,21 @@ class MyApp : public App
 		if (key == GLFW_KEY_C && action == GLFW_PRESS) showGbufferContent = !showGbufferContent;
 
 		// model switching
-		if (key == GLFW_KEY_1 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(modelTeapot);
-		if (key == GLFW_KEY_2 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(modelCar);
-		if (key == GLFW_KEY_3 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(modelSphere);
-		if (key == GLFW_KEY_4 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(modelLantern);
+		if (key == GLFW_KEY_1 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(models[0]);
+		if (key == GLFW_KEY_2 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(models[1]);
+		if (key == GLFW_KEY_3 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(models[2]);
+		if (key == GLFW_KEY_4 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(models[3]);
+
+		if (key == GLFW_KEY_T && action == GLFW_PRESS) {
+			useTextures = !useTextures;
+			std::cout << "Use Textures: " << (useTextures ? "Yes" : "No") << std::endl;
+			if (useTextures) {
+				for (Model* m : models)
+				{
+					m->useLoadedTextures();
+				}
+			}
+		}
 	}
 
 	void mouseCallback(Vector2 mousePosition) override { mouseCurrentPos = mousePosition; }
@@ -84,19 +95,19 @@ class MyApp : public App
 	{
 		quad.setupQuad();
 
-		modelLantern = new Model();
-		modelSphere = new Model();
-		modelTeapot = new Model();
-		modelCar = new Model();
+		models[0] = new Model();
+		models[1] = new Model();
+		models[2] = new Model();
+		models[3] = new Model();
 
-		modelLantern->load(std::string("assets/models/lantern"));
-		modelSphere->load(std::string("assets/models/sphere"));
-		modelTeapot->load(std::string("assets/models/teapot"));
-		modelCar->load(std::string("assets/models/car"));
+		models[0]->load(std::string("assets/models/lantern"));
+		models[1]->load(std::string("assets/models/sphere"));
+		models[2]->load(std::string("assets/models/teapot"));
+		models[3]->load(std::string("assets/models/car"));
 
 		sceneGraph = new SceneGraph();
 		SceneNode* root = sceneGraph->getRoot();
-		root->setModel(modelTeapot);
+		root->setModel(models[2]);
 
 		Camera* camera = new Camera(1);
 
@@ -105,7 +116,7 @@ class MyApp : public App
 			Vector3(0, 0, 0),
 			Vector3(0, 1, 0)
 		);
-		
+
 		sceneGraph->setCamera(camera);
 
 		updateProjection();
@@ -224,6 +235,60 @@ class MyApp : public App
 			camera->setViewMatrix(out);
 		}
 
+		if (!useTextures) {
+			int multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1 : 1;
+
+			if (engine.getKey(GLFW_KEY_R) == GLFW_PRESS)
+			{
+				roughness += 0.02 * multiplier;
+				if (roughness > 1) roughness = 1;
+				if (roughness < 0) roughness = 0;
+				std::cout << "Roughness: " << roughness << std::endl;
+			}
+
+			if (engine.getKey(GLFW_KEY_M) == GLFW_PRESS)
+			{
+				metallic += 0.02 * multiplier;
+				if (metallic > 1) metallic = 1;
+				if (metallic < 0) metallic = 0;
+				std::cout << "Metallic: " << metallic << std::endl;
+			}
+
+			if (engine.getKey(GLFW_KEY_A) == GLFW_PRESS)
+			{
+				ao += 0.02 * multiplier;
+				if (ao > 1) ao = 1;
+				if (ao < 0) ao = 0;
+				std::cout << "Ambient Occlusion: " << ao << std::endl;
+			}
+
+			if (!useTextures) {
+				for (Model* m : models)
+				{
+					Texture2D* texAlbedo = new Texture2D();
+					texAlbedo->createFromSingleColor(Vector3(1, 0, 0));
+					m->activeTextures[0]->texture = texAlbedo;
+
+					Texture2D* texNormal = new Texture2D();
+					texNormal->createFromSingleColor(Vector3(0.5, 0.5, 1));
+					m->activeTextures[1]->texture = texNormal;
+
+					Texture2D* texRoughness = new Texture2D();
+					texRoughness->createFromSingleColor(roughness);
+					m->activeTextures[2]->texture = texRoughness;
+
+					Texture2D* texMetallic = new Texture2D();
+					texMetallic->createFromSingleColor(metallic);
+					m->activeTextures[3]->texture = texMetallic;
+
+					Texture2D* texAO = new Texture2D();
+					texAO->createFromSingleColor(ao);
+					m->activeTextures[4]->texture = texAO;
+				}
+			}
+		}
+
+
 		Matrix4 viewMatrix = camera->getViewMatrix();
 		Matrix3 viewMatrixInversed = camera->getViewMatrixInversed();
 		Vector3 translation = viewMatrixInversed * Vector3(viewMatrix * Vector4(0, 0, 0, 1)) * -1;
@@ -261,6 +326,16 @@ class MyApp : public App
 			setupPostProcessPass(gbuffer);
 			quad.drawQuad();
 			postProcessProgram->unuse();
+		}
+
+		if (!useTextures) {
+			for (Model* m : models)
+			{
+				for (int i = 0; i < 5; i++)
+				{
+					delete m->activeTextures[i]->texture;
+				}
+			}
 		}
 	}
 };

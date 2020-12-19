@@ -31,6 +31,7 @@ namespace engine
 		void bind() override;
 		void unbind() override;
 		void load(const std::string& filename);
+		void createFromSingleColor(float color);
 		void createFromSingleColor(Vector3 color);
 	};
 
