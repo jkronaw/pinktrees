@@ -121,6 +121,12 @@ namespace engine
 		glUniform1i(location, value);
 	}
 
+	void ShaderProgram::setUniform(const char* name, float value)
+	{
+		GLuint location = glGetUniformLocation(programId, name);
+		glUniform1f(location, value);
+	}
+
 	void ShaderProgram::setUniformBlockBinding(const char* name, GLuint uboBP)
 	{
 		GLuint uboId = glGetUniformBlockIndex(programId, name);

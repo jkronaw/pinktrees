@@ -11,7 +11,7 @@ namespace engine
 	{
 		glActiveTexture(unit);
 		texture->bind();
-		program->setUniform(uniformName.c_str(), unit - GL_TEXTURE0);
+		program->setUniform(uniformName.c_str(), int( unit - GL_TEXTURE0));
 		if (sampler)
 		{
 			sampler->bind(unit - GL_TEXTURE0);

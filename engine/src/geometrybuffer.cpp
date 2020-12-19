@@ -22,6 +22,10 @@ namespace engine {
 			glDeleteFramebuffers(1, &m_fboPostProcess);
 		if (m_postProcessTextures[0] != 0)
 			glDeleteTextures(GBuffer::GB_NUMBER_OF_PP_TEXTURES, m_postProcessTextures);
+		if (m_fboPingPong != 0)
+			glDeleteFramebuffers(2, m_fboPingPong);
+		if (m_pingPongTextures[0] != 0)
+			glDeleteTextures(2, m_pingPongTextures);
 	}
 
 	void GBuffer::initialize(unsigned int windowWidth, unsigned int windowHeight) {
@@ -70,23 +74,23 @@ namespace engine {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 		
 		// Bloom Ping Pong FBO
-		//glGenFramebuffers(2, m_fboPingPong);
-		//glGenTextures(2, m_pingPongTextures);
-		//for (unsigned int i = 0; i < 2; i++)
-		//{
-		//	glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[i]);
-		//	glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[i]);
-		//	glTexImage2D(
-		//		GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL
-		//	);
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		//	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		//	glFramebufferTexture2D(
-		//		GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_pingPongTextures[i], 0
-		//	);
-		//}
+		glGenFramebuffers(2, m_fboPingPong);
+		glGenTextures(2, m_pingPongTextures);
+		for (unsigned int i = 0; i < 2; i++)
+		{
+			glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[i]);
+			glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[i]);
+			glTexImage2D(
+				GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL
+			);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glFramebufferTexture2D(
+				GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_pingPongTextures[i], 0
+			);
+		}
 	}
 
 	void GBuffer::bindWrite() {
@@ -112,10 +116,14 @@ namespace engine {
 
 	void GBuffer::bindReadPostProcess() {
 		bindRead();
-		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_PP_TEXTURES; i++) {
-			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + i);
-			glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED + i]);
-		}
+		//for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_PP_TEXTURES; i++) {
+		//	glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + i);
+		//	glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED + i]);
+		//}
+		glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES);
+		glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[0]);
+		glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 1);
+		glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED + 1]);
 	}
 
 	void GBuffer::setBufferToRead(GB_TEX_TYPE texType) {
@@ -126,26 +134,39 @@ namespace engine {
 	void GBuffer::bindPingFirstIteration() {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[0]);
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED]);
+		glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_BLOOM]);
 	}
 
 	void GBuffer::bindPing() {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[0]);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[1]);
+		
 	}
 
 	void GBuffer::bindPong() {
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_fboPingPong[1]);
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, m_pingPongTextures[1], 0); 
+		glDrawBuffer(GL_COLOR_ATTACHMENT1);
+		GLuint clearColor[4] = { 0, 0, 0, 0 };
+		glClearBufferuiv(GL_COLOR, 0, clearColor);
+
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[1]);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[0]);
+
 	}
 
 	void GBuffer::bindBloom() {
-		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPostProcess);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[0]);
+		glFramebufferTexture(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, m_pingPongTextures[0], 0); 
+		glDrawBuffer(GL_COLOR_ATTACHMENT0); 
+		GLuint clearColor[4] = { 0, 0, 0, 0 };
+		glClearBufferuiv(GL_COLOR, 0, clearColor);
+		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPingPong[0]);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED]);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[0]);
+		glBindTexture(GL_TEXTURE_2D, m_pingPongTextures[1]);
 	}
 }

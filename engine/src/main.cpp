@@ -21,11 +21,19 @@ class MyApp : public App
 	ShaderProgram* geoProgram;
 	ShaderProgram* lightProgram;
 	ShaderProgram* postProcessProgram;
+	ShaderProgram* horizontalBlurProgram;
+	ShaderProgram* vertikalBlurProgram;
+	ShaderProgram* bloomProgram;
 
 	bool useTextures = true;
 	float roughness = 0.5;
 	float metallic = 0.4;
 	float ao = 1;
+
+	float blurExposure = 0.5f;
+	bool useBlur = true;
+
+	bool useDOF = true;
 
 	bool showGbufferContent = false;
 
@@ -75,6 +83,18 @@ class MyApp : public App
 					m->useLoadedTextures();
 				}
 			}
+		}
+		if (key == GLFW_KEY_B && action == GLFW_PRESS) {
+			useBlur = !useBlur;
+			if (useBlur) 
+				blurExposure = 0.5;
+			else
+				blurExposure = 0.0;
+			std::cout << "Use Blur: " << (useBlur ? "Yes" : "No") << std::endl;
+		}
+		if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+			useDOF = !useDOF;
+			std::cout << "Use DOF: " << (useDOF ? "Yes" : "No") << std::endl;
 		}
 	}
 
@@ -139,6 +159,21 @@ class MyApp : public App
 			postProcessProgram->bindAttribLocation(Mesh::VERTICES, "inPosition");
 			postProcessProgram->link();
 			postProcessProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+
+			horizontalBlurProgram = new ShaderProgram();
+			horizontalBlurProgram->init("shaders/LIGHT_vertex.vert", "shaders/blur_horizontal.frag");
+			horizontalBlurProgram->link();
+			horizontalBlurProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+
+			vertikalBlurProgram = new ShaderProgram();
+			vertikalBlurProgram->init("shaders/LIGHT_vertex.vert", "shaders/blur_vertikal.frag");
+			vertikalBlurProgram->link();
+			vertikalBlurProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+
+			bloomProgram = new ShaderProgram();
+			bloomProgram->init("shaders/LIGHT_vertex.vert", "shaders/bloom_blend.frag");
+			bloomProgram->link();
+			bloomProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 		}
 		catch (Exception e)
 		{
@@ -235,6 +270,17 @@ class MyApp : public App
 			camera->setViewMatrix(out);
 		}
 
+		if (useBlur) {
+			int multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1 : 1;
+			if (engine.getKey(GLFW_KEY_E) == GLFW_PRESS)
+			{	
+				blurExposure += 0.02 * multiplier;
+				if (blurExposure > 1) blurExposure = 1;
+				if (blurExposure < 0) blurExposure = 0;
+				std::cout << "Blur Exposure: " << blurExposure << std::endl;
+			}	
+		}
+	
 		if (!useTextures) {
 			int multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1 : 1;
 
@@ -313,7 +359,38 @@ class MyApp : public App
 			quad.drawQuad();
 			lightProgram->unuse();
 
+			bool firstBlurIteration = true;
+			int numBlurIterations = 20;
+			for (int i = 0; i < numBlurIterations; i++) {
+				horizontalBlurProgram->use();
+				horizontalBlurProgram->setUniform("gBloom", 0);
+				if (firstBlurIteration) {
+					gbuffer.bindPingFirstIteration();
+					firstBlurIteration = false;
+				}
+				else {
+					gbuffer.bindPing();
+				}
+				quad.drawQuad();
+				horizontalBlurProgram->unuse();
+			
+				vertikalBlurProgram->use();
+				vertikalBlurProgram->setUniform("gBloom", 0);
+				gbuffer.bindPong();
+				quad.drawQuad();
+				vertikalBlurProgram->unuse();
+			}
+			
+			bloomProgram->use();
+			bloomProgram->setUniform("gShaded", 0);
+			bloomProgram->setUniform("gBloom", 1);
+			bloomProgram->setUniform("exposure", blurExposure);
+			gbuffer.bindBloom();
+			quad.drawQuad();
+			bloomProgram->unuse();
+			
 			postProcessProgram->use();
+			postProcessProgram->setUniform("useDOF", useDOF);
 			postProcessProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
 			postProcessProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
 			postProcessProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);

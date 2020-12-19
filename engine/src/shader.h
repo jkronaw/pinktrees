@@ -23,6 +23,7 @@ namespace engine
 		void setUniform(const char*, const Matrix3&);
 		void setUniform(const char*, const Matrix4&);
 		void setUniform(const char*, int);
+		void setUniform(const char*, float);
 		void setUniformBlockBinding(const char* name, GLuint uboBP);
 
 		void use();

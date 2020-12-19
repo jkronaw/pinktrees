@@ -127,12 +127,12 @@ void main()
     color = pow(color, vec3(1.0/2.2));
 
     // bloom separation
-    vec3 threshold = vec3(0.7, 0.7152, 0.7);
+    vec3 threshold = vec3(0.2126, 0.7152, 0.722);
     float brightness = dot(color, threshold);
     if(brightness > 1.0)
         outBloom = vec3(color);
     else
         outBloom = vec3(0.0, 0.0, 0.0);
 
-    outColor = vec3(color);
+   outColor = vec3(color);
 }

@@ -13,6 +13,7 @@ uniform sampler2D gTexCoord;
 uniform sampler2D gShaded;
 uniform sampler2D gBloom;
 
+uniform bool useDOF;
 uniform vec2 gScreenSize;
 uniform vec3 viewPos;
 
@@ -65,32 +66,37 @@ uint init_rng()
 void main()
 {   
     
-	//vec3 color = texture(gShaded, texcoord).rgb;
-	//vec3 bloom = texture(gBloom, texcoord).rgb;
-	//FragmentColor = vec4(color, 1.0);
+	// Without Post Processing:
 
-	// DOF:
+	vec3 color = texture(gShaded, texcoord).rgb;
+	FragmentColor = vec4(color, 1.0);
 
-	uint state = init_rng();
-	vec3 position = texture(gPosition, texcoord).rgb;
-	float z = -(ViewMatrix * vec4(position ,1.0)).z;
+
+	// very simple DOF:
 	
-	float depth_diff = abs(z - 4);
-	float disc_radius = depth_diff * 0.0005;
-	vec4 color_sum = vec4(0.0);
-	float num_valid = 0;
-	
-	for(int i = 0; i < 150; i++){
+	if(useDOF){
+
+		uint state = init_rng();
+		vec3 position = texture(gPosition, texcoord).rgb;
+		float z = -(ViewMatrix * vec4(position ,1.0)).z;
 		
-		vec2 sample_pos = sample_disc(state);
-		sample_pos = sample_pos * disc_radius;
-		vec3 sample_pos_ws = texture(gPosition, texcoord + sample_pos).rgb;
-		float sample_z = (viewPos - sample_pos_ws).z;
-	
-		vec4 sample_color = vec4(texture(gShaded, texcoord + sample_pos).rgb , 1.0);
+		float depth_diff = abs(z - 4);
+		float disc_radius = depth_diff * 0.0005;
+		vec4 color_sum = vec4(0.0);
+		float num_valid = 0;
 		
-		color_sum += sample_color;
-		num_valid++;
-	}
+		for(int i = 0; i < 150; i++){
+			
+			vec2 sample_pos = sample_disc(state);
+			sample_pos = sample_pos * disc_radius;
+			vec3 sample_pos_ws = texture(gPosition, texcoord + sample_pos).rgb;
+			float sample_z = (viewPos - sample_pos_ws).z;
+		
+			vec4 sample_color = vec4(texture(gShaded, texcoord + sample_pos).rgb , 1.0);
+			
+			color_sum += sample_color;
+			num_valid++;
+		}
 	FragmentColor = color_sum / num_valid;
+	}
 }
