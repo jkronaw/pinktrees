@@ -17,6 +17,8 @@ uniform bool useDOF;
 uniform vec2 gScreenSize;
 uniform vec3 viewPos;
 
+uniform float focalDepth;
+
 layout (shared) uniform SharedMatrices
 {
 	mat4 ViewMatrix;
@@ -80,8 +82,8 @@ void main()
 		vec3 position = texture(gPosition, texcoord).rgb;
 		float z = -(ViewMatrix * vec4(position ,1.0)).z;
 		
-		float depth_diff = abs(z - 4);
-		float disc_radius = depth_diff * 0.0005;
+		float depth_diff = abs(z - focalDepth);
+		float disc_radius = depth_diff * 0.003;
 		vec4 color_sum = vec4(0.0);
 		float num_valid = 0;
 		

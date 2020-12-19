@@ -72,6 +72,7 @@ namespace engine {
         virtual void keyCallback(int key, int scanCode, int action, int mods) { };
         virtual void mouseCallback(Vector2 mousePosition) { };
         virtual void mouseButtonCallback(int button, int action, int mods) { };
+        virtual void mouseScrollCallback(double xoffset, double yoffset) { };
     };
 
     void glfwErrorCallback(int error, const char* description);

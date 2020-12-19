@@ -74,10 +74,10 @@ namespace engine {
 			static_cast<App*>(glfwGetWindowUserPointer(w))->keyCallback(key, scanCode, action, mods);
 		};
 		glfwSetKeyCallback(window, keyCallback);
-		
+
 		auto mouseCallback = [](GLFWwindow* w, double x, double y)
 		{
-			static_cast<App*>(glfwGetWindowUserPointer(w))->mouseCallback(Vector2(x,y));
+			static_cast<App*>(glfwGetWindowUserPointer(w))->mouseCallback(Vector2(x, y));
 		};
 		glfwSetCursorPosCallback(window, mouseCallback);
 
@@ -86,6 +86,12 @@ namespace engine {
 			static_cast<App*>(glfwGetWindowUserPointer(w))->mouseButtonCallback(button, action, mods);
 		};
 		glfwSetMouseButtonCallback(window, mouseButtonCallback);
+
+		auto mouseScrollCallback = [](GLFWwindow* w, double xoffset, double yoffset)
+		{
+			static_cast<App*>(glfwGetWindowUserPointer(w))->mouseScrollCallback(xoffset, yoffset);
+		};
+		glfwSetScrollCallback(window, mouseScrollCallback);
 	}
 
 	void Engine::setupGLEW()

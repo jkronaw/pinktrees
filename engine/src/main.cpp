@@ -34,6 +34,7 @@ class MyApp : public App
 	bool useBloom = true;
 
 	bool useDOF = true;
+	float focalDepth = 2.0f;
 
 	bool showGbufferContent = false;
 
@@ -109,6 +110,11 @@ class MyApp : public App
 			oldCameraViewMatrix = sceneGraph->getCamera()->getViewMatrix();
 			oldCameraViewMatrixInversed = sceneGraph->getCamera()->getViewMatrixInversed();
 		}
+	}
+
+	void mouseScrollCallback(double xoffset, double yoffset) override
+	{
+		focalDepth += 0.5 * yoffset;
 	}
 
 	void start() override
@@ -239,8 +245,7 @@ class MyApp : public App
 
 	void update(double elapsedSecs) override
 	{
-		GBuffer gbuffer;
-		gbuffer.initialize(engine.windowWidth, engine.windowHeight);
+		
 		Camera* camera = sceneGraph->getCamera();
 
 		if (engine.getMouseButton(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) // camera rotation using mouse
@@ -339,6 +344,8 @@ class MyApp : public App
 		Matrix3 viewMatrixInversed = camera->getViewMatrixInversed();
 		Vector3 translation = viewMatrixInversed * Vector3(viewMatrix * Vector4(0, 0, 0, 1)) * -1;
 
+		GBuffer gbuffer;
+		gbuffer.initialize(engine.windowWidth, engine.windowHeight);
 		setupGeoPass(gbuffer);
 		sceneGraph->getRoot()->setShaderProgram(geoProgram);
 		sceneGraph->draw();
@@ -401,6 +408,7 @@ class MyApp : public App
 			postProcessProgram->setUniform("gShaded", GBuffer::GB_NUMBER_OF_TEXTURES + GBuffer::GB_SHADED);
 			postProcessProgram->setUniform("gBloom", GBuffer::GB_NUMBER_OF_TEXTURES + GBuffer::GB_BLOOM);
 			postProcessProgram->setUniform("viewPos", translation);
+			postProcessProgram->setUniform("focalDepth", focalDepth);
 			setupPostProcessPass(gbuffer);
 			quad.drawQuad();
 			postProcessProgram->unuse();
