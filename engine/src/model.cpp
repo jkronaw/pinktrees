@@ -2,6 +2,23 @@
 
 namespace engine {
 
+	Model::Model()
+	{
+		sampler = new LinearMipmapLinearSampler();
+		activeTextures[0] = new TextureInfo(GL_TEXTURE0, "texAlbedo", nullptr, sampler);
+		activeTextures[1] = new TextureInfo(GL_TEXTURE1, "texNormal", nullptr, sampler);
+		activeTextures[2] = new TextureInfo(GL_TEXTURE2, "texRoughness", nullptr, sampler);
+		activeTextures[3] = new TextureInfo(GL_TEXTURE3, "texMetallic", nullptr, sampler);
+		activeTextures[4] = new TextureInfo(GL_TEXTURE4, "texAO", nullptr, sampler);
+	}
+
+	Model::~Model()
+	{
+		delete sampler;
+		delete[] loadedTextures;
+		delete[] activeTextures;
+	}
+
 	void Model::load(std::string directoryName)
 	{
 		WavefrontLoader loaderGround;
@@ -11,39 +28,62 @@ namespace engine {
 		mesh->calculateTangents();
 		mesh->setup();
 
-		Texture2D* albedo = new Texture2D();
-		albedo->load(directoryName + "/albedo.png");
+		loadedTextures[0] = new Texture2D();
+		loadedTextures[0]->load(directoryName + "/albedo.png");
+		activeTextures[0]->texture = loadedTextures[0];
 
-		Texture2D* normal = new Texture2D();
-		normal->load(directoryName + "/normal.png");
+		loadedTextures[1] = new Texture2D();
+		loadedTextures[1]->load(directoryName + "/normal.png");
+		activeTextures[1]->texture = loadedTextures[1];
 
-		Texture2D* roughness = new Texture2D();
-		roughness->load(directoryName + "/roughness.png");
+		loadedTextures[2] = new Texture2D();
+		loadedTextures[2]->load(directoryName + "/roughness.png");
+		activeTextures[2]->texture = loadedTextures[2];
 
-		Texture2D* metallic = new Texture2D();
-		metallic->load(directoryName + "/metallic.png");
+		loadedTextures[3] = new Texture2D();
+		loadedTextures[3]->load(directoryName + "/metallic.png");
+		activeTextures[3]->texture = loadedTextures[3];
 
-		Texture2D* ao = new Texture2D();
-		ao->load(directoryName + "/ao.png");
+		loadedTextures[4] = new Texture2D();
+		loadedTextures[4]->load(directoryName + "/ao.png");
+		activeTextures[4]->texture = loadedTextures[4];
+	}
 
-		Sampler* s = new LinearMipmapLinearSampler();
-		textures[0] = new TextureInfo(GL_TEXTURE0, "texAlbedo", albedo, s);
-		textures[1] = new TextureInfo(GL_TEXTURE1, "texNormal", normal, s);
-		textures[2] = new TextureInfo(GL_TEXTURE2, "texRoughness", roughness, s);
-		textures[3] = new TextureInfo(GL_TEXTURE3, "texMetallic", metallic, s);
-		textures[4] = new TextureInfo(GL_TEXTURE4, "texAO", ao, s);
+	void Model::setAlbedo(Texture2D* texture)
+	{
+		activeTextures[0]->texture = texture;
+	}
+
+	void Model::setNormal(Texture2D* texture)
+	{
+		activeTextures[1]->texture = texture;
+	}
+
+	void Model::setRoughness(Texture2D* texture)
+	{
+		activeTextures[2]->texture = texture;
+	}
+
+	void Model::setMetallic(Texture2D* texture)
+	{
+		activeTextures[3]->texture = texture;
+	}
+
+	void Model::setAO(Texture2D* texture)
+	{
+		activeTextures[4]->texture = texture;
 	}
 
 	void Model::draw(ShaderProgram* program)
 	{
-		for (TextureInfo* tInfo : textures)
+		for (TextureInfo* tInfo : activeTextures)
 		{
 			tInfo->updateShader(program);
 		}
 
 		mesh->draw();
 
-		for (TextureInfo* tInfo : textures) {
+		for (TextureInfo* tInfo : activeTextures) {
 			tInfo->unbindSampler();
 		}	
 	}

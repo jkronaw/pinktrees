@@ -23,7 +23,7 @@
 namespace engine {
 
     class Engine;
-    class IApp;
+    class App;
     
     class Engine
     {
@@ -33,20 +33,23 @@ namespace engine {
         Engine(Engine const&) = delete;
         void operator=(Engine const&) = delete;
 
-        void setOpenGL(int glMajor, int glMinor);
-        void setWindow(int width, int height, const char* title, bool fullscreen, bool vsync);
-        void setApp(IApp* app);
+        const char* windowTitle = "Jakobs' Engine";
+        int windowWidth = 512, windowHeight = 512;
+        bool fullscreen = false;
+
+        int glMajor = 3, glMinor = 3;
+        bool vysnc = true;
+
+        void setApp(App* app);
         void start();
         void run();
+        void stop();
 
+        int getKey(int key);
+        int getMouseButton(int button);
     private:
-        int glMajor = 3, glMinor = 3;
         GLFWwindow* window = nullptr;
-        int windowWidth = 640, windowHeight = 480;
-        const char* windowTitle = "Powered by the Jakob's Engine";
-        bool fullscreen = false, vysnc = true;
-
-        IApp* app = nullptr;
+        App* app = nullptr;
 
         Engine() = default;
         void setupGLFW();
@@ -56,19 +59,19 @@ namespace engine {
         void setupOpenGL();
     };
 
-    class IApp
+    class App
     {
     public:
-        int windowWidth, windowHeight;
+        Engine& engine = Engine::getInstance();
 
         virtual void start() = 0;
         virtual void update(double elapsedSecs) = 0;
 
-        virtual void windowCloseCallback(GLFWwindow* window) { };
-        virtual void windowSizeCallback(GLFWwindow* window, int newWidth, int newHeight) { };
-        virtual void keyCallback(GLFWwindow* window, int key, int scanCode, int action, int mods) { };
-        virtual void mouseCallback(GLFWwindow* window, Vector2 mousePosition) { };
-        virtual void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) { };
+        virtual void windowCloseCallback() { };
+        virtual void windowSizeCallback(int newWidth, int newHeight) { };
+        virtual void keyCallback(int key, int scanCode, int action, int mods) { };
+        virtual void mouseCallback(Vector2 mousePosition) { };
+        virtual void mouseButtonCallback(int button, int action, int mods) { };
     };
 
     void glfwErrorCallback(int error, const char* description);

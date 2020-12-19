@@ -2,19 +2,14 @@
 
 using namespace engine;
 
-class App : public IApp
+class MyApp : public App
 {
 	GLuint vaoId, vboId[2];
 	Quad2D quad;
 
-	bool isEulerMode;
-
 	const float CAMERA_SPEED = 5.0f;
 	const float CAMERA_ROTATE_SPEED = 0.01f;
 
-	Vector3 cameraVelocity;
-
-	bool mouseButtonPressed = false;
 	Vector2 mouseStartingPos;
 	Vector2 mouseCurrentPos;
 
@@ -38,96 +33,50 @@ class App : public IApp
 
 	void updateProjection()
 	{
-		float aspectRatio = windowWidth / (float)windowHeight;
+		float aspectRatio = engine.windowWidth / (float)engine.windowHeight;
 		// M_PI / 3 is aproximately 60 degrees FOV
 		sceneGraph->getCamera()->setPerspective(M_PI / 3, aspectRatio, 0.1, 50);
 	}
 
-	void windowCloseCallback(GLFWwindow* window) override
+	void windowCloseCallback() override
 	{
-		glfwSetWindowShouldClose(window, GL_TRUE);
+		engine.stop();
 		delete sceneGraph;
 	}
 
-	void windowSizeCallback(GLFWwindow* window, int newWidth, int newHeight)
+	void windowSizeCallback(int newWidth, int newHeight)
 	{
-		windowWidth = newWidth;
-		windowHeight = newHeight;
+		engine.windowWidth = newWidth;
+		engine.windowHeight = newHeight;
 		glViewport(0, 0, newWidth, newHeight);
 		updateProjection();
 	}
 
-	void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods) override
+	void keyCallback(int key, int scancode, int action, int mods) override
 	{
-		if (key == GLFW_KEY_G && action == GLFW_PRESS)
-		{
-			isEulerMode = !isEulerMode;
-			if (isEulerMode)
-			{
-				std::cout << "Camera Control: Euler Mode" << std::endl;
-			}
-			else
-			{
-				std::cout << "Camera Control: Quaternion Mode" << std::endl;
-			}
-		}
+		// escape key to close window
+		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) windowCloseCallback();
 
-		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		{
-			windowCloseCallback(window);
-		}
+		// show gbuffer content
+		if (key == GLFW_KEY_C && action == GLFW_PRESS) showGbufferContent = !showGbufferContent;
 
-		if (key == GLFW_KEY_DOWN && action == GLFW_PRESS)
-		{
-			cameraVelocity.z = -CAMERA_SPEED;
-		}
-		else if (key == GLFW_KEY_UP && action == GLFW_PRESS)
-		{
-			cameraVelocity.z = CAMERA_SPEED;
-		}
-		else if ((key == GLFW_KEY_DOWN || key == GLFW_KEY_UP) && action == GLFW_RELEASE)
-		{
-			cameraVelocity.z = 0;
-		}
-
-		if (key == GLFW_KEY_C && action == GLFW_PRESS)
-		{
-			showGbufferContent = !showGbufferContent;
-		}
-
-		if (key == GLFW_KEY_1 && action == GLFW_PRESS) {
-			sceneGraph->getRoot()->setModel(modelTeapot);
-		}
-
-		if (key == GLFW_KEY_2 && action == GLFW_PRESS) {
-			sceneGraph->getRoot()->setModel(modelCar);
-		}
-
-		if (key == GLFW_KEY_3 && action == GLFW_PRESS) {
-			sceneGraph->getRoot()->setModel(modelSphere);
-		}
-
-		if (key == GLFW_KEY_4 && action == GLFW_PRESS) {
-			sceneGraph->getRoot()->setModel(modelLantern);
-		}
+		// model switching
+		if (key == GLFW_KEY_1 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(modelTeapot);
+		if (key == GLFW_KEY_2 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(modelCar);
+		if (key == GLFW_KEY_3 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(modelSphere);
+		if (key == GLFW_KEY_4 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(modelLantern);
 	}
 
-	void mouseCallback(GLFWwindow* window, Vector2 mousePosition) override { mouseCurrentPos = mousePosition; }
+	void mouseCallback(Vector2 mousePosition) override { mouseCurrentPos = mousePosition; }
 
-	void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods) override
+	void mouseButtonCallback(int button, int action, int mods) override
 	{
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 		{
-			mouseButtonPressed = true;
 			mouseStartingPos = mouseCurrentPos;
 
 			oldCameraViewMatrix = sceneGraph->getCamera()->getViewMatrix();
 			oldCameraViewMatrixInversed = sceneGraph->getCamera()->getViewMatrixInversed();
-		}
-
-		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE)
-		{
-			mouseButtonPressed = false;
 		}
 	}
 
@@ -156,8 +105,7 @@ class App : public IApp
 			Vector3(0, 0, 0),
 			Vector3(0, 1, 0)
 		);
-
-		isEulerMode = true;
+		
 		sceneGraph->setCamera(camera);
 
 		updateProjection();
@@ -227,57 +175,50 @@ class App : public IApp
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		gbuffer.bindReadDebug();
 
-		GLsizei HalfWidth = (GLsizei)(windowWidth / 2.0f);
-		GLsizei HalfHeight = (GLsizei)(windowHeight / 2.0f);
+		GLsizei HalfWidth = (GLsizei)(engine.windowWidth / 2.0f);
+		GLsizei HalfHeight = (GLsizei)(engine.windowHeight / 2.0f);
 
 		gbuffer.setBufferToRead(GBuffer::GB_POSITION);
-		glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 		gbuffer.setBufferToRead(GBuffer::GB_ALBEDO);
-		glBlitFramebuffer(0, 0, windowWidth, windowHeight, 0, HalfHeight, HalfWidth, windowHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, HalfHeight, HalfWidth, engine.windowHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 		gbuffer.setBufferToRead(GBuffer::GB_METALLIC_ROUGHNESS_AO);
-		glBlitFramebuffer(0, 0, windowWidth, windowHeight, HalfWidth, HalfHeight, windowWidth, windowHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, HalfWidth, HalfHeight, engine.windowWidth, engine.windowHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 		gbuffer.setBufferToRead(GBuffer::GB_NORMAL);
-		glBlitFramebuffer(0, 0, windowWidth, windowHeight, HalfWidth, 0, windowWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, HalfWidth, 0, engine.windowWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	}
 
 	void update(double elapsedSecs) override
 	{
 		GBuffer gbuffer;
-		gbuffer.initialize(windowWidth, windowHeight);
+		gbuffer.initialize(engine.windowWidth, engine.windowHeight);
 		Camera* camera = sceneGraph->getCamera();
 
-		if (mouseButtonPressed) // camera rotation using mouse
+		if (engine.getMouseButton(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) // camera rotation using mouse
 		{
 			Vector2 diff = mouseCurrentPos - mouseStartingPos;
 			diff *= CAMERA_ROTATE_SPEED;
 
-			if (isEulerMode)
-			{
-				Vector3 oldCameraSide = oldCameraViewMatrixInversed * Vector3(1, 0, 0);
+			Vector3 oldCameraSide = oldCameraViewMatrixInversed * Vector3(1, 0, 0);
 
-				Matrix4 rotationSide = Matrix4::CreateRotationY(diff.x);
-				Matrix4 rotationUp = Matrix4::CreateRotation(-diff.y, oldCameraSide);
+			Matrix4 rotationSide = Matrix4::CreateRotationY(diff.x);
+			Matrix4 rotationUp = Matrix4::CreateRotation(-diff.y, oldCameraSide);
 
-				camera->setViewMatrix(oldCameraViewMatrix * rotationUp * rotationSide);
-			}
-			else // Quaternion
-			{
-				if (diff.magnitude() > 0)
-				{
-					Vector3 oldCameraAxis = oldCameraViewMatrixInversed * Vector3(-diff.y, -diff.x, 0);
-
-					Quaternion q = Quaternion(oldCameraAxis.magnitude(), oldCameraAxis);
-					Matrix4 mat = q.GLRotationMatrix();
-
-					camera->setViewMatrix(oldCameraViewMatrix * mat);
-				}
-			}
+			camera->setViewMatrix(oldCameraViewMatrix * rotationUp * rotationSide);
 		}
 		else // camera translation using keys
 		{
+			Vector3 cameraVelocity = Vector3(0, 0, 0);
+
+			bool upArrowPressed = engine.getKey(GLFW_KEY_UP) == GLFW_PRESS;
+			bool downArrowPressed = engine.getKey(GLFW_KEY_DOWN) == GLFW_PRESS;
+
+			if (upArrowPressed && !downArrowPressed) cameraVelocity.z = CAMERA_SPEED;
+			if (!upArrowPressed && downArrowPressed) cameraVelocity.z = -CAMERA_SPEED;
+
 			Matrix4 translationMatrix = Matrix4::CreateTranslation(camera->getViewMatrixInversed() * cameraVelocity * elapsedSecs);
 			Matrix4 out = camera->getViewMatrix() * translationMatrix;
 			camera->setViewMatrix(out);
@@ -296,7 +237,7 @@ class App : public IApp
 		}
 		else {
 			lightProgram->use();
-			lightProgram->setUniform("gScreenSize", Vector2(windowWidth, windowHeight));
+			lightProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
 			lightProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
 			lightProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
 			lightProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
@@ -308,7 +249,7 @@ class App : public IApp
 			lightProgram->unuse();
 
 			postProcessProgram->use();
-			postProcessProgram->setUniform("gScreenSize", Vector2(windowWidth, windowHeight));
+			postProcessProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
 			postProcessProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
 			postProcessProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
 			postProcessProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
@@ -327,11 +268,8 @@ class App : public IApp
 int main(int argc, char* argv[])
 {
 	Engine& engine = Engine::getInstance();
-	engine.setOpenGL(4, 1);
-	engine.setWindow(640, 640, "Test", false, true);
-	engine.setApp(new App());
+	engine.setApp(new MyApp());
 	engine.start();
 	engine.run();
-
 	exit(EXIT_SUCCESS);
 }

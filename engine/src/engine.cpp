@@ -8,22 +8,7 @@ namespace engine {
 		return instance;
 	}
 
-	void Engine::setOpenGL(int glMajor, int glMinor)
-	{
-		this->glMajor = glMajor;
-		this->glMinor = glMinor;
-	}
-
-	void Engine::setWindow(int width, int height, const char* title, bool fullscreen, bool vsync)
-	{
-		this->windowWidth = width;
-		this->windowHeight = height;
-		this->windowTitle = title;
-		this->fullscreen = fullscreen;
-		this->vysnc = vsync;
-	}
-	
-    void Engine::setApp(IApp* app) {
+    void Engine::setApp(App* app) {
         this->app = app;
     }
 
@@ -36,8 +21,6 @@ namespace engine {
 #ifdef ERROR_CALLBACK
 		setupErrorCallback();
 #endif
-		app->windowWidth = windowWidth;
-		app->windowHeight = windowHeight;
 		app->start();
     }
 
@@ -76,31 +59,31 @@ namespace engine {
 
 		auto windowCloseCallback = [](GLFWwindow* w)
 		{
-			static_cast<IApp*>(glfwGetWindowUserPointer(w))->windowCloseCallback(w);
+			static_cast<App*>(glfwGetWindowUserPointer(w))->windowCloseCallback();
 		};
 		glfwSetWindowCloseCallback(window, windowCloseCallback);
 
 		auto windowSizeCallback = [](GLFWwindow* w, int newWidth, int newHeight)
 		{
-			static_cast<IApp*>(glfwGetWindowUserPointer(w))->windowSizeCallback(w, newWidth, newHeight);
+			static_cast<App*>(glfwGetWindowUserPointer(w))->windowSizeCallback(newWidth, newHeight);
 		};
 		glfwSetWindowSizeCallback(window, windowSizeCallback);
 
 		auto keyCallback = [](GLFWwindow* w, int key, int scanCode, int action, int mods)
 		{
-			static_cast<IApp*>(glfwGetWindowUserPointer(w))->keyCallback(w, key, scanCode, action, mods);
+			static_cast<App*>(glfwGetWindowUserPointer(w))->keyCallback(key, scanCode, action, mods);
 		};
 		glfwSetKeyCallback(window, keyCallback);
 		
 		auto mouseCallback = [](GLFWwindow* w, double x, double y)
 		{
-			static_cast<IApp*>(glfwGetWindowUserPointer(w))->mouseCallback(w, Vector2(x,y));
+			static_cast<App*>(glfwGetWindowUserPointer(w))->mouseCallback(Vector2(x,y));
 		};
 		glfwSetCursorPosCallback(window, mouseCallback);
 
 		auto mouseButtonCallback = [](GLFWwindow* w, int button, int action, int mods)
 		{
-			static_cast<IApp*>(glfwGetWindowUserPointer(w))->mouseButtonCallback(w, button, action, mods);
+			static_cast<App*>(glfwGetWindowUserPointer(w))->mouseButtonCallback(button, action, mods);
 		};
 		glfwSetMouseButtonCallback(window, mouseButtonCallback);
 	}
@@ -164,6 +147,21 @@ namespace engine {
 		glfwDestroyWindow(window);
 		glfwTerminate();
     }
+
+	void Engine::stop()
+	{
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	int Engine::getKey(int key)
+	{
+		return glfwGetKey(window, key);
+	}
+
+	int Engine::getMouseButton(int button)
+	{
+		return glfwGetMouseButton(window, button);
+	}
 
 	void glfwErrorCallback(int error, const char* description)
 	{

@@ -21,30 +21,34 @@ const vec3 lightColors[4] = { vec3(15), vec3(15), vec3(15), vec3(15) };
 
 const float PI = 3.14159265359;
 
-float distributionGGX(vec3 N, vec3 H, float roughness)
+// normal distribution function
+float trowbridgeReitzGGX(vec3 N, vec3 H, float roughness)
 {
-    float a      = roughness*roughness;
-    float a2     = a*a;
-    float NdotH  = max(dot(N, H), 0.0);
-    float NdotH2 = NdotH*NdotH;
+    float a = roughness * roughness;
+    float a2 = a * a;
+    float NdotH = max(dot(N, H), 0.0);
+    float NdotH2 = NdotH * NdotH;
 	
-    float num   = a2;
+    float num = a2;
     float denom = (NdotH2 * (a2 - 1.0) + 1.0);
     denom = PI * denom * denom;
 	
     return num / denom;
 }
 
+// used within geometry function
 float geometrySchlickGGX(float NdotV, float roughness)
 {
     float r = (roughness + 1.0);
-    float k = (r*r) / 8.0;
+    float k = (r * r) / 8.0;
 
-    float num   = NdotV;
+    float num = NdotV;
     float denom = NdotV * (1.0 - k) + k;
 	
     return num / denom;
 }
+
+// geometry function
 float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
 {
     float NdotV = max(dot(N, V), 0.0);
@@ -53,6 +57,8 @@ float geometrySmith(vec3 N, vec3 V, vec3 L, float roughness)
     float ggx2  = geometrySchlickGGX(NdotV, roughness);	
     return ggx1 * ggx2;
 }
+
+// fresnel term
 vec3 fresnelSchlick(float cosTheta, vec3 F0)
 {
     return F0 + (1.0 - F0) * pow(1.0 - cosTheta, 5.0);
@@ -64,11 +70,12 @@ void main()
     vec3 position = texture(gPosition, texcoord).rgb;
 
     vec3 albedo  = texture(gAlbedo, texcoord).rgb;
-    albedo = pow(albedo, vec3(2.2));
     float metallic = texture(gMetallicRoughnessAO, texcoord).r;
     float roughness = texture(gMetallicRoughnessAO, texcoord).g;
     float ao = texture(gMetallicRoughnessAO, texcoord).b;
 
+    // gamma correct albedo to get into linear space
+    albedo = pow(albedo, vec3(2.2));
 
     // view vector
     vec3 w_0 = normalize(viewPos - position);
@@ -89,7 +96,7 @@ void main()
         vec3 L_i = lightColors[i] / (distance * distance);
 
         // specular component
-        float NDF = distributionGGX(n, h, roughness);
+        float NDF = trowbridgeReitzGGX(n, h, roughness);
         float G = geometrySmith(n, w_0, w_i, roughness);
         vec3 F = fresnelSchlick(max(dot(h, w_0), 0.0), F0);  
 
