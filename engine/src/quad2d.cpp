@@ -62,7 +62,7 @@ namespace engine {
 		
 	}
 
-	void Quad2D::drawQuad() {
+	void Quad2D::draw() {
 		glBindVertexArray(m_vao);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (GLvoid*)0);
 		glBindVertexArray(0);

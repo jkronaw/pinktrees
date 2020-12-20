@@ -40,6 +40,8 @@ class MyApp : public App
 
 	Model* models[4];
 
+	GBuffer gbuffer;
+
 	void updateProjection()
 	{
 		float aspectRatio = engine.windowWidth / (float)engine.windowHeight;
@@ -158,89 +160,70 @@ class MyApp : public App
 			lightProgram = new ShaderProgram();
 			lightProgram->init("shaders/LIGHT_vertex.vert", "shaders/LIGHT_fragment.frag");
 			lightProgram->link();
-			lightProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+
+			lightProgram->use();
+			lightProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
+			lightProgram->setUniform("gPosition", GBuffer::GB_POSITION);
+			lightProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
+			lightProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
+			lightProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
+			lightProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
+			lightProgram->unuse();
 
 			postProcessProgram = new ShaderProgram();
 			postProcessProgram->init("shaders/LIGHT_vertex.vert", "shaders/POSTPROCESS_fragment.frag");
-			postProcessProgram->bindAttribLocation(Mesh::VERTICES, "inPosition");
 			postProcessProgram->link();
 			postProcessProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+
+			postProcessProgram->use();
+			postProcessProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
+			postProcessProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
+			postProcessProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
+			postProcessProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
+			postProcessProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
+			postProcessProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
+			postProcessProgram->setUniform("gShaded", GBuffer::GB_NUMBER_OF_TEXTURES + GBuffer::GB_SHADED);
+			postProcessProgram->setUniform("gBloom", GBuffer::GB_NUMBER_OF_TEXTURES + GBuffer::GB_BLOOM);
 
 			horizontalBlurProgram = new ShaderProgram();
 			horizontalBlurProgram->init("shaders/LIGHT_vertex.vert", "shaders/blur_horizontal.frag");
 			horizontalBlurProgram->link();
-			horizontalBlurProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 
 			vertikalBlurProgram = new ShaderProgram();
 			vertikalBlurProgram->init("shaders/LIGHT_vertex.vert", "shaders/blur_vertikal.frag");
 			vertikalBlurProgram->link();
-			vertikalBlurProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 
 			bloomProgram = new ShaderProgram();
 			bloomProgram->init("shaders/LIGHT_vertex.vert", "shaders/bloom_blend.frag");
 			bloomProgram->link();
-			bloomProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 		}
 		catch (Exception e)
 		{
 			std::cout << e.message << std::endl;
 			exit(EXIT_FAILURE);
-		}/*
+		}
 
-	#ifndef ERROR_CALLBACK
-		checkOpenGLError("ERROR: Could not create shader program.");
-	#endif*/
+		gbuffer.initialize(engine.windowWidth, engine.windowHeight);
 	}
 
-	void setupGeoPass(GBuffer& gbuffer) {
-		gbuffer.bindWrite();
-		glClearColor(0.0, 0.0, 0.0, 1.0);
-		glDepthMask(GL_TRUE);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glEnable(GL_DEPTH_TEST);
-		glDisable(GL_BLEND);
-	}
-
-	void afterGeoPass() {
-		glDepthMask(GL_FALSE);
-		glDisable(GL_DEPTH_TEST);
-	}
-
-	void setupLightPass(GBuffer& gbuffer) {
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_ONE, GL_ONE);
-		gbuffer.bindWritePostProcess();
-		glClear(GL_COLOR_BUFFER_BIT);
-	}
-
-	void setupPostProcessPass(GBuffer& gbuffer) {
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_ONE, GL_ONE);
-		gbuffer.bindReadPostProcess();
-		glClear(GL_COLOR_BUFFER_BIT);
-	}
-
-	void ShowGbuffer(GBuffer& gbuffer) {
+	void showGbuffer() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		gbuffer.bindReadDebug();
 
-		GLsizei HalfWidth = (GLsizei)(engine.windowWidth / 2.0f);
-		GLsizei HalfHeight = (GLsizei)(engine.windowHeight / 2.0f);
+		GLsizei halfWidth = (GLsizei)(engine.windowWidth / 2.0f);
+		GLsizei halfHeight = (GLsizei)(engine.windowHeight / 2.0f);
 
 		gbuffer.setBufferToRead(GBuffer::GB_POSITION);
-		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, HalfWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, halfWidth, halfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 		gbuffer.setBufferToRead(GBuffer::GB_ALBEDO);
-		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, HalfHeight, HalfWidth, engine.windowHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, halfHeight, halfWidth, engine.windowHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 		gbuffer.setBufferToRead(GBuffer::GB_METALLIC_ROUGHNESS_AO);
-		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, HalfWidth, HalfHeight, engine.windowWidth, engine.windowHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, halfWidth, halfHeight, engine.windowWidth, engine.windowHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 
 		gbuffer.setBufferToRead(GBuffer::GB_NORMAL);
-		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, HalfWidth, 0, engine.windowWidth, HalfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, halfWidth, 0, engine.windowWidth, halfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
 	}
 
 	void update(double elapsedSecs) override
@@ -339,80 +322,81 @@ class MyApp : public App
 			}
 		}
 
-
 		Matrix4 viewMatrix = camera->getViewMatrix();
 		Matrix3 viewMatrixInversed = camera->getViewMatrixInversed();
 		Vector3 translation = viewMatrixInversed * Vector3(viewMatrix * Vector4(0, 0, 0, 1)) * -1;
 
-		GBuffer gbuffer;
-		gbuffer.initialize(engine.windowWidth, engine.windowHeight);
-		setupGeoPass(gbuffer);
+		// geometry pass
+		gbuffer.bind();
+		glClearColor(0.0, 0.0, 0.0, 1.0);		
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 		sceneGraph->getRoot()->setShaderProgram(geoProgram);
 		sceneGraph->draw();
-		afterGeoPass();
-		if (showGbufferContent) {
-			ShowGbuffer(gbuffer);
-		}
-		else {
-			lightProgram->use();
-			lightProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
-			lightProgram->setUniform("gPosition", GBuffer::GB_POSITION);
-			lightProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
-			lightProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
-			lightProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
-			lightProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
-			lightProgram->setUniform("viewPos", translation);
-			setupLightPass(gbuffer);
-			quad.drawQuad();
-			lightProgram->unuse();
 
-			glDisable(GL_BLEND);
-			bool firstBlurIteration = true;
-			int numBlurIterations = 20;
-			for (int i = 0; i < numBlurIterations; i++) {
-				horizontalBlurProgram->use();
-				horizontalBlurProgram->setUniform("gBloom", 0);
-				if (firstBlurIteration) {
-					gbuffer.bindPingFirstIteration();
-					firstBlurIteration = false;
-				}
-				else {
-					gbuffer.bindPing();
-				}
-				quad.drawQuad();
-				horizontalBlurProgram->unuse();
-			
-				vertikalBlurProgram->use();
-				vertikalBlurProgram->setUniform("gBloom", 0);
-				gbuffer.bindPong();
-				quad.drawQuad();
-				vertikalBlurProgram->unuse();
-			}
-			
-			bloomProgram->use();
-			bloomProgram->setUniform("gShaded", 0);
-			bloomProgram->setUniform("gBloom", 1);
-			bloomProgram->setUniform("exposure", bloomExposure);
-			gbuffer.bindBloom();
-			quad.drawQuad();
-			bloomProgram->unuse();
-			
-			postProcessProgram->use();
-			postProcessProgram->setUniform("useDOF", useDOF);
-			postProcessProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
-			postProcessProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
-			postProcessProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
-			postProcessProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
-			postProcessProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
-			postProcessProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
-			postProcessProgram->setUniform("gShaded", GBuffer::GB_NUMBER_OF_TEXTURES + GBuffer::GB_SHADED);
-			postProcessProgram->setUniform("gBloom", GBuffer::GB_NUMBER_OF_TEXTURES + GBuffer::GB_BLOOM);
-			postProcessProgram->setUniform("viewPos", translation);
-			postProcessProgram->setUniform("focalDepth", focalDepth);
-			setupPostProcessPass(gbuffer);
-			quad.drawQuad();
-			postProcessProgram->unuse();
+		// debug view of geometry buffer
+		if (showGbufferContent) {
+			showGbuffer();
+			return;
 		}
+
+		// lighting pass
+		lightProgram->use();
+		lightProgram->setUniform("viewPos", translation);
+		
+		gbuffer.bindWritePostProcess();
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		quad.draw();
+		lightProgram->unuse();
+
+		// bloom
+		bool firstBlurIteration = true;
+		int numBlurIterations = 20;
+		for (int i = 0; i < numBlurIterations; i++) {
+			horizontalBlurProgram->use();
+			horizontalBlurProgram->setUniform("gBloom", 0);
+			if (firstBlurIteration) {
+				gbuffer.bindPingFirstIteration();
+				firstBlurIteration = false;
+			}
+			else {
+				gbuffer.bindPing();
+			}
+			quad.draw();
+			horizontalBlurProgram->unuse();
+			
+			vertikalBlurProgram->use();
+			vertikalBlurProgram->setUniform("gBloom", 0);
+			gbuffer.bindPong();
+			quad.draw();
+			vertikalBlurProgram->unuse();
+		}
+
+		bloomProgram->use();
+		bloomProgram->setUniform("gShaded", 0);
+		bloomProgram->setUniform("gBloom", 1);
+		bloomProgram->setUniform("exposure", bloomExposure);
+		gbuffer.bindBloom();
+		quad.draw();
+		bloomProgram->unuse();
+		
+		// post process
+		postProcessProgram->use();
+		postProcessProgram->setUniform("useDOF", useDOF);
+		postProcessProgram->setUniform("viewPos", translation);
+		postProcessProgram->setUniform("focalDepth", focalDepth);
+			
+		glEnable(GL_BLEND);
+		glBlendEquation(GL_FUNC_ADD);
+		glBlendFunc(GL_ONE, GL_ONE);
+		gbuffer.bindReadPostProcess();
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		quad.draw();
+		postProcessProgram->unuse();
+
+		glDisable(GL_BLEND);
 
 		if (!useTextures) {
 			for (Model* m : models)

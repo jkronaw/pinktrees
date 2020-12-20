@@ -29,7 +29,7 @@ namespace engine {
 
 		void initialize(unsigned int windowWidth, unsigned int windowHeight);
 
-		void bindWrite();
+		void bind();
 		void bindWritePostProcess();
 		void bindRead();
 		void bindReadPostProcess();

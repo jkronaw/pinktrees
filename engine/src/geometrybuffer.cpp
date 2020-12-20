@@ -93,13 +93,16 @@ namespace engine {
 		}
 	}
 
-	void GBuffer::bindWrite() {
+	void GBuffer::bind() {
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fbo);
 	}
 
 	void GBuffer::bindWritePostProcess() {
-		bindRead();
 		glBindFramebuffer(GL_FRAMEBUFFER, m_fboPostProcess);
+		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, m_textures[GB_POSITION + i]);
+		}
 	}
 
 	void GBuffer::bindReadDebug() {

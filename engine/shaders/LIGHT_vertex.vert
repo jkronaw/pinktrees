@@ -7,12 +7,6 @@ out vec2 texcoord;
 uniform mat4 ModelMAtrix;
 uniform mat4 NormalMatrix;
 
-layout (shared) uniform SharedMatrices
-{
-	mat4 ViewMatrix;
-	mat4 ProjectionMatrix;
-};
-
 void main()
 {
 	gl_Position = vec4(inPosition, 1.0);

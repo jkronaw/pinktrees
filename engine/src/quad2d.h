@@ -13,6 +13,6 @@ namespace engine {
 		Quad2D();
 		~Quad2D();
 		void setupQuad();
-		void drawQuad();
+		void draw();
 	};
 }
