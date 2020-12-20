@@ -59,6 +59,7 @@ class MyApp : public App
 	{
 		engine.windowWidth = newWidth;
 		engine.windowHeight = newHeight;
+		gbuffer.initialize(newWidth, newHeight);
 		glViewport(0, 0, newWidth, newHeight);
 		updateProjection();
 	}
