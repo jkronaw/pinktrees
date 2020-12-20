@@ -1,12 +1,12 @@
-#version 330 core
-out vec4 OutShaded; 
-out vec4 OutBloom;
+#version 420 core
 
+layout (location = 0) out vec4 OutShaded;
+layout (location = 1) out vec4 OutBloom;
 
 in vec2 texcoord;
 
-uniform sampler2D gShaded;
-uniform sampler2D gBloom;
+layout (binding = 0) uniform sampler2D gShaded;
+layout (binding = 1) uniform sampler2D gBloom;
 uniform float exposure;
 
 void main()
@@ -17,6 +17,7 @@ void main()
     bloomColor = bloomColor * 10.0 * exposure;
     vec3 result = hdrColor + bloomColor;
    
-    OutShaded = vec4(result,1.0);
+    OutShaded = vec4(hdrColor, 1.0);
+    OutBloom = vec4(result, 1.0);
 }  
 

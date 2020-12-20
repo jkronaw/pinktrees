@@ -70,7 +70,7 @@ void main()
     
 	// Without Post Processing:
 
-	vec3 color = texture(gShaded, texcoord).rgb;
+	vec3 color = texture(gBloom, texcoord).rgb;
 	FragmentColor = vec4(color, 1.0);
 
 
@@ -94,7 +94,7 @@ void main()
 			vec3 sample_pos_ws = texture(gPosition, texcoord + sample_pos).rgb;
 			float sample_z = (viewPos - sample_pos_ws).z;
 		
-			vec4 sample_color = vec4(texture(gShaded, texcoord + sample_pos).rgb , 1.0);
+			vec4 sample_color = vec4(texture(gBloom, texcoord + sample_pos).rgb , 1.0);
 			
 			color_sum += sample_color;
 			num_valid++;

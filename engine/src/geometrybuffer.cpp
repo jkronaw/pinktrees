@@ -105,11 +105,11 @@ namespace engine {
 		}
 	}
 
-	void GBuffer::bindReadDebug() {
+	void GBuffer::bindRead() {
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_fbo);
 	}
 
-	void GBuffer::bindRead() {
+	void GBuffer::bindReadGbufferTextures() {
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
 			glActiveTexture(GL_TEXTURE0 + i);
@@ -118,7 +118,7 @@ namespace engine {
 	}
 
 	void GBuffer::bindReadPostProcess() {
-		bindRead();
+		bindReadGbufferTextures();
 		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_PP_TEXTURES; i++) {
 			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + i);
 			glBindTexture(GL_TEXTURE_2D, m_postProcessTextures[GB_SHADED + i]);

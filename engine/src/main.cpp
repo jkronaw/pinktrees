@@ -207,8 +207,8 @@ class MyApp : public App
 	}
 
 	void showGbuffer() {
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		gbuffer.bindReadDebug();
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		gbuffer.bindRead();
 
 		GLsizei halfWidth = (GLsizei)(engine.windowWidth / 2.0f);
 		GLsizei halfHeight = (GLsizei)(engine.windowHeight / 2.0f);
@@ -355,7 +355,6 @@ class MyApp : public App
 		int numBlurIterations = 20;
 		for (int i = 0; i < numBlurIterations; i++) {
 			horizontalBlurProgram->use();
-			horizontalBlurProgram->setUniform("gBloom", 0);
 			if (firstBlurIteration) {
 				gbuffer.bindPingFirstIteration();
 				firstBlurIteration = false;
@@ -367,15 +366,12 @@ class MyApp : public App
 			horizontalBlurProgram->unuse();
 			
 			vertikalBlurProgram->use();
-			vertikalBlurProgram->setUniform("gBloom", 0);
 			gbuffer.bindPong();
 			quad.draw();
 			vertikalBlurProgram->unuse();
 		}
 
 		bloomProgram->use();
-		bloomProgram->setUniform("gShaded", 0);
-		bloomProgram->setUniform("gBloom", 1);
 		bloomProgram->setUniform("exposure", bloomExposure);
 		gbuffer.bindBloom();
 		quad.draw();

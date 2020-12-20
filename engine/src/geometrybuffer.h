@@ -31,9 +31,9 @@ namespace engine {
 
 		void bind();
 		void bindWritePostProcess();
-		void bindRead();
+		void bindReadGbufferTextures();
 		void bindReadPostProcess();
-		void bindReadDebug();
+		void bindRead();
 		void setBufferToRead(GB_TEX_TYPE texType);
 
 		void bindPingFirstIteration();
