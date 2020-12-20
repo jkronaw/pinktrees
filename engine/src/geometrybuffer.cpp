@@ -127,7 +127,6 @@ namespace engine {
 
 	void GBuffer::setBufferToRead(GB_TEX_TYPE texType) {
 		glReadBuffer(GL_COLOR_ATTACHMENT0 + texType);
-
 	}
 
 	void GBuffer::bindPingFirstIteration() {

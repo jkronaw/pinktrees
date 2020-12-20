@@ -336,6 +336,7 @@ class MyApp : public App
 		// debug view of geometry buffer
 		if (showGbufferContent) {
 			showGbuffer();
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			return;
 		}
 
