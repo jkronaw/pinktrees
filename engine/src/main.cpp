@@ -30,7 +30,7 @@ class MyApp : public App
 	float metallic = 0.4;
 	float ao = 1;
 
-	float blurExposure = 0.5f;
+	float bloomExposure = 0.5f;
 	bool useBloom = true;
 
 	bool useDOF = true;
@@ -88,10 +88,10 @@ class MyApp : public App
 		if (key == GLFW_KEY_B && action == GLFW_PRESS) {
 			useBloom = !useBloom;
 			if (useBloom) 
-				blurExposure = 0.5;
+				bloomExposure = 0.5;
 			else
-				blurExposure = 0.0;
-			std::cout << "Use Blur: " << (useBloom ? "Yes" : "No") << std::endl;
+				bloomExposure = 0.0;
+			std::cout << "Use Bloom: " << (useBloom ? "Yes" : "No") << std::endl;
 		}
 		if (key == GLFW_KEY_D && action == GLFW_PRESS) {
 			useDOF = !useDOF;
@@ -279,10 +279,10 @@ class MyApp : public App
 			int multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1 : 1;
 			if (engine.getKey(GLFW_KEY_E) == GLFW_PRESS)
 			{	
-				blurExposure += 0.02 * multiplier;
-				if (blurExposure > 1) blurExposure = 1;
-				if (blurExposure < 0) blurExposure = 0;
-				std::cout << "Bloom Exposure: " << blurExposure << std::endl;
+				bloomExposure += 0.02 * multiplier;
+				if (bloomExposure > 1) bloomExposure = 1;
+				if (bloomExposure < 0) bloomExposure = 0;
+				std::cout << "Bloom Exposure: " << bloomExposure << std::endl;
 			}	
 		}
 	
@@ -392,7 +392,7 @@ class MyApp : public App
 			bloomProgram->use();
 			bloomProgram->setUniform("gShaded", 0);
 			bloomProgram->setUniform("gBloom", 1);
-			bloomProgram->setUniform("exposure", blurExposure);
+			bloomProgram->setUniform("exposure", bloomExposure);
 			gbuffer.bindBloom();
 			quad.drawQuad();
 			bloomProgram->unuse();
