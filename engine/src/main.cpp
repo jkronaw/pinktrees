@@ -208,7 +208,6 @@ class MyApp : public App
 
 	void showGbuffer() {
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		gbuffer.bindRead();
 
 		GLsizei halfWidth = (GLsizei)(engine.windowWidth / 2.0f);
 		GLsizei halfHeight = (GLsizei)(engine.windowHeight / 2.0f);
