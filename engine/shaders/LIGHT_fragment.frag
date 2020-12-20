@@ -1,7 +1,7 @@
 #version 430 core
 
-out vec3 outColor;
-out vec3 outBloom;
+layout (location = 0) out vec3 outColor;
+layout (location = 1) out vec3 outBloom;
 
 in vec2 texcoord;
 

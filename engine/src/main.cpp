@@ -356,7 +356,7 @@ class MyApp : public App
 		else {
 			lightProgram->use();
 			lightProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
-			lightProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
+			lightProgram->setUniform("gPosition", GBuffer::GB_POSITION);
 			lightProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
 			lightProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
 			lightProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
