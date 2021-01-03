@@ -1,8 +1,8 @@
-#include "model.h"
+#include "pbrmodel.h"
 
 namespace engine {
 
-	Model::Model()
+	PBRModel::PBRModel()
 	{
 		sampler = new LinearMipmapLinearSampler();
 		activeTextures[0] = new TextureInfo(GL_TEXTURE0, "texAlbedo", nullptr, sampler);
@@ -12,14 +12,14 @@ namespace engine {
 		activeTextures[4] = new TextureInfo(GL_TEXTURE4, "texAO", nullptr, sampler);
 	}
 
-	Model::~Model()
+	PBRModel::~PBRModel()
 	{
 		delete sampler;
 		delete[] loadedTextures;
 		delete[] activeTextures;
 	}
 
-	void Model::load(std::string directoryName)
+	void PBRModel::load(std::string directoryName)
 	{
 		WavefrontLoader loaderGround;
 		loaderGround.loadFile((directoryName + std::string("/mesh.obj")).c_str());
@@ -36,7 +36,7 @@ namespace engine {
 
 		loadedTextures[2] = new Texture2D();
 		loadedTextures[2]->load(directoryName + "/roughness.png");
-		
+
 
 		loadedTextures[3] = new Texture2D();
 		loadedTextures[3]->load(directoryName + "/metallic.png");
@@ -47,14 +47,14 @@ namespace engine {
 		useLoadedTextures();
 	}
 
-	void Model::useLoadedTextures()
+	void PBRModel::useLoadedTextures()
 	{
 		for (int i = 0; i < 5; i++) {
 			activeTextures[i]->texture = loadedTextures[i];
 		}
 	}
 
-	void Model::draw(ShaderProgram* program)
+	void PBRModel::draw(ShaderProgram* program) const
 	{
 		for (TextureInfo* tInfo : activeTextures)
 		{
@@ -65,6 +65,6 @@ namespace engine {
 
 		for (TextureInfo* tInfo : activeTextures) {
 			tInfo->unbindSampler();
-		}	
+		}
 	}
 }

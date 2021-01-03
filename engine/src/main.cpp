@@ -1,10 +1,12 @@
 #include "engine.h"
+#include "pbrmodel.h"
+#include "skybox.h"
 
 using namespace engine;
 
 class MyApp : public App
 {
-	GLuint vaoId, vboId[2];
+	//GLuint vaoId, vboId[2];
 	Quad2D quad;
 
 	const float CAMERA_SPEED = 5.0f;
@@ -17,6 +19,7 @@ class MyApp : public App
 	Matrix3 oldCameraViewMatrixInversed;
 
 	SceneGraph* sceneGraph;
+	SceneNode* skyboxNode;
 
 	ShaderProgram* geoProgram;
 	ShaderProgram* lightProgram;
@@ -38,7 +41,7 @@ class MyApp : public App
 
 	bool showGbufferContent = false;
 
-	Model* models[4];
+	PBRModel* models[4];
 
 	GBuffer gbuffer;
 
@@ -73,16 +76,16 @@ class MyApp : public App
 		if (key == GLFW_KEY_C && action == GLFW_PRESS) showGbufferContent = !showGbufferContent;
 
 		// model switching
-		if (key == GLFW_KEY_1 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(models[0]);
-		if (key == GLFW_KEY_2 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(models[1]);
-		if (key == GLFW_KEY_3 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(models[2]);
-		if (key == GLFW_KEY_4 && action == GLFW_PRESS) sceneGraph->getRoot()->setModel(models[3]);
+		if (key == GLFW_KEY_1 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[0]);
+		if (key == GLFW_KEY_2 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[1]);
+		if (key == GLFW_KEY_3 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[2]);
+		if (key == GLFW_KEY_4 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[3]);
 
 		if (key == GLFW_KEY_T && action == GLFW_PRESS) {
 			useTextures = !useTextures;
 			std::cout << "Use Textures: " << (useTextures ? "Yes" : "No") << std::endl;
 			if (useTextures) {
-				for (Model* m : models)
+				for (PBRModel* m : models)
 				{
 					m->useLoadedTextures();
 				}
@@ -124,25 +127,32 @@ class MyApp : public App
 	{
 		quad.setupQuad();
 
-		models[0] = new Model();
-		models[1] = new Model();
-		models[2] = new Model();
-		models[3] = new Model();
+		models[0] = new PBRModel();
+		//models[1] = new Model();
+		//models[2] = new Model();
+		//models[3] = new Model();
 
 		models[0]->load(std::string("assets/models/lantern"));
-		models[1]->load(std::string("assets/models/sphere"));
-		models[2]->load(std::string("assets/models/teapot"));
-		models[3]->load(std::string("assets/models/car"));
+		//models[1]->load(std::string("assets/models/sphere"));
+		//models[2]->load(std::string("assets/models/teapot"));
+		//models[3]->load(std::string("assets/models/car"));
 
 		sceneGraph = new SceneGraph();
+
 		SceneNode* root = sceneGraph->getRoot();
-		root->setModel(models[2]);
+		root->setDrawable(models[0]);
+		
+		Skybox* skybox = new Skybox();
+		skybox->load("assets/cubemaps/palermo");
+
+		skyboxNode = new SceneNode(nullptr);
+		skyboxNode->setDrawable(skybox);
 
 		Camera* camera = new Camera(1);
 
 		camera->lookAt(
-			Vector3(0, 0, 3),
 			Vector3(0, 0, 0),
+			Vector3(0, 0, 1),
 			Vector3(0, 1, 0)
 		);
 
@@ -157,6 +167,12 @@ class MyApp : public App
 			geoProgram->link();
 			geoProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 			sceneGraph->getRoot()->setShaderProgram(geoProgram);
+
+			ShaderProgram* skyboxProgram = new ShaderProgram();
+			skyboxProgram->init("shaders/skybox.vert", "shaders/skybox.frag");
+			skyboxProgram->link();
+			skyboxProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+			skyboxNode->setShaderProgram(skyboxProgram);
 
 			lightProgram = new ShaderProgram();
 			lightProgram->init("shaders/LIGHT_vertex.vert", "shaders/LIGHT_fragment.frag");
@@ -297,26 +313,26 @@ class MyApp : public App
 			}
 
 			if (!useTextures) {
-				for (Model* m : models)
+				for (PBRModel* m : models)
 				{
 					Texture2D* texAlbedo = new Texture2D();
-					texAlbedo->createFromSingleColor(Vector3(1, 0, 0));
+					texAlbedo->createFromColorRGB(Vector3(1, 0, 0));
 					m->activeTextures[0]->texture = texAlbedo;
 
 					Texture2D* texNormal = new Texture2D();
-					texNormal->createFromSingleColor(Vector3(0.5, 0.5, 1));
+					texNormal->createFromColorRGB(Vector3(0.5, 0.5, 1));
 					m->activeTextures[1]->texture = texNormal;
 
 					Texture2D* texRoughness = new Texture2D();
-					texRoughness->createFromSingleColor(roughness);
+					texRoughness->createFromColorGrayscale(roughness);
 					m->activeTextures[2]->texture = texRoughness;
 
 					Texture2D* texMetallic = new Texture2D();
-					texMetallic->createFromSingleColor(metallic);
+					texMetallic->createFromColorGrayscale(metallic);
 					m->activeTextures[3]->texture = texMetallic;
 
 					Texture2D* texAO = new Texture2D();
-					texAO->createFromSingleColor(ao);
+					texAO->createFromColorGrayscale(ao);
 					m->activeTextures[4]->texture = texAO;
 				}
 			}
@@ -327,8 +343,7 @@ class MyApp : public App
 		Vector3 translation = viewMatrixInversed * Vector3(viewMatrix * Vector4(0, 0, 0, 1)) * -1;
 
 		// geometry pass
-		gbuffer.bind();
-		glClearColor(0.0, 0.0, 0.0, 1.0);		
+		gbuffer.bind();	
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		sceneGraph->getRoot()->setShaderProgram(geoProgram);
@@ -342,13 +357,18 @@ class MyApp : public App
 		}
 
 		// lighting pass
-		lightProgram->use();
-		lightProgram->setUniform("viewPos", translation);
-		
 		gbuffer.bindWritePostProcess();
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		quad.draw();
+		skyboxNode->getShaderProgram()->use();
+		skyboxNode->getShaderProgram()->setUniform("viewPos", translation);
+		skyboxNode->getShaderProgram()->unuse();
+
+		skyboxNode->draw();
+
+		lightProgram->use();
+		lightProgram->setUniform("viewPos", translation);
+		//quad.draw();
 		lightProgram->unuse();
 
 		// bloom
@@ -396,7 +416,7 @@ class MyApp : public App
 		glDisable(GL_BLEND);
 
 		if (!useTextures) {
-			for (Model* m : models)
+			for (PBRModel* m : models)
 			{
 				for (int i = 0; i < 5; i++)
 				{

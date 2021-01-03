@@ -4,7 +4,7 @@ layout (location = 0) in vec3 inPosition;
 
 out vec2 texcoord;
 
-uniform mat4 ModelMAtrix;
+uniform mat4 ModelMatrix;
 uniform mat4 NormalMatrix;
 
 void main()

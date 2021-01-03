@@ -6,12 +6,10 @@
 
 namespace engine
 {
-
 	class Texture;
 	class Texture2D;
-
+	class TextureCubeMap;
 	struct TextureInfo;
-
 	class Sampler;
 
 	class Texture
@@ -31,8 +29,16 @@ namespace engine
 		void bind() override;
 		void unbind() override;
 		void load(const std::string& filename);
-		void createFromSingleColor(float color);
-		void createFromSingleColor(Vector3 color);
+		void createFromColorGrayscale(float color);
+		void createFromColorRGB(Vector3 color);
+	};
+
+	class TextureCubeMap : public Texture
+	{
+	public:
+		void bind() override;
+		void unbind() override;
+		void load(const std::string& directoryName);
 	};
 
 	struct TextureInfo

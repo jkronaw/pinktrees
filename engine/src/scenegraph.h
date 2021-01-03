@@ -5,7 +5,7 @@
 #include "matrix.h"
 #include "camera.h"
 #include "shader.h"
-#include "model.h"
+#include "drawable.h"
 
 namespace engine
 {
@@ -47,12 +47,11 @@ namespace engine
 		ShaderProgram* getShaderProgram();
 		void setShaderProgram(ShaderProgram*);
 
-		void setMatrix(Matrix4);
 		Matrix4 getMatrix();
+		void setMatrix(Matrix4);
 
-		void setModel(Model*);
+		void setDrawable(IDrawable*);
 		void addNode(SceneNode*);
-		void addTexture(TextureInfo*);
 		SceneNode* createNode();
 		void removeNode(SceneNode*);
 		void clearNodes();
@@ -64,9 +63,10 @@ namespace engine
 		SceneNode* parent = nullptr;
 		ShaderProgram* shaderProgram = nullptr;
 		Matrix4 matrix;
-		Model* model = nullptr;
+		IDrawable* drawable = nullptr;
 		ISceneNodeCallback* callback = nullptr;
 		Matrix4 getModelMatrix();
+		ShaderProgram* getActiveShaderProgram();
 	};
 }
 

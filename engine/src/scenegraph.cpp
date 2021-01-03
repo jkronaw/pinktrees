@@ -64,9 +64,9 @@ namespace engine
 		this->matrix = matrix;
 	}
 
-	void SceneNode::setModel(Model* model)
+	void SceneNode::setDrawable(IDrawable* drawable)
 	{
-		this->model = model;
+		this->drawable = drawable;
 	}
 
 	void SceneNode::setCallback(ISceneNodeCallback* callback)
@@ -108,18 +108,19 @@ namespace engine
 			callback->beforeDraw(this);
 		}
 
-		shaderProgram->use();
-		if (model != nullptr)
+		ShaderProgram* program = getActiveShaderProgram();
+		program->use();
+		if (drawable != nullptr)
 		{
 			Matrix4 modelMatrix = getModelMatrix();
-			shaderProgram->setUniform(MODEL_MATRIX_NAME_IN_SHADER, modelMatrix);
+			program->setUniform(MODEL_MATRIX_NAME_IN_SHADER, modelMatrix);
 
 			Matrix3 normalMatrix = Matrix3(modelMatrix).inversed().transposed();
-			shaderProgram->setUniform(NORMAL_MATRIX_NAME_IN_SHADER, normalMatrix);
+			program->setUniform(NORMAL_MATRIX_NAME_IN_SHADER, normalMatrix);
 
-			model->draw(shaderProgram);
+			drawable->draw(program);
 		}
-		shaderProgram->unuse();
+		program->unuse();
 
 		for (SceneNode* sn : nodes)
 		{
@@ -141,6 +142,25 @@ namespace engine
 		else
 		{
 			return parent->getModelMatrix() * matrix;
+		}
+	}
+
+	ShaderProgram* SceneNode::getActiveShaderProgram()
+	{
+		if (shaderProgram != nullptr)
+		{
+			return shaderProgram;
+		}
+		else
+		{
+			if (parent == nullptr)
+			{
+				throw Exception("No shader program active.");
+			}
+			else
+			{
+				return parent->getActiveShaderProgram();
+			}
 		}
 	}
 }
