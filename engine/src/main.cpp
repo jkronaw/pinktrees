@@ -38,7 +38,7 @@ class MyApp : public App
 	float bloomExposure = 0.5f;
 	bool useBloom = true;
 
-	bool useDOF = true;
+	bool useDOF = false;
 	float focalDepth = 2.0f;
 
 	bool showGbufferContent = false;
@@ -375,12 +375,6 @@ class MyApp : public App
 			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesGeo[GBuffer::GB_POSITION + i]);
 		}
 
-		// draw Skybox
-		skyboxNode->getShaderProgram()->use();
-		skyboxNode->getShaderProgram()->setUniform("viewPos", translation);
-		skyboxNode->getShaderProgram()->unuse();
-		//skyboxNode->draw();
-
 		// draw objects
 		lightProgram->use();
 		lightProgram->setUniform("viewPos", translation);
@@ -451,7 +445,20 @@ class MyApp : public App
 		quad.draw();
 		dofProgram->unuse();
 
+		// draw Skybox
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
 		glDisable(GL_BLEND);
+
+		skyboxNode->getShaderProgram()->use();
+		skyboxNode->getShaderProgram()->setUniform("viewPos", translation);
+		skyboxNode->getShaderProgram()->unuse();
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.fboGeo);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0,0, engine.windowWidth, engine.windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		skyboxNode->draw();
 
 		if (!useTextures) {
 			for (PBRModel* m : models)

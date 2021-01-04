@@ -7,7 +7,8 @@ layout (location = 0) out vec4 outColor;
 uniform samplerCube cubemap;
 
 void main()
-{
+{   
+    gl_FragDepth = 1.0;
     vec3 color = vec3(texture(cubemap, texCoord));
 
     outColor = vec4(color, 1.0);
