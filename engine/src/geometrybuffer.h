@@ -28,7 +28,7 @@ namespace engine {
 		~GBuffer();
 
 		void initialize(unsigned int windowWidth, unsigned int windowHeight);
-
+		void deleteBufferData();
 		void bind();
 		void bindWritePostProcess();
 		void bindReadGbufferTextures();

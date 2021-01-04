@@ -11,6 +11,10 @@ namespace engine {
 	}
 
 	GBuffer::~GBuffer() {
+		deleteBufferData();
+	}
+
+	void GBuffer::deleteBufferData() {
 		if (m_fbo != 0)
 			glDeleteFramebuffers(1, &m_fbo);
 		if (m_textures[0] != 0)
