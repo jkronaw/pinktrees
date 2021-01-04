@@ -68,7 +68,7 @@ uint init_rng()
 void main()
 {   
     
-	// Without Post Processing:
+	// Without DOF:
 
 	vec3 color = texture(gBloom, texcoord).rgb;
 	FragmentColor = vec4(color, 1.0);

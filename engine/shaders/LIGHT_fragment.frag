@@ -1,7 +1,6 @@
 #version 430 core
 
-layout (location = 0) out vec3 outColor;
-layout (location = 1) out vec3 outBloom;
+layout (location = 0) out vec4 outColor;
 
 in vec2 texcoord;
 
@@ -126,13 +125,5 @@ void main()
     // gamma correct
     color = pow(color, vec3(1.0/2.2));
 
-    // bloom separation
-    vec3 threshold = vec3(0.2126, 0.7152, 0.722);
-    float brightness = dot(color, threshold);
-    if(brightness > 1.0)
-        outBloom = vec3(color);
-    else
-        outBloom = vec3(0.0, 0.0, 0.0);
-
-   outColor = vec3(color);
+    outColor = vec4(color, 1.0);
 }

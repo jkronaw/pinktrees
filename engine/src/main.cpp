@@ -23,10 +23,12 @@ class MyApp : public App
 
 	ShaderProgram* geoProgram;
 	ShaderProgram* lightProgram;
-	ShaderProgram* postProcessProgram;
+	ShaderProgram* bloomSeparationProgram;
+	ShaderProgram* dofProgram;
 	ShaderProgram* horizontalBlurProgram;
 	ShaderProgram* vertikalBlurProgram;
 	ShaderProgram* bloomProgram;
+
 
 	bool useTextures = true;
 	float roughness = 0.5;
@@ -129,14 +131,14 @@ class MyApp : public App
 		quad.setupQuad();
 
 		models[0] = new PBRModel();
-		//models[1] = new Model();
-		//models[2] = new Model();
-		//models[3] = new Model();
+		models[1] = new PBRModel();
+		models[2] = new PBRModel();
+		models[3] = new PBRModel();
 
 		models[0]->load(std::string("assets/models/lantern"));
-		//models[1]->load(std::string("assets/models/sphere"));
-		//models[2]->load(std::string("assets/models/teapot"));
-		//models[3]->load(std::string("assets/models/car"));
+		models[1]->load(std::string("assets/models/sphere"));
+		models[2]->load(std::string("assets/models/teapot"));
+		models[3]->load(std::string("assets/models/car"));
 
 		sceneGraph = new SceneGraph();
 
@@ -188,20 +190,21 @@ class MyApp : public App
 			lightProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
 			lightProgram->unuse();
 
-			postProcessProgram = new ShaderProgram();
-			postProcessProgram->init("shaders/LIGHT_vertex.vert", "shaders/POSTPROCESS_fragment.frag");
-			postProcessProgram->link();
-			postProcessProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+			dofProgram = new ShaderProgram();
+			dofProgram->init("shaders/LIGHT_vertex.vert", "shaders/DOF.frag");
+			dofProgram->link();
+			dofProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 
-			postProcessProgram->use();
-			postProcessProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
-			postProcessProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
-			postProcessProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
-			postProcessProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
-			postProcessProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
-			postProcessProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
-			postProcessProgram->setUniform("gShaded", GBuffer::GB_NUMBER_OF_TEXTURES + GBuffer::GB_SHADED);
-			postProcessProgram->setUniform("gBloom", GBuffer::GB_NUMBER_OF_TEXTURES + GBuffer::GB_BLOOM);
+			dofProgram->use();
+			dofProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
+			dofProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
+			dofProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
+			dofProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
+			dofProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
+			dofProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
+			dofProgram->setUniform("gShaded", GBuffer::GB_NUMBER_OF_TEXTURES + 0);
+			dofProgram->setUniform("gBloom", GBuffer::GB_NUMBER_OF_TEXTURES + 1);
+			dofProgram->unuse();
 
 			horizontalBlurProgram = new ShaderProgram();
 			horizontalBlurProgram->init("shaders/LIGHT_vertex.vert", "shaders/blur_horizontal.frag");
@@ -210,6 +213,13 @@ class MyApp : public App
 			vertikalBlurProgram = new ShaderProgram();
 			vertikalBlurProgram->init("shaders/LIGHT_vertex.vert", "shaders/blur_vertikal.frag");
 			vertikalBlurProgram->link();
+
+			bloomSeparationProgram = new ShaderProgram();
+			bloomSeparationProgram->init("shaders/LIGHT_vertex.vert", "shaders/bloom_separation.frag");
+			bloomSeparationProgram->link();
+			bloomSeparationProgram->use();
+			bloomSeparationProgram->setUniform("gShaded", 0);
+			bloomSeparationProgram->unuse();
 
 			bloomProgram = new ShaderProgram();
 			bloomProgram->init("shaders/LIGHT_vertex.vert", "shaders/bloom_blend.frag");
@@ -241,6 +251,8 @@ class MyApp : public App
 
 		gbuffer.setBufferToRead(GBuffer::GB_NORMAL);
 		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, halfWidth, 0, engine.windowWidth, halfHeight, GL_COLOR_BUFFER_BIT, GL_LINEAR);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 	}
 
 	void update(double elapsedSecs) override
@@ -343,8 +355,8 @@ class MyApp : public App
 		Matrix3 viewMatrixInversed = camera->getViewMatrixInversed();
 		Vector3 translation = viewMatrixInversed * Vector3(viewMatrix * Vector4(0, 0, 0, 1)) * -1;
 
-		// geometry pass
-		gbuffer.bind();	
+		// geometry pass	
+		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboGeo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		sceneGraph->getRoot()->setShaderProgram(geoProgram);
@@ -353,66 +365,91 @@ class MyApp : public App
 		// debug view of geometry buffer
 		if (showGbufferContent) {
 			showGbuffer();
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
 			return;
 		}
 
 		// lighting pass
-		gbuffer.bindWritePostProcess();
-		glClear(GL_COLOR_BUFFER_BIT);
+		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboShaded);
+		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesGeo[GBuffer::GB_POSITION + i]);
+		}
 
+		// draw Skybox
 		skyboxNode->getShaderProgram()->use();
 		skyboxNode->getShaderProgram()->setUniform("viewPos", translation);
 		skyboxNode->getShaderProgram()->unuse();
+		//skyboxNode->draw();
 
-		skyboxNode->draw();
-
+		// draw objects
 		lightProgram->use();
 		lightProgram->setUniform("viewPos", translation);
-		//quad.draw();
+		quad.draw();
 		lightProgram->unuse();
 
-		// bloom
+		// separate bright regions of shaded image and save into Pong FBO
+		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
+		bloomSeparationProgram->use();
+		quad.draw();
+		bloomSeparationProgram->unuse();
+
+		// bloom: apply blur to bright regions
 		bool firstBlurIteration = true;
 		int numBlurIterations = 20;
 		for (int i = 0; i < numBlurIterations; i++) {
+
+			// horizontal blur kernel: Read from Pong Texture, Write into Ping FBO (Texture)
+			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[0]);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
 			horizontalBlurProgram->use();
-			if (firstBlurIteration) {
-				gbuffer.bindPingFirstIteration();
-				firstBlurIteration = false;
-			}
-			else {
-				gbuffer.bindPing();
-			}
 			quad.draw();
 			horizontalBlurProgram->unuse();
 			
+			// vertikal blur kernel: Read from Ping Texture, Write into Pong FBO (Texture)
+			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[0]);
 			vertikalBlurProgram->use();
-			gbuffer.bindPong();
 			quad.draw();
 			vertikalBlurProgram->unuse();
 		}
 
+		// add blurred regions (currently in Pong FBO) to original image and save result in Bloom FBO
+		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboBloom);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
 		bloomProgram->use();
 		bloomProgram->setUniform("exposure", bloomExposure);
-		gbuffer.bindBloom();
 		quad.draw();
 		bloomProgram->unuse();
 		
-		// post process
-		postProcessProgram->use();
-		postProcessProgram->setUniform("useDOF", useDOF);
-		postProcessProgram->setUniform("viewPos", translation);
-		postProcessProgram->setUniform("focalDepth", focalDepth);
-			
+		// post process: DOF 
+		dofProgram->use();
+		dofProgram->setUniform("useDOF", useDOF);
+		dofProgram->setUniform("viewPos", translation);
+		dofProgram->setUniform("focalDepth", focalDepth);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesGeo[GBuffer::GB_POSITION + i]);
+		}
+		glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 0);
+		glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
+		glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 1);
+		glBindTexture(GL_TEXTURE_2D, gbuffer.textureBloom);
+
 		glEnable(GL_BLEND);
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
-		gbuffer.bindReadPostProcess();
-		glClear(GL_COLOR_BUFFER_BIT);
 
 		quad.draw();
-		postProcessProgram->unuse();
+		dofProgram->unuse();
 
 		glDisable(GL_BLEND);
 

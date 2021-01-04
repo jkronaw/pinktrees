@@ -68,13 +68,14 @@
       <FileType>Document</FileType>
     </CopyFileToFolders>
     <None Include="shaders\bloom_blend.frag" />
+    <None Include="shaders\bloom_separation.frag" />
     <None Include="shaders\blur_horizontal.frag" />
     <None Include="shaders\blur_vertikal.frag" />
     <None Include="shaders\GEO_fragment.frag" />
     <None Include="shaders\GEO_vertex.vert" />
     <None Include="shaders\LIGHT_fragment.frag" />
     <None Include="shaders\LIGHT_vertex.vert" />
-    <None Include="shaders\POSTPROCESS_fragment.frag" />
+    <None Include="shaders\DOF.frag" />
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />
   </ItemGroup>

@@ -2,12 +2,13 @@
 
 in vec3 texCoord;
 
-layout (location = 0) out vec3 outColor;
-layout (location = 1) out vec3 outBloom;
+layout (location = 0) out vec4 outColor;
 
 uniform samplerCube cubemap;
 
 void main()
 {
-    outColor = vec3(texture(cubemap, texCoord));
+    vec3 color = vec3(texture(cubemap, texCoord));
+
+    outColor = vec4(color, 1.0);
 }
