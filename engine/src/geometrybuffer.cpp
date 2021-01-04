@@ -60,7 +60,7 @@ namespace engine {
 		GLenum DrawBuffers[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, GL_COLOR_ATTACHMENT4 };
 		float drawBuffersSize = sizeof(DrawBuffers) / sizeof(DrawBuffers[0]);
 		glDrawBuffers(drawBuffersSize, DrawBuffers);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 
 		// Shade FBO
@@ -72,9 +72,13 @@ namespace engine {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureShaded, 0);
+		glGenTextures(1, &shadedDepthTexture);
+		glBindTexture(GL_TEXTURE_2D, shadedDepthTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, windowWidth, windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, shadedDepthTexture, 0);
 		GLenum DrawBuffersShade[] = { GL_COLOR_ATTACHMENT0};
 		glDrawBuffers(1, DrawBuffersShade);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 		// Bloom FBO
 		glGenFramebuffers(1, &fboBloom);
@@ -87,7 +91,7 @@ namespace engine {
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureBloom, 0);
 		GLenum DrawBuffersBloom[] = { GL_COLOR_ATTACHMENT0 };
 		glDrawBuffers(1, DrawBuffersBloom);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+		//glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 
 		// Ping Pong FBO
 		glGenFramebuffers(2, fboPingPong);

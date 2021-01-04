@@ -12,7 +12,7 @@ void main()
 {             
     vec3 hdrColor = texture(gShaded, texcoord).rgb;      
     vec3 bloomColor = texture(gBloom, texcoord).rgb;
-    bloomColor = bloomColor * 10.0 * exposure;
+    bloomColor = bloomColor * 1.5 * exposure;
     vec3 result = hdrColor + bloomColor;
 
     OutBloom = vec4(result, 1.0);

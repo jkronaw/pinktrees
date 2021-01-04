@@ -97,7 +97,7 @@ class MyApp : public App
 		if (key == GLFW_KEY_B && action == GLFW_PRESS) {
 			useBloom = !useBloom;
 			if (useBloom) 
-				bloomExposure = 0.5;
+				bloomExposure = 0.2;
 			else
 				bloomExposure = 0.0;
 			std::cout << "Use Bloom: " << (useBloom ? "Yes" : "No") << std::endl;
@@ -154,7 +154,7 @@ class MyApp : public App
 		Camera* camera = new Camera(1);
 
 		camera->lookAt(
-			Vector3(0, 0, 0),
+			Vector3(0, 0, 5),
 			Vector3(0, 0, 1),
 			Vector3(0, 1, 0)
 		);
@@ -381,34 +381,51 @@ class MyApp : public App
 		quad.draw();
 		lightProgram->unuse();
 
+		// draw Skybox
+		glEnable(GL_DEPTH_TEST);
+		glDepthFunc(GL_LEQUAL);
+		glDepthMask(GL_TRUE);
+
+		skyboxNode->getShaderProgram()->use();
+		skyboxNode->getShaderProgram()->setUniform("viewPos", translation);
+		skyboxNode->getShaderProgram()->unuse();
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.fboGeo);
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuffer.fboShaded);
+		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, engine.windowWidth, engine.windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboShaded);
+		skyboxNode->draw();
+
 		// separate bright regions of shaded image and save into Pong FBO
-		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
-		bloomSeparationProgram->use();
-		quad.draw();
-		bloomSeparationProgram->unuse();
-
-		// bloom: apply blur to bright regions
-		bool firstBlurIteration = true;
-		int numBlurIterations = 20;
-		for (int i = 0; i < numBlurIterations; i++) {
-
-			// horizontal blur kernel: Read from Pong Texture, Write into Ping FBO (Texture)
-			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[0]);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
-			horizontalBlurProgram->use();
-			quad.draw();
-			horizontalBlurProgram->unuse();
-			
-			// vertikal blur kernel: Read from Ping Texture, Write into Pong FBO (Texture)
+		if (useBloom) {
 			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[0]);
-			vertikalBlurProgram->use();
+			glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
+			bloomSeparationProgram->use();
 			quad.draw();
-			vertikalBlurProgram->unuse();
+			bloomSeparationProgram->unuse();
+
+			// bloom: apply blur to bright regions
+			bool firstBlurIteration = true;
+			int numBlurIterations = 20;
+			for (int i = 0; i < numBlurIterations; i++) {
+
+				// horizontal blur kernel: Read from Pong Texture, Write into Ping FBO (Texture)
+				glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[0]);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
+				horizontalBlurProgram->use();
+				quad.draw();
+				horizontalBlurProgram->unuse();
+
+				// vertikal blur kernel: Read from Ping Texture, Write into Pong FBO (Texture)
+				glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[0]);
+				vertikalBlurProgram->use();
+				quad.draw();
+				vertikalBlurProgram->unuse();
+			}
 		}
 
 		// add blurred regions (currently in Pong FBO) to original image and save result in Bloom FBO
@@ -445,20 +462,7 @@ class MyApp : public App
 		quad.draw();
 		dofProgram->unuse();
 
-		// draw Skybox
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
 		glDisable(GL_BLEND);
-
-		skyboxNode->getShaderProgram()->use();
-		skyboxNode->getShaderProgram()->setUniform("viewPos", translation);
-		skyboxNode->getShaderProgram()->unuse();
-
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.fboGeo);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0,0, engine.windowWidth, engine.windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		skyboxNode->draw();
 
 		if (!useTextures) {
 			for (PBRModel* m : models)

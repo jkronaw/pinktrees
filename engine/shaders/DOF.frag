@@ -75,30 +75,39 @@ void main()
 
 
 	// very simple DOF:
-	
+	// TODO: integrate BackGround with DOF in a better way
 	if(useDOF){
 
 		uint state = init_rng();
 		vec3 position = texture(gPosition, texcoord).rgb;
-		float z = -(ViewMatrix * vec4(position ,1.0)).z;
+		vec3 normal = texture(gNormal, texcoord).rgb;
+		float z = (ViewMatrix * vec4(position ,1.0)).z;
 		
 		float depth_diff = abs(z - focalDepth);
-		float disc_radius = depth_diff * 0.003;
-		vec4 color_sum = vec4(0.0);
+		if(position == vec3(0,0,0) || (normal == vec3(0,0,0))){
+			depth_diff = abs(50 - focalDepth);
+			z = 999999999;
+		}
+		float disc_radius = depth_diff * 0.0003;
+		vec4 color_sum = vec4(0.0);// vec4(color, 1.0);
 		float num_valid = 0;
 		
-		for(int i = 0; i < 150; i++){
+		for(int i = 0; i < 75; i++){
 			
 			vec2 sample_pos = sample_disc(state);
 			sample_pos = sample_pos * disc_radius;
 			vec3 sample_pos_ws = texture(gPosition, texcoord + sample_pos).rgb;
-			float sample_z = (viewPos - sample_pos_ws).z;
-		
-			vec4 sample_color = vec4(texture(gBloom, texcoord + sample_pos).rgb , 1.0);
-			
-			color_sum += sample_color;
-			num_valid++;
+			float sample_z = (ViewMatrix * vec4(sample_pos_ws, 1.0)).z;
+			if(sample_pos_ws == vec3(0,0,0)){
+				sample_z = 999999999;
+			}
+			if (z <= sample_z + 100){
+				vec4 sample_color = vec4(texture(gBloom, texcoord + sample_pos).rgb , 1.0);
+				
+				color_sum += sample_color;
+				num_valid++;
+			}
 		}
-	FragmentColor = color_sum / num_valid;
+		FragmentColor = color_sum / num_valid;
 	}
 }

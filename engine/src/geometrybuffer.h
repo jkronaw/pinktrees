@@ -33,6 +33,7 @@ namespace engine {
 		GLuint textureShaded;
 		GLuint textureBloom;
 		GLuint depthTexture;
+		GLuint shadedDepthTexture;
 		GLuint texturesPingPong[2];
 	};
 }

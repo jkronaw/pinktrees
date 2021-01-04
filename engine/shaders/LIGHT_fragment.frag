@@ -84,46 +84,52 @@ void main()
     F0 = mix(F0, albedo, metallic);
 
     // direct lighting
+
     vec3 L_0 = vec3(0.0);
-    for(int i = 0; i < 4; ++i) 
-    {
-        vec3 w_i = normalize(lightPositions[i] - position); // light vector
-        vec3 h = normalize(w_0 + w_i); // halfway vector
 
-        // calculate attenuated light color (radiance)
-        float distance = length(lightPositions[i] - position);
-        vec3 L_i = lightColors[i] / (distance * distance);
+    if(position != vec3(0,0,0)){
 
-        // specular component
-        float NDF = trowbridgeReitzGGX(n, h, roughness);
-        float G = geometrySmith(n, w_0, w_i, roughness);
-        vec3 F = fresnelSchlick(max(dot(h, w_0), 0.0), F0);  
+        for(int i = 0; i < 4; ++i) 
+        {
+            vec3 w_i = normalize(lightPositions[i] - position); // light vector
+            vec3 h = normalize(w_0 + w_i); // halfway vector
 
-        vec3 kS = F;
-        vec3 numerator    = NDF * G * F;
-        float denominator = 4.0 * max(dot(n, w_0), 0.0) * max(dot(n, w_i), 0.0);
-        vec3 specular     = numerator / max(denominator, 0.001);  
+            // calculate attenuated light color (radiance)
+            float distance = length(lightPositions[i] - position);
+            vec3 L_i = lightColors[i] / (distance * distance);
 
-        // diffuse component
-        vec3 kD = (vec3(1.0) - kS) * (1.0 - metallic);
-        vec3 diffuse = kD * albedo / PI;
+            // specular component
+            float NDF = trowbridgeReitzGGX(n, h, roughness);
+            float G = geometrySmith(n, w_0, w_i, roughness);
+            vec3 F = fresnelSchlick(max(dot(h, w_0), 0.0), F0);  
 
-        // calculate BRDF
-        vec3 BRDF = diffuse + specular;
+            vec3 kS = F;
+            vec3 numerator    = NDF * G * F;
+            float denominator = 4.0 * max(dot(n, w_0), 0.0) * max(dot(n, w_i), 0.0);
+            vec3 specular     = numerator / max(denominator, 0.001);  
 
-        // calculate reflection equation and add to L_0
-        L_0 += BRDF * L_i * max(dot(n, w_i), 0.0);
+            // diffuse component
+            vec3 kD = (vec3(1.0) - kS) * (1.0 - metallic);
+            vec3 diffuse = kD * albedo / PI;
+
+            // calculate BRDF
+            vec3 BRDF = diffuse + specular;
+
+            // calculate reflection equation and add to L_0
+            L_0 += BRDF * L_i * max(dot(n, w_i), 0.0);
+        }
     }
 
     // ambient lighting considering ao texture
     vec3 ambient = vec3(0.05) * albedo * ao;
     vec3 color = L_0 + ambient;
 
-	// tone map from HDR to LDR
+    // tone map from HDR to LDR
     color = color / (color + vec3(1.0));
 
     // gamma correct
     color = pow(color, vec3(1.0/2.2));
 
     outColor = vec4(color, 1.0);
+
 }
