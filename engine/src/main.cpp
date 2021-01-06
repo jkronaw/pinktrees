@@ -17,16 +17,16 @@ class MyApp : public App
 
 	SceneGraph* sceneGraph;
 	Quad2D* quad;
-	SceneNode* skyboxNode;
+	Skybox* skybox;
 
 	ShaderProgram* geoProgram;
+	ShaderProgram* skyboxProgram;
 	ShaderProgram* lightProgram;
 	ShaderProgram* bloomSeparationProgram;
 	ShaderProgram* dofProgram;
 	ShaderProgram* horizontalBlurProgram;
 	ShaderProgram* vertikalBlurProgram;
 	ShaderProgram* bloomProgram;
-
 
 	bool useTextures = true;
 	float roughness = 0.5;
@@ -56,6 +56,8 @@ class MyApp : public App
 	{
 		engine.stop();
 		delete sceneGraph;
+		delete quad;
+		delete skybox;
 	}
 
 	void windowSizeCallback(int newWidth, int newHeight)
@@ -126,8 +128,6 @@ class MyApp : public App
 
 	void start() override
 	{
-		quad = new Quad2D();
-
 		models[0] = new PBRModel();
 		models[1] = new PBRModel();
 		models[2] = new PBRModel();
@@ -142,12 +142,11 @@ class MyApp : public App
 
 		SceneNode* root = sceneGraph->getRoot();
 		root->setDrawable(models[0]);
-		
-		Skybox* skybox = new Skybox();
-		skybox->load("assets/cubemaps/palermo");
 
-		skyboxNode = new SceneNode(nullptr);
-		skyboxNode->setDrawable(skybox);
+		quad = new Quad2D();
+		
+		skybox = new Skybox();
+		skybox->load("assets/cubemaps/palermo");
 
 		Camera* camera = new Camera(1);
 
@@ -169,11 +168,10 @@ class MyApp : public App
 			geoProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
 			sceneGraph->getRoot()->setShaderProgram(geoProgram);
 
-			ShaderProgram* skyboxProgram = new ShaderProgram();
+			skyboxProgram = new ShaderProgram();
 			skyboxProgram->init("shaders/skybox.vert", "shaders/skybox.frag");
 			skyboxProgram->link();
 			skyboxProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
-			skyboxNode->setShaderProgram(skyboxProgram);
 
 			lightProgram = new ShaderProgram();
 			lightProgram->init("shaders/LIGHT_vertex.vert", "shaders/LIGHT_fragment.frag");
@@ -384,7 +382,10 @@ class MyApp : public App
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuffer.fboShaded);
 		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, engine.windowWidth, engine.windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboShaded);
-		skyboxNode->draw();
+
+		skyboxProgram->use();
+		skybox->draw(skyboxProgram);
+		skyboxProgram->unuse();
 
 		// separate bright regions of shaded image and save into Pong FBO
 		if (useBloom) {
