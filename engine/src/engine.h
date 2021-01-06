@@ -15,7 +15,10 @@
 #include "meshloading.h"
 
 #include "geometrybuffer.h"
-#include "quad2d.h"  
+#include "quad2d.h"
+
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -34,7 +37,7 @@ namespace engine {
         void operator=(Engine const&) = delete;
 
         const char* windowTitle = "Jakobs' Engine";
-        int windowWidth = 512, windowHeight = 512;
+        int windowWidth = 1200, windowHeight = 700;
         bool fullscreen = false;
 
         int glMajor = 3, glMinor = 3;
@@ -57,6 +60,7 @@ namespace engine {
         void setupCallbacks();
         void setupGLEW();
         void setupOpenGL();
+        void setupImGui();
     };
 
     class App

@@ -33,12 +33,13 @@ class MyApp : public App
 	float metallic = 0.4;
 	float ao = 1;
 
-	float bloomExposure = 0.5f;
+	float bloomExposure = 0.2f;
 	bool useBloom = true;
 
 	bool useDOF = false;
 	float focalDepth = 2.0f;
 
+	bool showDemoWindow = true;
 	bool showGbufferContent = false;
 
 	PBRModel* models[4];
@@ -94,18 +95,9 @@ class MyApp : public App
 				}
 			}
 		}
-		if (key == GLFW_KEY_B && action == GLFW_PRESS) {
-			useBloom = !useBloom;
-			if (useBloom) 
-				bloomExposure = 0.2;
-			else
-				bloomExposure = 0.0;
-			std::cout << "Use Bloom: " << (useBloom ? "Yes" : "No") << std::endl;
-		}
-		if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-			useDOF = !useDOF;
-			std::cout << "Use DOF: " << (useDOF ? "Yes" : "No") << std::endl;
-		}
+		if (key == GLFW_KEY_B && action == GLFW_PRESS) useBloom = !useBloom;
+		if (key == GLFW_KEY_D && action == GLFW_PRESS) useDOF = !useDOF;
+		if (key == GLFW_KEY_I && action == GLFW_PRESS) showDemoWindow = !showDemoWindow; // I to toggle the ImGui debug window
 	}
 
 	void mouseCallback(Vector2 mousePosition) override { mouseCurrentPos = mousePosition; }
@@ -128,6 +120,7 @@ class MyApp : public App
 
 	void start() override
 	{
+
 		models[0] = new PBRModel();
 		models[1] = new PBRModel();
 		models[2] = new PBRModel();
@@ -253,7 +246,6 @@ class MyApp : public App
 
 	void update(double elapsedSecs) override
 	{
-		
 		Camera* camera = sceneGraph->getCamera();
 
 		if (engine.getMouseButton(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) // camera rotation using mouse
@@ -387,6 +379,11 @@ class MyApp : public App
 		skybox->draw(skyboxProgram);
 		skyboxProgram->unuse();
 
+		if (useBloom)
+			bloomExposure = 0.2;
+		else
+			bloomExposure = 0.0;
+
 		// separate bright regions of shaded image and save into Pong FBO
 		if (useBloom) {
 			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
@@ -455,6 +452,8 @@ class MyApp : public App
 
 		glDisable(GL_BLEND);
 
+		handleImGui();
+
 		if (!useTextures) {
 			for (PBRModel* m : models)
 			{
@@ -464,6 +463,30 @@ class MyApp : public App
 				}
 			}
 		}
+	}
+
+	void handleImGui()
+	{
+		// ImGui demo window (toggle with I)
+		if (showDemoWindow) ImGui::ShowDemoWindow(&showDemoWindow);
+
+		// window "Rendering options"
+		{
+			ImGui::Begin("Rendering Options");
+
+			ImGui::Checkbox("Enable Bloom", &useBloom);
+			ImGui::Checkbox("Enable DOF", &useDOF);
+
+			ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f);
+			ImGui::SliderFloat("Metallic", &metallic, 0.0f, 1.0f);
+			ImGui::SliderFloat("AO", &ao, 0.0f, 1.0f);
+
+			ImGui::End();
+		}
+
+		// render windows
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 	}
 };
 

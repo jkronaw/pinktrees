@@ -21,6 +21,8 @@ namespace engine {
 #ifdef ERROR_CALLBACK
 		setupErrorCallback();
 #endif
+		setupImGui();
+
 		app->start();
     }
 
@@ -132,16 +134,33 @@ namespace engine {
 		glViewport(0, 0, windowWidth, windowHeight);
 	}
 
+	void Engine::setupImGui()
+	{
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
+		// Setup Platform/Renderer bindings
+		ImGui_ImplGlfw_InitForOpenGL(window, true);
+		ImGui_ImplOpenGL3_Init("#version 330");
+		// Setup Dear ImGui style
+		ImGui::StyleColorsDark();
+	}
+
     void Engine::run() {
 		double last_time = glfwGetTime();
+
 		while (!glfwWindowShouldClose(window))
 		{
 			double time = glfwGetTime();
 			double elapsed_time = time - last_time;
 			last_time = time;
 
+			// inform ImGui that a new frame has started
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			
 			app->update(elapsed_time);
 
 			glfwSwapBuffers(window);
