@@ -381,10 +381,6 @@ class MyApp : public App
 		lightProgram->unuse();
 
 		// draw Skybox
-		glEnable(GL_DEPTH_TEST);
-		glDepthFunc(GL_LEQUAL);
-		glDepthMask(GL_TRUE);
-
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.fboGeo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuffer.fboShaded);
 		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, engine.windowWidth, engine.windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
