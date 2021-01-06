@@ -17,3 +17,5 @@ engine/intermediate/
 #Mac Implementation files
 mainMac.cpp
 mainMac*
+
+engine/imgui.ini
