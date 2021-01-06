@@ -18,6 +18,8 @@ namespace engine {
 		static const GLuint POSITIONS = 0;
 	private:
 		GLuint vaoId = -1;
+		GLuint vboId = -1;
+
 		TextureInfo* textureInfo = nullptr;
 	};
 }

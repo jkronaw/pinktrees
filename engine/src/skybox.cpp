@@ -47,21 +47,23 @@ namespace engine {
 
 	Skybox::Skybox() {
 		glGenVertexArrays(1, &vaoId);
-
 		glBindVertexArray(vaoId);
+        {
+            glGenBuffers(1, &vboId);
+            glBindBuffer(GL_ARRAY_BUFFER, vboId);
+            {
+                glBufferData(GL_ARRAY_BUFFER, sizeof(CUBE_VERTICES), CUBE_VERTICES, GL_STATIC_DRAW);
+                glEnableVertexAttribArray(POSITIONS);
+                glVertexAttribPointer(POSITIONS, 3, GL_FLOAT, GL_FALSE, 0, 0);
+            }
+        }
 		
-        GLuint vboId;
-		glGenBuffers(1, &vboId);
-		glBindBuffer(GL_ARRAY_BUFFER, vboId);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(CUBE_VERTICES), CUBE_VERTICES, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(POSITIONS);
-		glVertexAttribPointer(POSITIONS, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindVertexArray(0);
 	}
 
     Skybox::~Skybox() {
+        glDeleteBuffers(1, &vboId);
         glDeleteVertexArrays(1, &vaoId);
     }
 
@@ -74,12 +76,8 @@ namespace engine {
 
 	void Skybox::draw(ShaderProgram* program) const {
         glBindVertexArray(vaoId);
-
-		glDepthMask(GL_FALSE);
         textureInfo->updateShader(program);
 		glDrawArrays(GL_TRIANGLES, 0, sizeof(CUBE_VERTICES));
-		glDepthMask(GL_TRUE);
-
         glBindVertexArray(0);
 	}
 }
