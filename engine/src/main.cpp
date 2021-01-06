@@ -6,8 +6,6 @@ using namespace engine;
 
 class MyApp : public App
 {
-	Quad2D quad;
-
 	const float CAMERA_SPEED = 5.0f;
 	const float CAMERA_ROTATE_SPEED = 0.01f;
 
@@ -18,6 +16,7 @@ class MyApp : public App
 	Matrix3 oldCameraViewMatrixInversed;
 
 	SceneGraph* sceneGraph;
+	Quad2D* quad;
 	SceneNode* skyboxNode;
 
 	ShaderProgram* geoProgram;
@@ -127,7 +126,7 @@ class MyApp : public App
 
 	void start() override
 	{
-		quad.setupQuad();
+		quad = new Quad2D();
 
 		models[0] = new PBRModel();
 		models[1] = new PBRModel();
@@ -377,7 +376,7 @@ class MyApp : public App
 		// draw objects
 		lightProgram->use();
 		lightProgram->setUniform("viewPos", translation);
-		quad.draw();
+		quad->draw();
 		lightProgram->unuse();
 
 		// draw Skybox
@@ -393,7 +392,7 @@ class MyApp : public App
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
 			bloomSeparationProgram->use();
-			quad.draw();
+			quad->draw();
 			bloomSeparationProgram->unuse();
 
 			// bloom: apply blur to bright regions
@@ -406,7 +405,7 @@ class MyApp : public App
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
 				horizontalBlurProgram->use();
-				quad.draw();
+				quad->draw();
 				horizontalBlurProgram->unuse();
 
 				// vertikal blur kernel: Read from Ping Texture, Write into Pong FBO (Texture)
@@ -414,7 +413,7 @@ class MyApp : public App
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[0]);
 				vertikalBlurProgram->use();
-				quad.draw();
+				quad->draw();
 				vertikalBlurProgram->unuse();
 			}
 		}
@@ -427,7 +426,7 @@ class MyApp : public App
 		glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
 		bloomProgram->use();
 		bloomProgram->setUniform("exposure", bloomExposure);
-		quad.draw();
+		quad->draw();
 		bloomProgram->unuse();
 		
 		// post process: DOF 
@@ -450,7 +449,7 @@ class MyApp : public App
 		glBlendEquation(GL_FUNC_ADD);
 		glBlendFunc(GL_ONE, GL_ONE);
 
-		quad.draw();
+		quad->draw();
 		dofProgram->unuse();
 
 		glDisable(GL_BLEND);

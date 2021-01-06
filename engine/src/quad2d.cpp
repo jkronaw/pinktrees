@@ -1,76 +1,42 @@
 #include "quad2d.h"
-#include "GL/glew.h"
+
+#include "vector.h"
 
 namespace engine {
 
-	GLfloat data[] = {
-			1.0f, -1.0f,
-			1.0f, 1.0f,
-			-1.0f, -1.0f,
-			-1.0f, 1.0f
+	const Vector3 QUAD_VERTICES[4] = {
+			Vector3( 1.0f, -1.0f, 0.0f),
+			Vector3( 1.0f,  1.0f, 0.0f),
+			Vector3(-1.0f, -1.0f, 0.0f),
+			Vector3(-1.0f,  1.0f, 0.0f)
 	};
 
 	Quad2D::Quad2D()
-		: m_vao(-1)//, m_vbo(-1)
-	{}
-
-	Quad2D::~Quad2D() {
-		destroy();
-	}
-
-	void Quad2D::setupQuad() {
-		/*
-		glGenVertexArrays(1, &m_vao);
-		glGenBuffers(1, &m_vbo);
-
-		glBindVertexArray(m_vao);
-		glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(data), data, GL_STATIC_DRAW);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 2, GL)
-		*/
-		typedef struct {
-			GLfloat XYZ[3];
-		} Vertex;
-
-		const Vertex Vertices[] = {
-			-1, -1, 0,
-			-1,	 1, 0,
-			 1,	 1, 0,
-			 1, -1, 0 };
-
-		const GLubyte Indices[] = { 0, 2, 1, 0, 3, 2 };
-
-		glGenVertexArrays(1, &m_vao);
-		glBindVertexArray(m_vao);
+	{
+		glGenVertexArrays(1, &vaoId);
+		glBindVertexArray(vaoId);
 		{
-			glGenBuffers(2, m_vbo);
-			glBindBuffer(GL_ARRAY_BUFFER, m_vbo[0]);
+			glGenBuffers(1, &vboId);
+			glBindBuffer(GL_ARRAY_BUFFER, vboId);
 			{
-				glBufferData(GL_ARRAY_BUFFER, sizeof(Vertices), Vertices, GL_STATIC_DRAW);
-				glEnableVertexAttribArray(0);
-				glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), 0);
-			}
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_vbo[1]);
-			{
-				glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(Indices), Indices, GL_STATIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(QUAD_VERTICES), QUAD_VERTICES, GL_STATIC_DRAW);
+				glEnableVertexAttribArray(POSITIONS);
+				glVertexAttribPointer(POSITIONS, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			}
 		}
-		glBindVertexArray(0);
+
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-		
+		glBindVertexArray(0);
+	}
+
+	Quad2D::~Quad2D() {
+		glDeleteBuffers(1, &vboId);
+		glDeleteVertexArrays(1, &vaoId);
 	}
 
 	void Quad2D::draw() {
-		glBindVertexArray(m_vao);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE, (GLvoid*)0);
+		glBindVertexArray(vaoId);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 		glBindVertexArray(0);
 	}
-
-	void Quad2D::destroy() {
-		glDeleteBuffers(2, m_vbo);
-		glDeleteVertexArrays(1, &m_vao);
-	}
-
 }

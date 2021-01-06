@@ -1,18 +1,20 @@
 #pragma once
 
+#include "GL/glew.h"
+
 namespace engine {
-
 	class Quad2D {
-	private:
-		unsigned int m_vao;
-		unsigned int m_vbo[2];
-
-		void destroy();
 
 	public:
 		Quad2D();
 		~Quad2D();
-		void setupQuad();
+
 		void draw();
+
+		// vertex shader layout
+		static const GLuint POSITIONS = 0;
+	private:
+		GLuint vaoId = -1;
+		GLuint vboId = -1;
 	};
 }
