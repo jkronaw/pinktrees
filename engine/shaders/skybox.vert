@@ -10,10 +10,9 @@ uniform SharedMatrices
 	mat4 ProjectionMatrix;
 };
 
-uniform vec3 viewPos;
-
 void main()
 {
 	texCoord = position;
-    gl_Position = ProjectionMatrix * ViewMatrix * vec4(position + viewPos, 1.0);
+	mat3 viewMatrixNoTranslation = mat3(ViewMatrix);
+    gl_Position = ProjectionMatrix * vec4(viewMatrixNoTranslation * position, 1.0);
 }

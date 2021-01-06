@@ -6,7 +6,6 @@ using namespace engine;
 
 class MyApp : public App
 {
-	//GLuint vaoId, vboId[2];
 	Quad2D quad;
 
 	const float CAMERA_SPEED = 5.0f;
@@ -385,10 +384,6 @@ class MyApp : public App
 		glEnable(GL_DEPTH_TEST);
 		glDepthFunc(GL_LEQUAL);
 		glDepthMask(GL_TRUE);
-
-		skyboxNode->getShaderProgram()->use();
-		skyboxNode->getShaderProgram()->setUniform("viewPos", translation);
-		skyboxNode->getShaderProgram()->unuse();
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.fboGeo);
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuffer.fboShaded);
