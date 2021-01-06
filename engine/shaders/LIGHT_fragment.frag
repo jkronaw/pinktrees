@@ -2,7 +2,7 @@
 
 layout (location = 0) out vec4 outColor;
 
-in vec2 texcoord;
+in vec2 exTexcoord;
 
 // GBuffer
 uniform sampler2D gPosition;
@@ -65,13 +65,13 @@ vec3 fresnelSchlick(float cosTheta, vec3 F0)
 
 void main()
 {
-    vec3 n = (texture(gNormal, texcoord).rgb);
-    vec3 position = texture(gPosition, texcoord).rgb;
+    vec3 n = (texture(gNormal, exTexcoord).rgb);
+    vec3 position = texture(gPosition, exTexcoord).rgb;
 
-    vec3 albedo  = texture(gAlbedo, texcoord).rgb;
-    float metallic = texture(gMetallicRoughnessAO, texcoord).r;
-    float roughness = texture(gMetallicRoughnessAO, texcoord).g;
-    float ao = texture(gMetallicRoughnessAO, texcoord).b;
+    vec3 albedo  = texture(gAlbedo, exTexcoord).rgb;
+    float metallic = texture(gMetallicRoughnessAO, exTexcoord).r;
+    float roughness = texture(gMetallicRoughnessAO, exTexcoord).g;
+    float ao = texture(gMetallicRoughnessAO, exTexcoord).b;
 
     // gamma correct albedo to get into linear space
     albedo = pow(albedo, vec3(2.2));

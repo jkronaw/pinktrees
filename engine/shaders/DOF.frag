@@ -2,7 +2,7 @@
 
 out vec4 FragmentColor;
 
-in vec2 texcoord;
+in vec2 exTexcoord;
 
 // GBuffer
 uniform sampler2D gPosition;
@@ -70,7 +70,7 @@ void main()
     
 	// Without DOF:
 
-	vec3 color = texture(gBloom, texcoord).rgb;
+	vec3 color = texture(gBloom, exTexcoord).rgb;
 	FragmentColor = vec4(color, 1.0);
 
 
@@ -79,8 +79,8 @@ void main()
 	if(useDOF){
 
 		uint state = init_rng();
-		vec3 position = texture(gPosition, texcoord).rgb;
-		vec3 normal = texture(gNormal, texcoord).rgb;
+		vec3 position = texture(gPosition, exTexcoord).rgb;
+		vec3 normal = texture(gNormal, exTexcoord).rgb;
 		float z = (ViewMatrix * vec4(position ,1.0)).z;
 		
 		float depth_diff = abs(z - focalDepth);
@@ -96,13 +96,13 @@ void main()
 			
 			vec2 sample_pos = sample_disc(state);
 			sample_pos = sample_pos * disc_radius;
-			vec3 sample_pos_ws = texture(gPosition, texcoord + sample_pos).rgb;
+			vec3 sample_pos_ws = texture(gPosition, exTexcoord + sample_pos).rgb;
 			float sample_z = (ViewMatrix * vec4(sample_pos_ws, 1.0)).z;
 			if(sample_pos_ws == vec3(0,0,0)){
 				sample_z = 999999999;
 			}
 			if (z <= sample_z + 100){
-				vec4 sample_color = vec4(texture(gBloom, texcoord + sample_pos).rgb , 1.0);
+				vec4 sample_color = vec4(texture(gBloom, exTexcoord + sample_pos).rgb , 1.0);
 				
 				color_sum += sample_color;
 				num_valid++;

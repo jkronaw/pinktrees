@@ -1,8 +1,8 @@
 #version 330 core
 
-layout (location = 0) in vec3 position;
+layout (location = 0) in vec3 inPosition;
 
-out vec3 texCoord;
+out vec3 exTexcoord;
 
 uniform SharedMatrices
 {
@@ -12,7 +12,7 @@ uniform SharedMatrices
 
 void main()
 {
-	texCoord = position;
+	exTexcoord = inPosition;
 	mat3 viewMatrixNoTranslation = mat3(ViewMatrix);
-    gl_Position = ProjectionMatrix * vec4(viewMatrixNoTranslation * position, 1.0);
+    gl_Position = ProjectionMatrix * vec4(viewMatrixNoTranslation * inPosition, 1.0);
 }

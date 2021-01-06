@@ -2,7 +2,7 @@
 
 layout (location = 0) out vec4 outBloom;
 
-in vec2 texcoord;
+in vec2 exTexcoord;
 
 uniform sampler2D gShaded;
 
@@ -10,7 +10,7 @@ void main()
 {
     // bloom separation
 
-    vec3 color = texture(gShaded, texcoord).rgb;
+    vec3 color = texture(gShaded, exTexcoord).rgb;
     //vec3 threshold = vec3(0.5126, 0.4152, 0.352);
     vec3 threshold = vec3(0.0126, 0.0152, 1.52);
     float brightness = dot(color, threshold);
