@@ -2,6 +2,8 @@
 #include "pbrmodel.h"
 #include "skybox.h"
 
+#include "meshfactory.h"
+
 using namespace engine;
 
 class MyApp : public App
@@ -16,6 +18,7 @@ class MyApp : public App
 	Matrix3 oldCameraViewMatrixInversed;
 
 	SceneGraph* sceneGraph;
+
 	Quad2D* quad;
 	Skybox* skybox;
 
@@ -121,6 +124,7 @@ class MyApp : public App
 	void start() override
 	{
 
+
 		models[0] = new PBRModel();
 		models[1] = new PBRModel();
 		models[2] = new PBRModel();
@@ -139,18 +143,17 @@ class MyApp : public App
 		quad = new Quad2D();
 		
 		skybox = new Skybox();
-		skybox->load("assets/cubemaps/palermo");
+		//skybox->loadCubemapFromDiskSingleFiles("assets/cubemaps/palermo");
+		skybox->loadCubemapFromDiskHDR("assets/hdris/crosswalk_2k.hdr");
 
 		Camera* camera = new Camera(1);
+		sceneGraph->setCamera(camera);
 
 		camera->lookAt(
 			Vector3(0, 0, 5),
 			Vector3(0, 0, 1),
 			Vector3(0, 1, 0)
 		);
-
-		sceneGraph->setCamera(camera);
-
 		updateProjection();
 
 		try
@@ -493,8 +496,12 @@ class MyApp : public App
 int main(int argc, char* argv[])
 {
 	Engine& engine = Engine::getInstance();
-	engine.setApp(new MyApp());
+
+	MyApp* myApp = new MyApp();
+	engine.setApp(myApp);
 	engine.start();
 	engine.run();
+	delete myApp;
+
 	exit(EXIT_SUCCESS);
 }

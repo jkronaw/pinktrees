@@ -11,7 +11,9 @@ namespace engine {
 		Skybox();
 		~Skybox();
 
-		void load(const std::string& directoryName);
+		void setCubemap(TextureCubemap* cubemap);
+		void loadCubemapFromDiskSingleFiles(const std::string& directoryName);
+		void loadCubemapFromDiskHDR(const std::string& filename);
 		void draw(ShaderProgram* program) const;
 
 		// vertex shader layout

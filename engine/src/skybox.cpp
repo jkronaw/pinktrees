@@ -67,11 +67,24 @@ namespace engine {
         glDeleteVertexArrays(1, &vaoId);
     }
 
-    void Skybox::load(const std::string& directoryName)
+    void Skybox::setCubemap(TextureCubemap* cubemap)
     {
-        TextureCubeMap* cubemap = new TextureCubeMap();
-        cubemap->load(directoryName);
+        if (textureInfo != nullptr) delete textureInfo;
         textureInfo = new TextureInfo(GL_TEXTURE0, "cubemap", cubemap, nullptr);
+    }
+
+    void Skybox::loadCubemapFromDiskSingleFiles(const std::string& directoryName)
+    {
+        TextureCubemap* cubemap = new TextureCubemap();
+        cubemap->loadFromDiskSingleFiles(directoryName);
+        setCubemap(cubemap);
+    }
+
+    void Skybox::loadCubemapFromDiskHDR(const std::string& filename)
+    {
+        TextureCubemap* cubemap = new TextureCubemap();
+        cubemap->loadFromDiskHDR(filename);
+        setCubemap(cubemap);
     }
 
 	void Skybox::draw(ShaderProgram* program) const {

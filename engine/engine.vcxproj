@@ -19,6 +19,10 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\meshfactory.cpp" />
+    <None Include="shaders\equirectToCubemap.vert">
+      <FileType>Document</FileType>
+    </None>
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
@@ -44,6 +48,7 @@
     <ClCompile Include="src\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\meshfactory.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
     <ClInclude Include="src\imgui\imgui.h" />
     <ClInclude Include="src\imgui\imgui_impl_glfw.h" />
@@ -91,6 +96,7 @@
     <None Include="shaders\bloom_separation.frag" />
     <None Include="shaders\blur_horizontal.frag" />
     <None Include="shaders\blur_vertikal.frag" />
+    <None Include="shaders\equirectToCubemap.frag" />
     <None Include="shaders\GEO_fragment.frag" />
     <None Include="shaders\GEO_vertex.vert" />
     <None Include="shaders\LIGHT_fragment.frag" />

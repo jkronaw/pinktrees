@@ -8,7 +8,7 @@ namespace engine
 {
 	class Texture;
 	class Texture2D;
-	class TextureCubeMap;
+	class TextureCubemap;
 	struct TextureInfo;
 	class Sampler;
 
@@ -33,12 +33,23 @@ namespace engine
 		void createFromColorRGB(Vector3 color);
 	};
 
-	class TextureCubeMap : public Texture
+	class TextureHDR : public Texture
 	{
 	public:
 		void bind() override;
 		void unbind() override;
-		void load(const std::string& directoryName);
+		void load(const std::string& filename);
+	};
+
+	class TextureCubemap : public Texture
+	{
+	public:
+		void bind() override;
+		void unbind() override;
+		void loadFromDiskSingleFiles(const std::string& directoryName);
+		void loadFromDiskHDR(const std::string& filename);
+	private:
+		void setupEmpty(int cubeSidelength);
 	};
 
 	struct TextureInfo
@@ -49,7 +60,7 @@ namespace engine
 		Sampler* sampler = nullptr;
 
 		TextureInfo(GLenum unit, const std::string& uniformName, Texture* texture, Sampler* sampler);
-		void updateShader(ShaderProgram* program);
+		void updateShader(ShaderProgram* program) const;
 		void unbindSampler();
 	};
 

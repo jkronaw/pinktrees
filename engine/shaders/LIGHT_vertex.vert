@@ -1,5 +1,4 @@
 #version 330 core
-
 layout (location = 0) in vec3 inPosition; // positions of the 2d quad corners
 
 out vec2 exTexcoord;

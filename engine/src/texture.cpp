@@ -3,6 +3,11 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+#include "meshfactory.h"
+
 namespace engine
 {
 	Texture::Texture() { glGenTextures(1, &id); }
@@ -98,8 +103,35 @@ namespace engine
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	void TextureCubeMap::bind() { glBindTexture(GL_TEXTURE_CUBE_MAP, id); }
-	void TextureCubeMap::unbind() { glBindTexture(GL_TEXTURE_CUBE_MAP, id); }
+	void TextureHDR::bind() { glBindTexture(GL_TEXTURE_2D, id); }
+	void TextureHDR::unbind() { glBindTexture(GL_TEXTURE_2D, 0); }
+
+	void TextureHDR::load(const std::string& filename)
+	{
+		int width, height, channels;
+		stbi_set_flip_vertically_on_load(true);
+		float* data = stbi_loadf(filename.c_str(), &width, &height, &channels, 0);
+
+		if (data == nullptr)
+		{
+			throw FileCouldNotBeOpenedException(filename.c_str());
+		}
+
+		glBindTexture(GL_TEXTURE_2D, id);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, width, height, 0, GL_RGB, GL_FLOAT, data);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+		stbi_image_free(data);
+	}
+
+	void TextureCubemap::bind() { glBindTexture(GL_TEXTURE_CUBE_MAP, id); }
+	void TextureCubemap::unbind() { glBindTexture(GL_TEXTURE_CUBE_MAP, id); }
 
 	const GLenum CUBEMAP_TEXTURES[6] = {
 		GL_TEXTURE_CUBE_MAP_POSITIVE_X, GL_TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -113,7 +145,7 @@ namespace engine
 		"pz", "nz"
 	};
 
-	void TextureCubeMap::load(const std::string& directoryName)
+	void TextureCubemap::loadFromDiskSingleFiles(const std::string& directoryName)
 	{
 		glBindTexture(GL_TEXTURE_CUBE_MAP, id);
 
@@ -142,9 +174,100 @@ namespace engine
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 
+	void TextureCubemap::loadFromDiskHDR(const std::string& filename)
+	{
+		const unsigned int INTERNAL_CUBEMAP_SIDELENGTH = 512;
+
+		TextureHDR* hdr = new TextureHDR();
+		hdr->load(filename);
+		TextureInfo* hdrInfo = new TextureInfo(GL_TEXTURE0, "equirectangularMap", hdr, nullptr);
+
+		setupEmpty(INTERNAL_CUBEMAP_SIDELENGTH);
+
+		unsigned int captureFbo, captureRbo;
+		glGenFramebuffers(1, &captureFbo);
+		glGenRenderbuffers(1, &captureRbo);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, captureRbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, INTERNAL_CUBEMAP_SIDELENGTH, INTERNAL_CUBEMAP_SIDELENGTH);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRbo);
+
+		const Matrix4 captureViews[] =
+		{
+		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3( 1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3( 0.0f,  1.0f,  0.0f), Vector3(0.0f,  0.0f,  1.0f)),
+		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3( 0.0f, -1.0f,  0.0f), Vector3(0.0f,  0.0f, -1.0f)),
+		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3( 0.0f,  0.0f,  1.0f), Vector3(0.0f, -1.0f,  0.0f)),
+		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3( 0.0f,  0.0f, -1.0f), Vector3(0.0f, -1.0f,  0.0f))
+		};
+
+		ShaderProgram* program = new ShaderProgram();
+		program->init("shaders/equirectToCubemap.vert", "shaders/equirectToCubemap.frag");
+		program->link();
+
+		program->use();
+
+		hdrInfo->updateShader(program);
+
+		Matrix4 projectionMatrix = Matrix4::CreatePerspectiveProjection(M_PI / 2, 1.0f, 0.1f, 10.0f);
+		program->setUniform("ProjectionMatrix", projectionMatrix);
+
+		// change global OpenGL settings
+		int oldViewport[4];
+		glGetIntegerv(GL_VIEWPORT, oldViewport);
+		glViewport(0, 0, INTERNAL_CUBEMAP_SIDELENGTH, INTERNAL_CUBEMAP_SIDELENGTH);
+		glCullFace(GL_FRONT);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
+		for (unsigned int i = 0; i < 6; ++i)
+		{
+			program->setUniform("ViewMatrix", captureViews[i]);
+
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, id, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			Mesh* cube = MeshFactory::createCube();
+			cube->setup();
+			cube->draw();
+		}
+
+		// restore global OpenGL settings
+		glViewport(0, 0, oldViewport[2], oldViewport[3]);
+		glCullFace(GL_BACK);
+
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		program->unuse();
+
+		delete hdr;
+		delete hdrInfo;
+		delete program;
+	}
+
+	void TextureCubemap::setupEmpty(int cubeSidelength)
+	{
+		glBindTexture(GL_TEXTURE_CUBE_MAP, id);
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+		for (unsigned int i = 0; i < 6; i++)
+		{
+			glTexImage2D(CUBEMAP_TEXTURES[i], 0, GL_RGB16F, cubeSidelength, cubeSidelength, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
+		}
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	}
+
 	TextureInfo::TextureInfo(GLenum unit, const std::string& uniformName, Texture* texture, Sampler* sampler) : unit(unit), uniformName(uniformName), texture(texture), sampler(sampler) {}
 
-	void TextureInfo::updateShader(ShaderProgram* program)
+	void TextureInfo::updateShader(ShaderProgram* program) const
 	{
 		glActiveTexture(unit);
 		texture->bind();
