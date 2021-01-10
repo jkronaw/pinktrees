@@ -123,8 +123,6 @@ class MyApp : public App
 
 	void start() override
 	{
-
-
 		models[0] = new PBRModel();
 		models[1] = new PBRModel();
 		models[2] = new PBRModel();

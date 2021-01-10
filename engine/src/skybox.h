@@ -25,8 +25,6 @@ namespace engine {
 		GLuint vboId = -1;
 
 		TextureInfo* textureInfo = nullptr;
-
-		ShaderProgram* program = nullptr;
 	};
 }
 

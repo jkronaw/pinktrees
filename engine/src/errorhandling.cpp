@@ -49,11 +49,14 @@ namespace engine
 
 	static void error(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 	{
-		std::cerr << "GL ERROR:" << std::endl;
-		std::cerr << "  source:     " << errorSource(source) << std::endl;
-		std::cerr << "  type:       " << errorType(type) << std::endl;
-		std::cerr << "  severity:   " << errorSeverity(severity) << std::endl;
-		std::cerr << "  debug call: " << std::endl << message << std::endl << std::endl;
+		if (severity != GL_DEBUG_SEVERITY_NOTIFICATION)
+		{
+			std::cerr << "GL ERROR:" << std::endl;
+			std::cerr << "  source:     " << errorSource(source) << std::endl;
+			std::cerr << "  type:       " << errorType(type) << std::endl;
+			std::cerr << "  severity:   " << errorSeverity(severity) << std::endl;
+			std::cerr << "  debug call: " << std::endl << message << std::endl << std::endl;
+		}
 	}
 
 	void setupErrorCallback()

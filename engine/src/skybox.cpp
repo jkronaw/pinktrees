@@ -45,6 +45,9 @@ namespace engine {
         Vector3( 1.0f, -1.0f,  1.0f)
     };
 
+    // static variable
+    ShaderProgram* program = nullptr;
+
 	Skybox::Skybox(const Camera* camera) {
 		glGenVertexArrays(1, &vaoId);
 		glBindVertexArray(vaoId);
