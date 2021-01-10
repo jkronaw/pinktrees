@@ -21,6 +21,7 @@ class MyApp : public App
 
 	Camera* camera;
 	Quad2D* quad;
+
 	Skybox* skybox;
 
 	ShaderProgram* geoProgram;
@@ -154,10 +155,9 @@ class MyApp : public App
 		//skybox->loadCubemapFromDiskSingleFiles("assets/cubemaps/palermo");
 		skybox->loadCubemapFromDiskHDR("assets/hdris/Bryant_Park_2k.hdr");
 
-		//TextureCubemap* irradianceMap = new TextureCubemap();
-		//irradianceMap->convoluteFromCubemap(skybox->getCubemap());
-
-		//skybox->setCubemap(irradianceMap);
+		TextureCubemap* irradianceMap = new TextureCubemap();
+		irradianceMap->convoluteFromCubemap(skybox->getCubemap());
+		TextureInfo* irradianceMapInfo = new TextureInfo(GL_TEXTURE10, "irradianceMap", irradianceMap, nullptr);
 
 		try
 		{
@@ -178,6 +178,7 @@ class MyApp : public App
 			lightProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
 			lightProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
 			lightProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
+			irradianceMapInfo->updateShader(lightProgram);
 			lightProgram->unuse();
 
 			dofProgram = new ShaderProgram();
