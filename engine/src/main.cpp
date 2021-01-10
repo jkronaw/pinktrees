@@ -24,7 +24,6 @@ class MyApp : public App
 	Skybox* skybox;
 
 	ShaderProgram* geoProgram;
-	ShaderProgram* skyboxProgram;
 	ShaderProgram* lightProgram;
 	ShaderProgram* bloomSeparationProgram;
 	ShaderProgram* dofProgram;
@@ -142,10 +141,6 @@ class MyApp : public App
 		root->setDrawable(models[0]);
 
 		quad = new Quad2D();
-		
-		skybox = new Skybox();
-		//skybox->loadCubemapFromDiskSingleFiles("assets/cubemaps/palermo");
-		skybox->loadCubemapFromDiskHDR("assets/hdris/crosswalk_2k.hdr");
 
 		camera = new Camera(0);
 
@@ -154,7 +149,12 @@ class MyApp : public App
 			Vector3(0, 0, 1),
 			Vector3(0, 1, 0)
 		);
+
 		updateProjection();
+
+		skybox = new Skybox(camera);
+		//skybox->loadCubemapFromDiskSingleFiles("assets/cubemaps/palermo");
+		skybox->loadCubemapFromDiskHDR("assets/hdris/crosswalk_2k.hdr");
 
 		try
 		{
@@ -163,11 +163,6 @@ class MyApp : public App
 			geoProgram->link();
 			geoProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
 			sceneGraph->getRoot()->setShaderProgram(geoProgram);
-
-			skyboxProgram = new ShaderProgram();
-			skyboxProgram->init("shaders/skybox.vert", "shaders/skybox.frag");
-			skyboxProgram->link();
-			skyboxProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
 
 			lightProgram = new ShaderProgram();
 			lightProgram->init("shaders/LIGHT_vertex.vert", "shaders/LIGHT_fragment.frag");
@@ -378,9 +373,7 @@ class MyApp : public App
 		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, engine.windowWidth, engine.windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboShaded);
 
-		skyboxProgram->use();
-		skybox->draw(skyboxProgram);
-		skyboxProgram->unuse();
+		skybox->draw();
 
 		if (useBloom)
 			bloomExposure = 0.2;

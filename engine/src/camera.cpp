@@ -23,7 +23,7 @@ namespace engine
 		glDeleteBuffers(1, &uboId);
 	}
 
-	GLuint Camera::getUboBP()
+	GLuint Camera::getUboBP() const
 	{
 		return uboBP;
 	}

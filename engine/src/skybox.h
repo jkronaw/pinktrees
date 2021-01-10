@@ -1,28 +1,32 @@
 #pragma once
 
-#include "drawable.h"
-
+#include "camera.h"
 #include "texture.h"
 
 namespace engine {
-	class Skybox : public IDrawable
+	class Skybox
 	{
 	public:
-		Skybox();
+		Skybox(const Camera* camera);
 		~Skybox();
+
+		void enableToneMapping();
+		void disableToneMapping();
 
 		void setCubemap(TextureCubemap* cubemap);
 		void loadCubemapFromDiskSingleFiles(const std::string& directoryName);
 		void loadCubemapFromDiskHDR(const std::string& filename);
-		void draw(ShaderProgram* program) const;
+		void draw() const;
 
-		// vertex shader layout
+		// vertex attributes
 		static const GLuint POSITIONS = 0;
 	private:
 		GLuint vaoId = -1;
 		GLuint vboId = -1;
 
 		TextureInfo* textureInfo = nullptr;
+
+		ShaderProgram* program = nullptr;
 	};
 }
 

@@ -12,7 +12,7 @@ namespace engine
 		Camera(GLuint uboBP);
 		~Camera();
 
-		GLuint getUboBP();
+		GLuint getUboBP() const;
 
 		void bind();
 
