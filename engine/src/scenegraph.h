@@ -19,13 +19,9 @@ namespace engine
 		SceneGraph();
 		~SceneGraph();
 
-		Camera* getCamera();
-		void setCamera(Camera* camera);
-
 		SceneNode* getRoot();
 		void draw();
 	private:
-		Camera* camera = nullptr;
 		SceneNode* root;
 	};
 

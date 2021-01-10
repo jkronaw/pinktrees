@@ -12,19 +12,8 @@ namespace engine
 		delete root;
 	}
 
-	Camera* SceneGraph::getCamera()
-	{
-		return camera;
-	}
-
-	void SceneGraph::setCamera(Camera* camera)
-	{
-		this->camera = camera;
-	}
-
 	void SceneGraph::draw()
 	{
-		if (camera != nullptr) camera->bind();
 		root->draw();
 	}
 

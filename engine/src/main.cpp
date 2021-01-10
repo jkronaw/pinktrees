@@ -19,6 +19,7 @@ class MyApp : public App
 
 	SceneGraph* sceneGraph;
 
+	Camera* camera;
 	Quad2D* quad;
 	Skybox* skybox;
 
@@ -53,7 +54,7 @@ class MyApp : public App
 	{
 		float aspectRatio = engine.windowWidth / (float)engine.windowHeight;
 		// M_PI / 3 is aproximately 60 degrees FOV
-		sceneGraph->getCamera()->setPerspective(M_PI / 3, aspectRatio, 0.1, 50);
+		camera->setPerspective(M_PI / 3, aspectRatio, 0.1, 50);
 	}
 
 	void windowCloseCallback() override
@@ -111,8 +112,8 @@ class MyApp : public App
 		{
 			mouseStartingPos = mouseCurrentPos;
 
-			oldCameraViewMatrix = sceneGraph->getCamera()->getViewMatrix();
-			oldCameraViewMatrixInversed = sceneGraph->getCamera()->getViewMatrixInversed();
+			oldCameraViewMatrix = camera->getViewMatrix();
+			oldCameraViewMatrixInversed = camera->getViewMatrixInversed();
 		}
 	}
 
@@ -146,8 +147,7 @@ class MyApp : public App
 		//skybox->loadCubemapFromDiskSingleFiles("assets/cubemaps/palermo");
 		skybox->loadCubemapFromDiskHDR("assets/hdris/crosswalk_2k.hdr");
 
-		Camera* camera = new Camera(1);
-		sceneGraph->setCamera(camera);
+		camera = new Camera(0);
 
 		camera->lookAt(
 			Vector3(0, 0, 5),
@@ -161,13 +161,13 @@ class MyApp : public App
 			geoProgram = new ShaderProgram();
 			geoProgram->init("shaders/GEO_vertex.vert", "shaders/GEO_fragment.frag");
 			geoProgram->link();
-			geoProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+			geoProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
 			sceneGraph->getRoot()->setShaderProgram(geoProgram);
 
 			skyboxProgram = new ShaderProgram();
 			skyboxProgram->init("shaders/skybox.vert", "shaders/skybox.frag");
 			skyboxProgram->link();
-			skyboxProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+			skyboxProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
 
 			lightProgram = new ShaderProgram();
 			lightProgram->init("shaders/LIGHT_vertex.vert", "shaders/LIGHT_fragment.frag");
@@ -185,7 +185,7 @@ class MyApp : public App
 			dofProgram = new ShaderProgram();
 			dofProgram->init("shaders/LIGHT_vertex.vert", "shaders/DOF.frag");
 			dofProgram->link();
-			dofProgram->setUniformBlockBinding("SharedMatrices", sceneGraph->getCamera()->getUboBP());
+			dofProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
 
 			dofProgram->use();
 			dofProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
@@ -249,8 +249,6 @@ class MyApp : public App
 
 	void update(double elapsedSecs) override
 	{
-		Camera* camera = sceneGraph->getCamera();
-
 		if (engine.getMouseButton(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) // camera rotation using mouse
 		{
 			Vector2 diff = mouseCurrentPos - mouseStartingPos;
@@ -277,6 +275,8 @@ class MyApp : public App
 			Matrix4 out = camera->getViewMatrix() * translationMatrix;
 			camera->setViewMatrix(out);
 		}
+
+		camera->bind();
 
 		if (useBloom) {
 			int multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1 : 1;
