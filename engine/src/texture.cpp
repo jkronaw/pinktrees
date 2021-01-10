@@ -174,6 +174,16 @@ namespace engine
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 	}
 
+	const Matrix4 CAPTURE_VIEW_MATRICES[] =
+	{
+	   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3(1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+	   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
+	   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3(0.0f,  1.0f,  0.0f), Vector3(0.0f,  0.0f,  1.0f)),
+	   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3(0.0f, -1.0f,  0.0f), Vector3(0.0f,  0.0f, -1.0f)),
+	   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3(0.0f,  0.0f,  1.0f), Vector3(0.0f, -1.0f,  0.0f)),
+	   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3(0.0f,  0.0f, -1.0f), Vector3(0.0f, -1.0f,  0.0f))
+	};
+
 	void TextureCubemap::loadFromDiskHDR(const std::string& filename)
 	{
 		const unsigned int INTERNAL_CUBEMAP_SIDELENGTH = 512;
@@ -193,16 +203,6 @@ namespace engine
 		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, INTERNAL_CUBEMAP_SIDELENGTH, INTERNAL_CUBEMAP_SIDELENGTH);
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRbo);
 
-		const Matrix4 captureViews[] =
-		{
-		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3( 1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
-		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3(-1.0f,  0.0f,  0.0f), Vector3(0.0f, -1.0f,  0.0f)),
-		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3( 0.0f,  1.0f,  0.0f), Vector3(0.0f,  0.0f,  1.0f)),
-		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3( 0.0f, -1.0f,  0.0f), Vector3(0.0f,  0.0f, -1.0f)),
-		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3( 0.0f,  0.0f,  1.0f), Vector3(0.0f, -1.0f,  0.0f)),
-		   Matrix4::CreateLookAt(Vector3(0.0f, 0.0f, 0.0f), Vector3( 0.0f,  0.0f, -1.0f), Vector3(0.0f, -1.0f,  0.0f))
-		};
-
 		ShaderProgram* program = new ShaderProgram();
 		program->init("shaders/equirectToCubemap.vert", "shaders/equirectToCubemap.frag");
 		program->link();
@@ -220,16 +220,17 @@ namespace engine
 		glViewport(0, 0, INTERNAL_CUBEMAP_SIDELENGTH, INTERNAL_CUBEMAP_SIDELENGTH);
 		glCullFace(GL_FRONT);
 
+		Mesh* cube = MeshFactory::createCube();
+		cube->setup();
+
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
 		for (unsigned int i = 0; i < 6; ++i)
 		{
-			program->setUniform("ViewMatrix", captureViews[i]);
+			program->setUniform("ViewMatrix", CAPTURE_VIEW_MATRICES[i]);
 
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, id, 0);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			Mesh* cube = MeshFactory::createCube();
-			cube->setup();
 			cube->draw();
 		}
 
@@ -242,9 +243,72 @@ namespace engine
 
 		program->unuse();
 
+		delete cube;
 		delete hdr;
 		delete hdrInfo;
 		delete program;
+	}
+
+	void TextureCubemap::convoluteFromCubemap(TextureCubemap* cubemap)
+	{
+		const unsigned int INTERNAL_CUBEMAP_SIDELENGTH = 128;
+
+		setupEmpty(INTERNAL_CUBEMAP_SIDELENGTH);
+
+		unsigned int captureFbo, captureRbo;
+		glGenFramebuffers(1, &captureFbo);
+		glGenRenderbuffers(1, &captureRbo);
+
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
+		glBindRenderbuffer(GL_RENDERBUFFER, captureRbo);
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, INTERNAL_CUBEMAP_SIDELENGTH, INTERNAL_CUBEMAP_SIDELENGTH);
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRbo);
+
+		ShaderProgram* program = new ShaderProgram();
+		program->init("shaders/equirectToCubemap.vert", "shaders/cubemapConvolution.frag");
+		program->link();
+
+		program->use();
+
+		TextureInfo* cubemapInfo = new TextureInfo(GL_TEXTURE0, "cubemap", cubemap, nullptr);
+		cubemapInfo->updateShader(program);
+
+		Matrix4 projectionMatrix = Matrix4::CreatePerspectiveProjection(M_PI / 2, 1.0f, 0.1f, 10.0f);
+		program->setUniform("ProjectionMatrix", projectionMatrix);
+
+		// change global OpenGL settings
+		int oldViewport[4];
+		glGetIntegerv(GL_VIEWPORT, oldViewport);
+		glViewport(0, 0, INTERNAL_CUBEMAP_SIDELENGTH, INTERNAL_CUBEMAP_SIDELENGTH);
+		glCullFace(GL_FRONT);
+
+		Mesh* cube = MeshFactory::createCube();
+		cube->setup();
+
+		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
+		for (unsigned int i = 0; i < 6; ++i)
+		{
+			program->setUniform("ViewMatrix", CAPTURE_VIEW_MATRICES[i]);
+
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, id, 0);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			cube->draw();
+		}
+
+		// restore global OpenGL settings
+		glViewport(0, 0, oldViewport[2], oldViewport[3]);
+		glCullFace(GL_BACK);
+
+		glBindRenderbuffer(GL_RENDERBUFFER, 0);
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+		program->unuse();
+
+		delete cube;
+		delete cubemapInfo;
+		delete program;
+	
 	}
 
 	void TextureCubemap::setupEmpty(int cubeSidelength)

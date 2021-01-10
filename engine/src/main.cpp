@@ -37,7 +37,7 @@ class MyApp : public App
 	float ao = 1;
 
 	float bloomExposure = 0.2f;
-	bool useBloom = true;
+	bool useBloom = false;
 
 	bool useDOF = false;
 	float focalDepth = 2.0f;
@@ -152,7 +152,12 @@ class MyApp : public App
 
 		skybox = new Skybox(camera);
 		//skybox->loadCubemapFromDiskSingleFiles("assets/cubemaps/palermo");
-		skybox->loadCubemapFromDiskHDR("assets/hdris/crosswalk_2k.hdr");
+		skybox->loadCubemapFromDiskHDR("assets/hdris/Bryant_Park_2k.hdr");
+
+		//TextureCubemap* irradianceMap = new TextureCubemap();
+		//irradianceMap->convoluteFromCubemap(skybox->getCubemap());
+
+		//skybox->setCubemap(irradianceMap);
 
 		try
 		{

@@ -13,7 +13,9 @@ namespace engine {
 		void enableToneMapping();
 		void disableToneMapping();
 
+		TextureCubemap* getCubemap() const;
 		void setCubemap(TextureCubemap* cubemap);
+
 		void loadCubemapFromDiskSingleFiles(const std::string& directoryName);
 		void loadCubemapFromDiskHDR(const std::string& filename);
 		void draw() const;

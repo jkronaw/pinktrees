@@ -48,6 +48,7 @@ namespace engine
 		void unbind() override;
 		void loadFromDiskSingleFiles(const std::string& directoryName);
 		void loadFromDiskHDR(const std::string& filename);
+		void convoluteFromCubemap(TextureCubemap* cubemap);
 	private:
 		void setupEmpty(int cubeSidelength);
 	};

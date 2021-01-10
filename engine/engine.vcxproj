@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\meshfactory.cpp" />
+    <None Include="shaders\cubemapConvolution.frag" />
     <None Include="shaders\equirectToCubemap.vert">
       <FileType>Document</FileType>
     </None>
