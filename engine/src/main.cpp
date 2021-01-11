@@ -396,11 +396,6 @@ class MyApp : public App
 
 		skybox->draw();
 
-		if (useBloom)
-			bloomExposure = 0.2;
-		else
-			bloomExposure = 0.0;
-
 		// separate bright regions of shaded image and save into Pong FBO
 		if (useBloom) {
 			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
