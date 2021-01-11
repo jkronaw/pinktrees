@@ -138,6 +138,8 @@ namespace engine
 
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RG16F, INTERNAL_SIZE, INTERNAL_SIZE, 0, GL_RG, GL_FLOAT, 0);
 
+		unbind();
+
 		unsigned int captureFbo, captureRbo;
 		glGenFramebuffers(1, &captureFbo);
 		glGenRenderbuffers(1, &captureRbo);
@@ -169,8 +171,8 @@ namespace engine
 
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		unbind();
+		glDeleteFramebuffers(1, &captureFbo);
+		glDeleteRenderbuffers(1, &captureRbo);
 
 		delete quad;
 		delete program;
@@ -338,14 +340,16 @@ namespace engine
 			cube->draw();
 		}
 
+		program->unuse();
+
 		// restore global OpenGL settings
 		glViewport(0, 0, oldViewport[2], oldViewport[3]);
 		glCullFace(GL_BACK);
 
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		program->unuse();
+		glDeleteFramebuffers(1, &captureFbo);
+		glDeleteRenderbuffers(1, &captureRbo);
 
 		delete cube;
 		delete cubemapInfo;
@@ -413,14 +417,16 @@ namespace engine
 			}
 		}
 
+		program->unuse();
+
 		// restore global OpenGL settings
 		glViewport(0, 0, oldViewport[2], oldViewport[3]);
 		glCullFace(GL_BACK);
 
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		program->unuse();
+		glDeleteFramebuffers(1, &captureFbo);
+		glDeleteRenderbuffers(1, &captureRbo);
 
 		delete cube;
 		delete cubemapInfo;
