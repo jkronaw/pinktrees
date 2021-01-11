@@ -12,12 +12,13 @@ namespace engine
 	public:
 		Mesh() = default;
 		Mesh(std::vector<Vector3> vertices, std::vector<Vector2> texcoords, std::vector<Vector3> normals);
+		~Mesh();
 
 		void calculateTangents();
 		void setup();
 		void draw();
 
-		// vertex shader layout
+		// vertex attributes
 		static const GLuint VERTICES = 0;
 		static const GLuint TEXCOORDS = 1;
 		static const GLuint NORMALS = 2;
@@ -28,7 +29,8 @@ namespace engine
 		std::vector<Vector3> normals;
 		std::vector<Vector3> tangents;
 
-		GLuint vaoId = -1;
+		GLuint vaoId = 0;
+		GLuint vboIds[4] = { 0 };
 	};
 }
 

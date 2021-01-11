@@ -11,6 +11,12 @@ namespace engine
 		this->normals = normals;
 	}
 
+	Mesh::~Mesh()
+	{
+		glDeleteBuffers(4, vboIds);
+		glDeleteVertexArrays(1, &vaoId);
+	}
+
 	void Mesh::calculateTangents()
 	{
 		if (normals.empty() || texcoords.empty())
@@ -54,12 +60,10 @@ namespace engine
 
 	void Mesh::setup()
 	{
-		GLuint vboIds[4];
-
 		glGenVertexArrays(1, &vaoId);
 		glBindVertexArray(vaoId);
 		{
-			glGenBuffers(4, vboIds);
+			glGenBuffers(1, vboIds + 0);
 			glBindBuffer(GL_ARRAY_BUFFER, vboIds[0]);
 			glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vector3), &vertices[0], GL_STATIC_DRAW);
 			glEnableVertexAttribArray(VERTICES);
@@ -67,6 +71,7 @@ namespace engine
 
 			if (texcoords.size() > 0)
 			{
+				glGenBuffers(1, vboIds + 1);
 				glBindBuffer(GL_ARRAY_BUFFER, vboIds[1]);
 				glBufferData(GL_ARRAY_BUFFER, texcoords.size() * sizeof(Vector2), &texcoords[0], GL_STATIC_DRAW);
 				glEnableVertexAttribArray(TEXCOORDS);
@@ -74,6 +79,7 @@ namespace engine
 			}
 			if (normals.size() > 0)
 			{
+				glGenBuffers(1, vboIds + 2);
 				glBindBuffer(GL_ARRAY_BUFFER, vboIds[2]);
 				glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(Vector3), &normals[0], GL_STATIC_DRAW);
 				glEnableVertexAttribArray(NORMALS);
@@ -81,6 +87,7 @@ namespace engine
 			}
 			if (tangents.size() > 0)
 			{
+				glGenBuffers(1, vboIds + 3);
 				glBindBuffer(GL_ARRAY_BUFFER, vboIds[3]);
 				glBufferData(GL_ARRAY_BUFFER, tangents.size() * sizeof(Vector3), &tangents[0], GL_STATIC_DRAW);
 				glEnableVertexAttribArray(TANGENTS);
@@ -90,7 +97,6 @@ namespace engine
 
 		glBindVertexArray(0);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDeleteBuffers(4, vboIds);
 	}
 
 	void Mesh::draw()

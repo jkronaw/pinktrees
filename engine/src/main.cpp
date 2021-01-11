@@ -20,7 +20,7 @@ class MyApp : public App
 	SceneGraph* sceneGraph;
 
 	Camera* camera;
-	Quad2D* quad;
+	Mesh* quad;
 
 	Skybox* skybox;
 
@@ -142,7 +142,7 @@ class MyApp : public App
 		SceneNode* root = sceneGraph->getRoot();
 		root->setDrawable(models[0]);
 
-		quad = new Quad2D();
+		quad = MeshFactory::createQuad();
 
 		camera = new Camera(0);
 

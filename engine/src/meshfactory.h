@@ -7,6 +7,7 @@ namespace engine {
 	{
 	public:
 		static Mesh* createCube();
+		static Mesh* createQuad();
 	private:
 		MeshFactory();
 	};

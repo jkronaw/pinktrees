@@ -1,6 +1,7 @@
 #pragma once
 
 #include "camera.h"
+#include "mesh.h"
 #include "texture.h"
 
 namespace engine {
@@ -23,9 +24,7 @@ namespace engine {
 		// vertex attributes
 		static const GLuint POSITIONS = 0;
 	private:
-		GLuint vaoId = -1;
-		GLuint vboId = -1;
-
+		Mesh* cube = nullptr;
 		TextureInfo* textureInfo = nullptr;
 	};
 }

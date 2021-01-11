@@ -45,7 +45,6 @@
     <ClCompile Include="src\matrix.cpp" />
     <ClCompile Include="src\meshloading.cpp" />
     <ClCompile Include="src\pbrmodel.cpp" />
-    <ClCompile Include="src\quad2d.cpp" />
     <ClCompile Include="src\quaternion.cpp" />
     <ClCompile Include="src\scenegraph.cpp" />
     <ClCompile Include="src\shader.cpp" />
@@ -73,7 +72,6 @@
     <ClInclude Include="src\geometrybuffer.h" />
     <ClInclude Include="src\matrix.h" />
     <ClInclude Include="src\meshloading.h" />
-    <ClInclude Include="src\quad2d.h" />
     <ClInclude Include="src\quaternion.h" />
     <ClInclude Include="src\scenegraph.h" />
     <ClInclude Include="src\shader.h" />

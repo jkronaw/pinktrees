@@ -6,7 +6,6 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-#include "quad2d.h"
 #include "meshfactory.h"
 
 namespace engine
@@ -159,7 +158,7 @@ namespace engine
 		glGetIntegerv(GL_VIEWPORT, oldViewport);
 		glViewport(0, 0, INTERNAL_SIZE, INTERNAL_SIZE);
 
-		Quad2D* quad = new Quad2D();
+		Mesh* quad = MeshFactory::createQuad();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
 
@@ -266,7 +265,6 @@ namespace engine
 		glCullFace(GL_FRONT);
 
 		Mesh* cube = MeshFactory::createCube();
-		cube->setup();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
 		for (unsigned int i = 0; i < 6; ++i)
@@ -329,7 +327,6 @@ namespace engine
 		glCullFace(GL_FRONT);
 
 		Mesh* cube = MeshFactory::createCube();
-		cube->setup();
 
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
 		for (unsigned int i = 0; i < 6; ++i)
@@ -391,8 +388,6 @@ namespace engine
 		glCullFace(GL_FRONT);
 
 		Mesh* cube = MeshFactory::createCube();
-		cube->setup();
-
 
 		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
 
