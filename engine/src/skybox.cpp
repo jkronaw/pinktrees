@@ -43,8 +43,6 @@ namespace engine {
 
 	void Skybox::setCubemap(TextureCubemap* cubemap)
 	{
-		disableToneMapping();
-
 		if (textureInfo != nullptr) delete textureInfo;
 		textureInfo = new TextureInfo(GL_TEXTURE0, "cubemap", cubemap, nullptr);
 	}

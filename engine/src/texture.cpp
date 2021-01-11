@@ -230,7 +230,7 @@ namespace engine
 	}
 	void TextureCubemap::loadFromDiskHDR(const std::string& filename) const
 	{
-		const unsigned int INTERNAL_CUBEMAP_SIDELENGTH = 512;
+		const unsigned int INTERNAL_CUBEMAP_SIDELENGTH = 1024;
 
 		Texture2D* hdr = new Texture2D();
 		hdr->loadFromDiskHDR(filename);
