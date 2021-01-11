@@ -2,6 +2,7 @@
 
 layout (location = 0) out vec4 outColor;
 
+// texcoord from screen space quad
 in vec2 exTexcoord;
 
 // GBuffer
@@ -14,11 +15,14 @@ uniform sampler2D gTexCoord;
 uniform vec2 gScreenSize;
 uniform vec3 viewPos;
 
-uniform samplerCube irradianceMap;
-
-// lights
+// direct lighting
 const vec3 lightPositions[4] = { vec3(2, 3, 2), vec3(-2, 3,2), vec3(2, 3, -2), vec3(-2, 3, -2) };
 const vec3 lightColors[4] = { vec3(15), vec3(15), vec3(15), vec3(15) };
+
+// image based lighting
+uniform samplerCube irradianceMap;
+uniform samplerCube prefilterMap;
+uniform sampler2D   brdfLUT;
 
 const float PI = 3.14159265359;
 
@@ -90,7 +94,6 @@ void main()
     F0 = mix(F0, albedo, metallic);
 
     // direct lighting
-
     vec3 L_0 = vec3(0.0);
 
     if(position != vec3(0,0,0)){
@@ -126,11 +129,24 @@ void main()
         }
     }
 
-    vec3 kS = fresnelSchlickRoughness(max(dot(n, w_0), 0.0), F0, roughness); 
+    // image based lighting
+    vec3 F = fresnelSchlickRoughness(max(dot(n, w_0), 0.0), F0, roughness);
+
+    vec3 R = reflect(-w_0, n);  
+
+    vec3 kS = F;
     vec3 kD = 1.0 - kS;
+    kD *= 1.0 - metallic;	  
+  
     vec3 irradiance = texture(irradianceMap, n).rgb;
     vec3 diffuse    = irradiance * albedo;
-    vec3 ambient    = (kD * diffuse) * ao;    
+  
+    const float MAX_REFLECTION_LOD = 4.0;
+    vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;   
+    vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(n, w_0), 0.0), roughness)).rg;
+    vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+  
+    vec3 ambient = (kD * diffuse + specular) * ao; 
 
     vec3 color = L_0 + ambient;
 
@@ -140,6 +156,6 @@ void main()
     // gamma correct
     color = pow(color, vec3(1.0/2.2));
 
+//    color = texture(brdfLUT, exTexcoord).rgb;
     outColor = vec4(color, 1.0);
-
 }

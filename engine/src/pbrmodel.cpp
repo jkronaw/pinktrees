@@ -29,20 +29,20 @@ namespace engine {
 		mesh->setup();
 
 		loadedTextures[0] = new Texture2D();
-		loadedTextures[0]->load(directoryName + "/albedo.png");
+		loadedTextures[0]->loadFromDisk(directoryName + "/albedo.png");
 
 		loadedTextures[1] = new Texture2D();
-		loadedTextures[1]->load(directoryName + "/normal.png");
+		loadedTextures[1]->loadFromDisk(directoryName + "/normal.png");
 
 		loadedTextures[2] = new Texture2D();
-		loadedTextures[2]->load(directoryName + "/roughness.png");
+		loadedTextures[2]->loadFromDisk(directoryName + "/roughness.png");
 
 
 		loadedTextures[3] = new Texture2D();
-		loadedTextures[3]->load(directoryName + "/metallic.png");
+		loadedTextures[3]->loadFromDisk(directoryName + "/metallic.png");
 
 		loadedTextures[4] = new Texture2D();
-		loadedTextures[4]->load(directoryName + "/ao.png");
+		loadedTextures[4]->loadFromDisk(directoryName + "/ao.png");
 
 		useLoadedTextures();
 	}

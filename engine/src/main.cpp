@@ -31,6 +31,7 @@ class MyApp : public App
 	ShaderProgram* horizontalBlurProgram;
 	ShaderProgram* vertikalBlurProgram;
 	ShaderProgram* bloomProgram;
+	ShaderProgram* debugProgram;
 
 	bool useTextures = true;
 	float roughness = 0.5;
@@ -57,6 +58,7 @@ class MyApp : public App
 		camera->setPerspective(M_PI / 3, aspectRatio, 0.1, 50);
 	}
 
+	#pragma region Callbacks
 	void windowCloseCallback() override
 	{
 		engine.stop();
@@ -121,6 +123,7 @@ class MyApp : public App
 	{
 		focalDepth += 0.5 * yoffset;
 	}
+#pragma endregion
 
 	void start() override
 	{
@@ -156,8 +159,18 @@ class MyApp : public App
 		skybox->loadCubemapFromDiskHDR("assets/hdris/Bryant_Park_2k.hdr");
 
 		TextureCubemap* irradianceMap = new TextureCubemap();
-		irradianceMap->convoluteFromCubemap(skybox->getCubemap());
-		TextureInfo* irradianceMapInfo = new TextureInfo(GL_TEXTURE10, "irradianceMap", irradianceMap, nullptr);
+		irradianceMap->convoluteIrradianceMapFromCubemap(skybox->getCubemap());
+		TextureInfo* irradianceMapInfo = new TextureInfo(GL_TEXTURE8, "irradianceMap", irradianceMap, nullptr);
+
+		TextureCubemap* prefilterMap = new TextureCubemap();
+		prefilterMap->convolutePrefilterMapFromCubemap(skybox->getCubemap());
+		TextureInfo* prefilterMapInfo = new TextureInfo(GL_TEXTURE9, "prefilterMap", prefilterMap, nullptr);
+
+		Texture2D* brdfLUT = new Texture2D();
+		brdfLUT->createBRDFLookupTexture();
+		TextureInfo* brdfLUTinfo = new TextureInfo(GL_TEXTURE10, "brdfLUT", brdfLUT, nullptr);
+
+		gbuffer.initialize(engine.windowWidth, engine.windowHeight);
 
 		try
 		{
@@ -179,6 +192,8 @@ class MyApp : public App
 			lightProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
 			lightProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
 			irradianceMapInfo->updateShader(lightProgram);
+			prefilterMapInfo->updateShader(lightProgram);
+			brdfLUTinfo->updateShader(lightProgram);
 			lightProgram->unuse();
 
 			dofProgram = new ShaderProgram();
@@ -215,14 +230,16 @@ class MyApp : public App
 			bloomProgram = new ShaderProgram();
 			bloomProgram->init("shaders/LIGHT_vertex.vert", "shaders/bloom_blend.frag");
 			bloomProgram->link();
+
+			debugProgram = new ShaderProgram();
+			debugProgram->init("shaders/LIGHT_vertex.vert", "shaders/debug.frag");
+			debugProgram->link();
 		}
 		catch (Exception e)
 		{
 			std::cout << e.message << std::endl;
 			exit(EXIT_FAILURE);
 		}
-
-		gbuffer.initialize(engine.windowWidth, engine.windowHeight);
 	}
 
 	void showGbuffer() {

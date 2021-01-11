@@ -19,8 +19,11 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\prefilterMapConvolution.frag">
+      <FileType>Document</FileType>
+    </None>
     <ClCompile Include="src\meshfactory.cpp" />
-    <None Include="shaders\cubemapConvolution.frag" />
+    <None Include="shaders\irradianceMapConvolution.frag" />
     <None Include="shaders\equirectToCubemap.vert">
       <FileType>Document</FileType>
     </None>
@@ -119,6 +122,22 @@
     <Content Include="dependencies\glfw\*.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\brdfLUT.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\debug.frag">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='release|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='release|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='debug|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='debug|Win32'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='debug|x64'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='debug|x64'">4.0</ShaderModel>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='release|Win32'">Geometry</ShaderType>
+      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='release|Win32'">4.0</ShaderModel>
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

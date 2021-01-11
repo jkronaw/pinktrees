@@ -41,10 +41,9 @@ namespace engine {
 		// Geometry FBO
 		glGenFramebuffers(1, &fboGeo);
 		glBindFramebuffer(GL_FRAMEBUFFER, fboGeo);
-		float texturesSize = sizeof(texturesGeo) / sizeof(texturesGeo[0]);
 		glGenTextures(GBuffer::GB_NUMBER_OF_TEXTURES, texturesGeo);
 		glGenTextures(1, &depthTexture);
-
+		
 		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
 			glBindTexture(GL_TEXTURE_2D, texturesGeo[i]);
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
@@ -52,7 +51,7 @@ namespace engine {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, texturesGeo[i], 0);
 		}
-
+		
 		glBindTexture(GL_TEXTURE_2D, depthTexture);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT24, windowWidth, windowHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, depthTexture, 0);
@@ -111,6 +110,8 @@ namespace engine {
 				GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texturesPingPong[i], 0
 			);
 		}
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void GBuffer::setBufferToRead(GB_TEX_TYPE texType) {

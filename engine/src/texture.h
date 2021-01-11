@@ -19,38 +19,33 @@ namespace engine
 	public:
 		Texture();
 		~Texture();
-		virtual void bind() = 0;
-		virtual void unbind() = 0;
+		virtual void bind() const = 0;
+		virtual void unbind() const = 0;
 	};
 
 	class Texture2D : public Texture
 	{
 	public:
-		void bind() override;
-		void unbind() override;
-		void load(const std::string& filename);
-		void createFromColorGrayscale(float color);
-		void createFromColorRGB(Vector3 color);
-	};
-
-	class TextureHDR : public Texture
-	{
-	public:
-		void bind() override;
-		void unbind() override;
-		void load(const std::string& filename);
+		void bind() const override;
+		void unbind() const override;
+		void loadFromDisk(const std::string& filename) const;
+		void loadFromDiskHDR(const std::string& filename) const;
+		void createFromColorGrayscale(float color) const;
+		void createFromColorRGB(const Vector3& color) const;
+		void createBRDFLookupTexture() const;
 	};
 
 	class TextureCubemap : public Texture
 	{
 	public:
-		void bind() override;
-		void unbind() override;
-		void loadFromDiskSingleFiles(const std::string& directoryName);
-		void loadFromDiskHDR(const std::string& filename);
-		void convoluteFromCubemap(TextureCubemap* cubemap);
+		void bind() const override;
+		void unbind() const override;
+		void loadFromDiskSingleFiles(const std::string& directoryName) const;
+		void loadFromDiskHDR(const std::string& filename) const;
+		void convoluteIrradianceMapFromCubemap(TextureCubemap* cubemap) const;
+		void convolutePrefilterMapFromCubemap(TextureCubemap* cubemap) const;
 	private:
-		void setupEmpty(int cubeSidelength);
+		void setupEmpty(int cubeSidelength, bool useMipmaps = false) const;
 	};
 
 	struct TextureInfo
@@ -62,7 +57,7 @@ namespace engine
 
 		TextureInfo(GLenum unit, const std::string& uniformName, Texture* texture, Sampler* sampler);
 		void updateShader(ShaderProgram* program) const;
-		void unbindSampler();
+		void unbindSampler() const;
 	};
 
 	class Sampler
@@ -72,8 +67,8 @@ namespace engine
 		Sampler();
 	public:
 		~Sampler();
-		virtual void bind(GLuint unit);
-		virtual void unbind(GLuint unit);
+		virtual void bind(GLuint unit) const;
+		virtual void unbind(GLuint unit) const;
 	};
 
 	class NearestSampler : public Sampler { public: NearestSampler(); };
