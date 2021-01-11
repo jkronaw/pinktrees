@@ -278,6 +278,8 @@ namespace engine
 
 			cube->draw();
 		}
+		
+		program->unuse();
 
 		// restore global OpenGL settings
 		glViewport(0, 0, oldViewport[2], oldViewport[3]);
@@ -285,8 +287,8 @@ namespace engine
 
 		glBindRenderbuffer(GL_RENDERBUFFER, 0);
 		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-		program->unuse();
+		glDeleteFramebuffers(1, &captureFbo);
+		glDeleteRenderbuffers(1, &captureRbo);
 
 		delete cube;
 		delete hdr;
