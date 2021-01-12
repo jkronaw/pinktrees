@@ -374,99 +374,100 @@ class MyApp : public App
 		sceneGraph->draw();
 
 		// debug view of geometry buffer
-		if (showGbufferContent) {
+		if (showGbufferContent)
+		{
 			showGbuffer();
-			return;
 		}
+		else {
+			// lighting pass
+			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboShaded);
+			for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
+				glActiveTexture(GL_TEXTURE0 + i);
+				glBindTexture(GL_TEXTURE_2D, gbuffer.texturesGeo[GBuffer::GB_POSITION + i]);
+			}
 
-		// lighting pass
-		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboShaded);
-		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesGeo[GBuffer::GB_POSITION + i]);
-		}
-
-		// draw objects
-		lightProgram->use();
-		lightProgram->setUniform("viewPos", translation);
-		quad->draw();
-		lightProgram->unuse();
-
-		// draw Skybox
-		glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.fboGeo);
-		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuffer.fboShaded);
-		glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, engine.windowWidth, engine.windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboShaded);
-
-		skybox->draw();
-
-		// separate bright regions of shaded image and save into Pong FBO
-		if (useBloom) {
-			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
-			bloomSeparationProgram->use();
+			// draw objects
+			lightProgram->use();
+			lightProgram->setUniform("viewPos", translation);
 			quad->draw();
-			bloomSeparationProgram->unuse();
+			lightProgram->unuse();
 
-			// bloom: apply blur to bright regions
-			bool firstBlurIteration = true;
-			int numBlurIterations = 20;
-			for (int i = 0; i < numBlurIterations; i++) {
+			// draw Skybox
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.fboGeo);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuffer.fboShaded);
+			glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, engine.windowWidth, engine.windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboShaded);
 
-				// horizontal blur kernel: Read from Pong Texture, Write into Ping FBO (Texture)
-				glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[0]);
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
-				horizontalBlurProgram->use();
-				quad->draw();
-				horizontalBlurProgram->unuse();
+			skybox->draw();
 
-				// vertikal blur kernel: Read from Ping Texture, Write into Pong FBO (Texture)
+			// separate bright regions of shaded image and save into Pong FBO
+			if (useBloom) {
 				glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[0]);
-				vertikalBlurProgram->use();
+				glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
+				bloomSeparationProgram->use();
 				quad->draw();
-				vertikalBlurProgram->unuse();
+				bloomSeparationProgram->unuse();
+
+				// bloom: apply blur to bright regions
+				bool firstBlurIteration = true;
+				int numBlurIterations = 20;
+				for (int i = 0; i < numBlurIterations; i++) {
+
+					// horizontal blur kernel: Read from Pong Texture, Write into Ping FBO (Texture)
+					glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[0]);
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
+					horizontalBlurProgram->use();
+					quad->draw();
+					horizontalBlurProgram->unuse();
+
+					// vertikal blur kernel: Read from Ping Texture, Write into Pong FBO (Texture)
+					glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
+					glActiveTexture(GL_TEXTURE0);
+					glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[0]);
+					vertikalBlurProgram->use();
+					quad->draw();
+					vertikalBlurProgram->unuse();
+				}
 			}
+
+			// add blurred regions (currently in Pong FBO) to original image and save result in Bloom FBO
+			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboBloom);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
+			bloomProgram->use();
+			bloomProgram->setUniform("exposure", bloomExposure);
+			quad->draw();
+			bloomProgram->unuse();
+
+			// post process: DOF 
+			dofProgram->use();
+			dofProgram->setUniform("useDOF", useDOF);
+			dofProgram->setUniform("viewPos", translation);
+			dofProgram->setUniform("focalDepth", focalDepth);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
+				glActiveTexture(GL_TEXTURE0 + i);
+				glBindTexture(GL_TEXTURE_2D, gbuffer.texturesGeo[GBuffer::GB_POSITION + i]);
+			}
+			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 0);
+			glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
+			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 1);
+			glBindTexture(GL_TEXTURE_2D, gbuffer.textureBloom);
+
+			glEnable(GL_BLEND);
+			glBlendEquation(GL_FUNC_ADD);
+			glBlendFunc(GL_ONE, GL_ONE);
+
+			quad->draw();
+			dofProgram->unuse();
+
+			glDisable(GL_BLEND);
 		}
-
-		// add blurred regions (currently in Pong FBO) to original image and save result in Bloom FBO
-		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboBloom);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
-		bloomProgram->use();
-		bloomProgram->setUniform("exposure", bloomExposure);
-		quad->draw();
-		bloomProgram->unuse();
-		
-		// post process: DOF 
-		dofProgram->use();
-		dofProgram->setUniform("useDOF", useDOF);
-		dofProgram->setUniform("viewPos", translation);
-		dofProgram->setUniform("focalDepth", focalDepth);
-
-		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-		for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
-			glActiveTexture(GL_TEXTURE0 + i);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesGeo[GBuffer::GB_POSITION + i]);
-		}
-		glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 0);
-		glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
-		glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 1);
-		glBindTexture(GL_TEXTURE_2D, gbuffer.textureBloom);
-
-		glEnable(GL_BLEND);
-		glBlendEquation(GL_FUNC_ADD);
-		glBlendFunc(GL_ONE, GL_ONE);
-
-		quad->draw();
-		dofProgram->unuse();
-
-		glDisable(GL_BLEND);
 
 		handleImGui();
 
