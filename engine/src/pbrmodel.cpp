@@ -1,5 +1,7 @@
 #include "pbrmodel.h"
 
+#include "model.h"
+
 namespace engine {
 
 	PBRModel::PBRModel()
@@ -21,10 +23,13 @@ namespace engine {
 
 	void PBRModel::load(std::string directoryName)
 	{
-		WavefrontLoader loaderGround;
-		loaderGround.loadFile((directoryName + std::string("/mesh.obj")).c_str());
+		Model model(directoryName + std::string("/mesh.obj"));
+		
 
-		mesh = loaderGround.getObjects()[0];
+
+		//loaderGround.loadFile((directoryName + std::string("/mesh.obj")).c_str());
+
+		mesh = model.meshes[0];
 		mesh->calculateTangents();
 		mesh->setup();
 

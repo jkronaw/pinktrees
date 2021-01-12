@@ -1,6 +1,6 @@
 #pragma once
 
-#include "meshloading.h"
+#include "mesh.h"
 
 namespace engine {
 	class MeshFactory

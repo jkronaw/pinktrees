@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "drawable.h"
-#include "meshloading.h"
+#include "mesh.h"
 #include "texture.h"
 
 namespace engine {

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\model.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
@@ -36,7 +37,6 @@
     <ClCompile Include="src\geometrybuffer.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\matrix.cpp" />
-    <ClCompile Include="src\meshloading.cpp" />
     <ClCompile Include="src\pbrmodel.cpp" />
     <ClCompile Include="src\quaternion.cpp" />
     <ClCompile Include="src\scenegraph.cpp" />
@@ -45,6 +45,7 @@
     <ClCompile Include="src\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\model.h" />
     <ClInclude Include="src\mesh.h" />
     <ClInclude Include="src\meshfactory.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
@@ -64,7 +65,6 @@
     <ClInclude Include="src\exceptions.h" />
     <ClInclude Include="src\geometrybuffer.h" />
     <ClInclude Include="src\matrix.h" />
-    <ClInclude Include="src\meshloading.h" />
     <ClInclude Include="src\quaternion.h" />
     <ClInclude Include="src\scenegraph.h" />
     <ClInclude Include="src\shader.h" />

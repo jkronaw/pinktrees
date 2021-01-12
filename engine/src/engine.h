@@ -12,7 +12,6 @@
 
 #include "scenegraph.h"
 #include "shader.h"
-#include "meshloading.h"
 
 #include "geometrybuffer.h"
 
