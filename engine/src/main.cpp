@@ -4,6 +4,8 @@
 
 #include "meshfactory.h"
 
+#include "assimp/Importer.hpp"
+
 using namespace engine;
 
 class MyApp : public App

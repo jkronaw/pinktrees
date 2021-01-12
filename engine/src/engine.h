@@ -5,7 +5,6 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include <assimp/config.h>
 
 #include "vector.h"
 #include "matrix.h"

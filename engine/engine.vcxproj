@@ -92,7 +92,8 @@
       <FileType>Document</FileType>
     </CopyFileToFolders>
     <CopyFileToFolders Include="dependencies\assimp\lib\assimp-vc142-mt.dll">
-      <DeploymentContent>true</DeploymentContent>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='release|x64'">true</DeploymentContent>
       <FileType>Document</FileType>
     </CopyFileToFolders>
     <None Include="imgui.ini" />
