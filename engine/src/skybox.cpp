@@ -67,6 +67,8 @@ namespace engine {
 
 	void Skybox::draw() const {
 		program->use();
+		
+		textureInfo->updateShader(program);
 
 		glCullFace(GL_FRONT);
 		cube->draw();

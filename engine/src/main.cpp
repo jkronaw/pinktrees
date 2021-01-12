@@ -24,6 +24,9 @@ class MyApp : public App
 
 	Skybox* skybox;
 
+	// for debugging output
+	TextureCubemap* environmentMap, *irradianceMap, *prefilterMap;
+
 	ShaderProgram* geoProgram;
 	ShaderProgram* lightProgram;
 	ShaderProgram* bloomSeparationProgram;
@@ -44,7 +47,7 @@ class MyApp : public App
 	bool useDOF = false;
 	float focalDepth = 2.0f;
 
-	bool showDemoWindow = true;
+	bool showDemoWindow = false;
 	bool showGbufferContent = false;
 
 	PBRModel* models[4];
@@ -156,13 +159,14 @@ class MyApp : public App
 
 		skybox = new Skybox(camera);
 		//skybox->loadCubemapFromDiskSingleFiles("assets/cubemaps/palermo");
-		skybox->loadCubemapFromDiskHDR("assets/hdris/Bryant_Park_2k.hdr");
+		skybox->loadCubemapFromDiskHDR("assets/hdris/kiaradawn4k.hdr");
+		environmentMap = skybox->getCubemap();
 
-		TextureCubemap* irradianceMap = new TextureCubemap();
+		irradianceMap = new TextureCubemap();
 		irradianceMap->convoluteIrradianceMapFromCubemap(skybox->getCubemap());
 		TextureInfo* irradianceMapInfo = new TextureInfo(GL_TEXTURE8, "irradianceMap", irradianceMap, nullptr);
 
-		TextureCubemap* prefilterMap = new TextureCubemap();
+		prefilterMap = new TextureCubemap();
 		prefilterMap->convolutePrefilterMapFromCubemap(skybox->getCubemap());
 		TextureInfo* prefilterMapInfo = new TextureInfo(GL_TEXTURE9, "prefilterMap", prefilterMap, nullptr);
 
@@ -482,16 +486,36 @@ class MyApp : public App
 		// ImGui demo window (toggle with I)
 		if (showDemoWindow) ImGui::ShowDemoWindow(&showDemoWindow);
 
-		// window "Rendering options"
 		{
-			ImGui::Begin("Rendering Options");
+			ImGui::Begin("Post Processing Effects");
 
 			ImGui::Checkbox("Enable Bloom", &useBloom);
 			ImGui::Checkbox("Enable DOF", &useDOF);
 
+			ImGui::End();
+		}
+
+		{
+			ImGui::Begin("Physically Based Rendering Options");
+
+			ImGui::Text("Displayed Cube Map:");
+			static int map = 0;
+			ImGui::RadioButton("Environment map (default)", &map, 0);
+			ImGui::RadioButton("Irradiance map (for debugging)", &map, 1);
+			ImGui::RadioButton("Prefilter map (max mipmap level, for debugging)", &map, 2);
+
+			switch (map)
+			{
+			case 0: skybox->setCubemap(environmentMap); break;
+			case 1: skybox->setCubemap(irradianceMap); break;
+			case 2: skybox->setCubemap(prefilterMap); break;
+			default: break;
+			}
+
 			ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f);
 			ImGui::SliderFloat("Metallic", &metallic, 0.0f, 1.0f);
 			ImGui::SliderFloat("AO", &ao, 0.0f, 1.0f);
+
 
 			ImGui::End();
 		}
