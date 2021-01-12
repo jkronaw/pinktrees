@@ -516,7 +516,6 @@ class MyApp : public App
 			ImGui::SliderFloat("Metallic", &metallic, 0.0f, 1.0f);
 			ImGui::SliderFloat("AO", &ao, 0.0f, 1.0f);
 
-
 			ImGui::End();
 		}
 

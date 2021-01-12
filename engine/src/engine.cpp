@@ -79,7 +79,9 @@ namespace engine {
 
 		auto mouseCallback = [](GLFWwindow* w, double x, double y)
 		{
-			static_cast<App*>(glfwGetWindowUserPointer(w))->mouseCallback(Vector2(x, y));
+			if (!ImGui::GetIO().WantCaptureMouse) {
+				static_cast<App*>(glfwGetWindowUserPointer(w))->mouseCallback(Vector2(x, y));
+			}
 		};
 		glfwSetCursorPosCallback(window, mouseCallback);
 
