@@ -2,7 +2,7 @@
 
 namespace engine
 {
-	void Model::loadModel(std::string path)
+	Model::Model(const std::string& path)
 	{
 		Assimp::Importer import;
 		const aiScene* scene = import.ReadFile(path, aiProcess_Triangulate);
@@ -13,13 +13,14 @@ namespace engine
 			return;
 		}
 
-		std::string directory = path.substr(0, path.find_last_of('/'));
+		std::string directory = path.substr(0, path.find_last_of('/') + 1);
 
 		for (int i = 0; i < scene->mNumMaterials; i++)
 		{
 			aiMaterial* material = scene->mMaterials[i];
-			aiString aiStr;
+			if (std::strcmp(material->GetName().C_Str(), "DefaultMaterial") == 0) continue;
 
+			aiString aiStr;
 			for (int i = 0; i < NR_TEXTURE_TYPES; i++)
 			{
 				aiTextureType aiTextureType = toAiTextureType(static_cast<TextureType>(i));
@@ -36,9 +37,9 @@ namespace engine
 					texture->loadFromDisk(path);
 				}
 			}
-
-			processNode(scene->mRootNode, scene);
 		}
+
+		processNode(scene->mRootNode, scene);
 	}
 
 	void Model::processNode(aiNode* node, const aiScene* scene)
@@ -46,8 +47,11 @@ namespace engine
 		// process all the node's meshes (if any)
 		for (unsigned int i = 0; i < node->mNumMeshes; i++)
 		{
-			aiMesh* mesh = scene->mMeshes[node->mMeshes[i]];
-			meshes.push_back(new Mesh(mesh, scene, loadedTextures));
+			aiMesh* tMesh = scene->mMeshes[node->mMeshes[i]];
+			Mesh* mesh = new Mesh(tMesh, scene, loadedTextures);
+			mesh->calculateTangents();
+			mesh->setup();
+			meshes.push_back(mesh);
 		}
 
 		// then do the same for each of its children
@@ -57,11 +61,11 @@ namespace engine
 		}
 	}
 
-	void Model::draw(ShaderProgram* program)
+	void Model::draw(ShaderProgram* program) const
 	{
 		for (Mesh* mesh : meshes)
 		{
-			mesh->draw();		
+			mesh->draw(program);
 		}
 	}
 }

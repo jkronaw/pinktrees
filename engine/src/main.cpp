@@ -1,5 +1,5 @@
 #include "engine.h"
-#include "pbrmodel.h"
+#include "model.h"
 #include "skybox.h"
 
 #include "meshfactory.h"
@@ -36,7 +36,7 @@ class MyApp : public App
 	ShaderProgram* bloomProgram;
 	ShaderProgram* debugProgram;
 
-	bool useTextures = true;
+	//bool useTextures = true;
 	float roughness = 0.5;
 	float metallic = 0.4;
 	float ao = 1;
@@ -50,7 +50,7 @@ class MyApp : public App
 	bool showDemoWindow = false;
 	bool showGbufferContent = false;
 
-	PBRModel* models[4];
+	Model* models[4];
 
 	GBuffer gbuffer;
 
@@ -95,14 +95,14 @@ class MyApp : public App
 		if (key == GLFW_KEY_4 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[3]);
 
 		if (key == GLFW_KEY_T && action == GLFW_PRESS) {
-			useTextures = !useTextures;
+		/*	useTextures = !useTextures;
 			std::cout << "Use Textures: " << (useTextures ? "Yes" : "No") << std::endl;
 			if (useTextures) {
 				for (PBRModel* m : models)
 				{
 					m->useLoadedTextures();
 				}
-			}
+			}*/
 		}
 		if (key == GLFW_KEY_B && action == GLFW_PRESS) useBloom = !useBloom;
 		if (key == GLFW_KEY_D && action == GLFW_PRESS) useDOF = !useDOF;
@@ -130,16 +130,10 @@ class MyApp : public App
 
 	void start() override
 	{
-		models[0] = new PBRModel();
-		models[1] = new PBRModel();
-		models[2] = new PBRModel();
-		models[3] = new PBRModel();
-
-		//models[0]->load(std::string("assets/models/cube/cube.obj"));
-		models[0]->load(std::string("assets/models/lantern"));
-		//models[1]->load(std::string("assets/models/sphere"));
-		//models[2]->load(std::string("assets/models/teapot"));
-		//models[3]->load(std::string("assets/models/car"));
+		models[0] = new Model("assets/models/lantern/lantern.obj");
+		models[1] = new Model("assets/models/sphere/sphere.obj");
+		models[2] = new Model("assets/models/teapot/teapot.obj");
+		models[3] = new Model("assets/models/car/car.obj");
 
 		sceneGraph = new SceneGraph();
 
@@ -310,7 +304,7 @@ class MyApp : public App
 			}	
 		}
 	
-		if (!useTextures) {
+		/*if (!useTextures) {
 			int multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1 : 1;
 
 			if (engine.getKey(GLFW_KEY_R) == GLFW_PRESS)
@@ -335,9 +329,9 @@ class MyApp : public App
 				if (ao > 1) ao = 1;
 				if (ao < 0) ao = 0;
 				std::cout << "Ambient Occlusion: " << ao << std::endl;
-			}
+			}*/
 
-			if (!useTextures) {
+			/*if (!useTextures) {
 				for (PBRModel* m : models)
 				{
 					Texture2D* texAlbedo = new Texture2D();
@@ -360,8 +354,8 @@ class MyApp : public App
 					texAO->createFromColorGrayscale(ao);
 					m->activeTextures[4]->texture = texAO;
 				}
-			}
-		}
+			}*/
+		//}
 
 		Matrix4 viewMatrix = camera->getViewMatrix();
 		Matrix3 viewMatrixInversed = camera->getViewMatrixInversed();
@@ -472,7 +466,7 @@ class MyApp : public App
 
 		handleImGui();
 
-		if (!useTextures) {
+		/*if (!useTextures) {
 			for (PBRModel* m : models)
 			{
 				for (int i = 0; i < 5; i++)
@@ -480,7 +474,7 @@ class MyApp : public App
 					delete m->activeTextures[i]->texture;
 				}
 			}
-		}
+		}*/
 	}
 
 	void handleImGui()

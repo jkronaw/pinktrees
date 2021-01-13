@@ -66,18 +66,23 @@ namespace engine
 					{
 					case ALBEDO:
 						albedoMap = loadedTextures.at(path);
+						textureInfos[i] = new TextureInfo(GL_TEXTURE0, "texAlbedo", albedoMap, nullptr);
 						break;
 					case NORMAL:
 						normalMap = loadedTextures.at(path);
+						textureInfos[i] = new TextureInfo(GL_TEXTURE1, "texNormal", normalMap, nullptr);
 						break;
 					case METALLIC:
 						metallicMap = loadedTextures.at(path);
+						textureInfos[i] = new TextureInfo(GL_TEXTURE2, "texMetallic", metallicMap, nullptr);
 						break;
 					case ROUGHNESS:
 						roughnessMap = loadedTextures.at(path);
+						textureInfos[i] = new TextureInfo(GL_TEXTURE3, "texRoughness", roughnessMap, nullptr);
 						break;
 					case AO:
 						aoMap = loadedTextures.at(path);
+						textureInfos[i] = new TextureInfo(GL_TEXTURE4, "texAO", aoMap, nullptr);
 						break;
 					default:
 						throw Exception("Should not happen");
@@ -159,11 +164,20 @@ namespace engine
 		glBindVertexArray(0);
 	}
 
-	void Mesh::draw()
+	void Mesh::draw(ShaderProgram* program)
 	{
+		for (TextureInfo* tInfo : textureInfos)
+		{
+			if (tInfo != nullptr) tInfo->updateShader(program);
+		}
+
 		glBindVertexArray(vaoId);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+
+		for (TextureInfo* tInfo : textureInfos) {
+			if (tInfo != nullptr) tInfo->unbindSampler();
+		}
 	}
 
 	aiTextureType toAiTextureType(TextureType textureType)
@@ -173,13 +187,13 @@ namespace engine
 		case ALBEDO:
 			return aiTextureType_DIFFUSE;
 		case NORMAL:
-			return aiTextureType_NORMALS;
+			return aiTextureType_HEIGHT;
 		case METALLIC:
-			return aiTextureType_METALNESS;
+			return aiTextureType_SPECULAR;
 		case ROUGHNESS:
-			return aiTextureType_DIFFUSE_ROUGHNESS;
+			return aiTextureType_SHININESS;
 		case AO:
-			return aiTextureType_AMBIENT_OCCLUSION;
+			return aiTextureType_AMBIENT;
 		default:
 			throw Exception("Should not happen");
 		}

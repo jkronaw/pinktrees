@@ -37,7 +37,6 @@
     <ClCompile Include="src\geometrybuffer.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\matrix.cpp" />
-    <ClCompile Include="src\pbrmodel.cpp" />
     <ClCompile Include="src\quaternion.cpp" />
     <ClCompile Include="src\scenegraph.cpp" />
     <ClCompile Include="src\shader.cpp" />
@@ -58,7 +57,6 @@
     <ClInclude Include="src\imgui\imstb_truetype.h" />
     <ClInclude Include="src\skybox.h" />
     <ClInclude Include="src\drawable.h" />
-    <ClInclude Include="src\pbrmodel.h" />
     <ClInclude Include="src\engine.h" />
     <ClInclude Include="src\errorhandling.h" />
     <ClInclude Include="src\camera.h" />

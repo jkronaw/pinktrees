@@ -44,7 +44,7 @@ namespace engine
 
 		void calculateTangents();
 		void setup();
-		void draw();
+		void draw(ShaderProgram* program = nullptr);
 
 		// vertex attributes
 		static const GLuint VERTICES = 0;
@@ -60,6 +60,8 @@ namespace engine
 		Texture2D* metallicMap;
 		Texture2D* roughnessMap;
 		Texture2D* aoMap;
+
+		TextureInfo* textureInfos[5] = { nullptr };
 
 		GLuint vaoId = 0;
 		GLuint vboId = 0;
