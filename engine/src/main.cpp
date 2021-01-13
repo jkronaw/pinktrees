@@ -426,7 +426,6 @@ class MyApp : public App
 					vertikalBlurProgram->unuse();
 				}
 			}
-
 			// add blurred regions (currently in Pong FBO) to original image and save result in Bloom FBO
 			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboBloom);
 			glActiveTexture(GL_TEXTURE0);
@@ -434,7 +433,12 @@ class MyApp : public App
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
 			bloomProgram->use();
-			bloomProgram->setUniform("exposure", bloomExposure);
+
+			if (useBloom)
+				bloomProgram->setUniform("exposure", bloomExposure);
+			else
+				bloomProgram->setUniform("exposure", 0.0f);
+
 			quad->draw();
 			bloomProgram->unuse();
 
@@ -487,7 +491,8 @@ class MyApp : public App
 
 			ImGui::Checkbox("Enable Bloom", &useBloom);
 			ImGui::Checkbox("Enable DOF", &useDOF);
-
+			ImGui::SliderFloat("Bloom Exposure", &bloomExposure, 0.0f, 1.0f);
+			ImGui::SliderFloat("Focal Depth", &focalDepth, -50.0f, 50.0f);
 			ImGui::End();
 		}
 
