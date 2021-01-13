@@ -23,12 +23,8 @@ namespace engine {
 
 	void PBRModel::load(std::string directoryName)
 	{
-		Model model(directoryName + std::string("/mesh.obj"));
+		Model model(directoryName + "/mesh.obj");
 		
-
-
-		//loaderGround.loadFile((directoryName + std::string("/mesh.obj")).c_str());
-
 		mesh = model.meshes[0];
 		mesh->calculateTangents();
 		mesh->setup();

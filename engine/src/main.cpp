@@ -135,10 +135,11 @@ class MyApp : public App
 		models[2] = new PBRModel();
 		models[3] = new PBRModel();
 
+		//models[0]->load(std::string("assets/models/cube/cube.obj"));
 		models[0]->load(std::string("assets/models/lantern"));
-		models[1]->load(std::string("assets/models/sphere"));
-		models[2]->load(std::string("assets/models/teapot"));
-		models[3]->load(std::string("assets/models/car"));
+		//models[1]->load(std::string("assets/models/sphere"));
+		//models[2]->load(std::string("assets/models/teapot"));
+		//models[3]->load(std::string("assets/models/car"));
 
 		sceneGraph = new SceneGraph();
 

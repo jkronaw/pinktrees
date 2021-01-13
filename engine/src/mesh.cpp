@@ -22,10 +22,8 @@ namespace engine
 		}
 	}
 
-	Mesh::Mesh(aiMesh* mesh, const aiScene* scene)
+	Mesh::Mesh(aiMesh* mesh, const aiScene* scene, const std::map<std::string, Texture2D*>& loadedTextures)
 	{
-		//std::vector<Texture> textures;
-
 		bool texcoordsAvailable = mesh->mTextureCoords[0];
 
 		for (unsigned int i = 0; i < mesh->mNumVertices; i++)
@@ -48,6 +46,43 @@ namespace engine
 			for (unsigned int j = 0; j < face.mNumIndices; j++)
 			{
 				indices.push_back(face.mIndices[j]);
+			}
+		}
+
+		if (mesh->mMaterialIndex >= 0)
+		{
+			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+			aiString aiStr;
+
+			for (int i = 0; i < NR_TEXTURE_TYPES; i++)
+			{
+				aiTextureType aiTextureType = toAiTextureType(static_cast<TextureType>(i));
+				if (material->GetTextureCount(aiTextureType) > 0)
+				{
+					material->GetTexture(aiTextureType, 0, &aiStr);
+					std::string path(aiStr.C_Str());
+
+					switch (i)
+					{
+					case ALBEDO:
+						albedoMap = loadedTextures.at(path);
+						break;
+					case NORMAL:
+						normalMap = loadedTextures.at(path);
+						break;
+					case METALLIC:
+						metallicMap = loadedTextures.at(path);
+						break;
+					case ROUGHNESS:
+						roughnessMap = loadedTextures.at(path);
+						break;
+					case AO:
+						aoMap = loadedTextures.at(path);
+						break;
+					default:
+						throw Exception("Should not happen");
+					}
+				}
 			}
 		}
 	}
@@ -129,5 +164,24 @@ namespace engine
 		glBindVertexArray(vaoId);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
+	}
+
+	aiTextureType toAiTextureType(TextureType textureType)
+	{
+		switch (textureType)
+		{
+		case ALBEDO:
+			return aiTextureType_DIFFUSE;
+		case NORMAL:
+			return aiTextureType_NORMALS;
+		case METALLIC:
+			return aiTextureType_METALNESS;
+		case ROUGHNESS:
+			return aiTextureType_DIFFUSE_ROUGHNESS;
+		case AO:
+			return aiTextureType_AMBIENT_OCCLUSION;
+		default:
+			throw Exception("Should not happen");
+		}
 	}
 }
