@@ -10,9 +10,9 @@ namespace engine
 	public:
 		Vector3 albedo;
 		Vector3 normal;
-		Vector3 metallic;
-		Vector3 roughness;
-		Vector3 ao;
+		float metallic;
+		float roughness;
+		float ao;
 
 		Texture2D* albedoMap;
 		Texture2D* normalMap;
@@ -25,5 +25,6 @@ namespace engine
 		Material(Texture2D* albedoMap, Texture2D* normalMap, Texture2D* roughnessMap, Texture2D* metallicMap, Texture2D* aoMap);
 		~Material();
 
+		void bind(ShaderProgram* program);
 	};
 }

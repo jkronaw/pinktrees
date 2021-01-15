@@ -1,4 +1,4 @@
-#include "Mesh.h"
+#include "mesh.h"
 
 #include "exceptions.h"
 
@@ -124,28 +124,7 @@ namespace engine
 	void Mesh::draw(ShaderProgram* program)
 	{	
 		if (material) {
-			// TODO: add checks if respective textures exist
-			glActiveTexture(GL_TEXTURE0);
-			material->albedoMap->bind();
-			program->setUniform("texAlbedo", 0);
-			glActiveTexture(GL_TEXTURE1);
-			material->normalMap->bind();
-			program->setUniform("texNormal", 1);
-			glActiveTexture(GL_TEXTURE2);
-			material->metallicMap->bind();
-			program->setUniform("texMetallic", 2);
-			glActiveTexture(GL_TEXTURE3);
-			material->roughnessMap->bind();
-			program->setUniform("texRoughness", 3);
-			glActiveTexture(GL_TEXTURE4);
-			material->aoMap->bind();
-			program->setUniform("texAO", 4);
-
-			program->setUniform("albedo", material->albedo);
-			program->setUniform("normal", material->normal);
-			program->setUniform("metallic", material->metallic);
-			program->setUniform("roughness", material->roughness);
-			program->setUniform("ao", material->ao);
+			material->bind(program);
 		}
 
 		glBindVertexArray(vaoId);
