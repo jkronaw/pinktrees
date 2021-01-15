@@ -1,6 +1,9 @@
+#include <sstream>
+
 #include "engine.h"
 #include "model.h"
 #include "skybox.h"
+#include "light.h"
 
 #include "postprocess.h"
 #include "meshfactory.h"
@@ -57,6 +60,8 @@ class MyApp : public App
 	ShadedBuffer shadedBuffer;
 	BloomBuffer bloomBuffer;
 	PingPongBuffer pingPongBuffer;
+
+	std::vector<Light> lights;
 
 	void updateProjection()
 	{
@@ -147,8 +152,10 @@ class MyApp : public App
 		models[3] = new Model("assets/models/car/car.obj");
 		models[4] = new Model("assets/models/tree/tree.obj");
 
-		sceneGraph = new SceneGraph();
+		lights.push_back(Light(Vector3(2.f, 3.f, 2.f), Vector3(1.f, 1.f, 1.f), 15.f));
+		lights.push_back(Light(Vector3(-2.f, 3.f, -2.f), Vector3(1.f, 1.f, 1.f), 15.f));
 
+		sceneGraph = new SceneGraph();
 		SceneNode* root = sceneGraph->getRoot();
 		root->setDrawable(models[0]);
 		root->setMatrix(Matrix4::CreateTranslation(0, -3, 0));
@@ -399,6 +406,19 @@ class MyApp : public App
 
 			// draw objects
 			lightProgram->use();
+			lightProgram->setUniform("lightCount", (int) lights.size());
+
+			// direct light sources
+			std::vector<Vector3> lightPositions;
+			std::vector<Vector3> lightColors;
+			for (int i = 0; i < lights.size(); i++)
+			{
+				lightPositions.push_back(lights[i].position);
+				lightColors.push_back(lights[i].color * lights[i].brightness);
+			}
+			lightProgram->setUniform("lightPositions", lightPositions);
+			lightProgram->setUniform("lightColors", lightColors);
+
 			lightProgram->setUniform("viewPos", translation);
 			quad->draw();
 			lightProgram->unuse();
@@ -497,6 +517,8 @@ class MyApp : public App
 		}*/
 	}
 
+	int selectedLight;
+
 	void handleImGui()
 	{
 		// ImGui demo window (toggle with I)
@@ -520,7 +542,7 @@ class MyApp : public App
 			ImGui::RadioButton("Environment map (default)", &map, 0);
 			ImGui::RadioButton("Irradiance map (for debugging)", &map, 1);
 			ImGui::RadioButton("Prefilter map (max mipmap level, for debugging)", &map, 2);
-
+			
 			switch (map)
 			{
 			case 0: skybox->setCubemap(environmentMap); break;
@@ -533,6 +555,32 @@ class MyApp : public App
 			ImGui::SliderFloat("Metallic", &metallic, 0.0f, 1.0f);
 			ImGui::SliderFloat("AO", &ao, 0.0f, 1.0f);
 
+
+			ImGui::Text("Direct Lights:");
+			static int selectedLight = 0;			
+			ImGui::DragFloat3("Light Position", (float*)&lights[selectedLight].position, 0.1, -15, 15);
+			ImGui::ColorEdit3("Color", (float*)&lights[selectedLight].color);
+			ImGui::DragFloat("Brightness", (float*)&lights[selectedLight].brightness, 0.1, 0, 100);
+			
+			if (ImGui::Button("Add Light")) { lights.push_back(Light(Vector3(), Vector3(1.f, 1.f, 1.f), 15.f)); }
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Remove Light") && lights.size() > 0) {
+				lights.erase(lights.begin() + selectedLight);
+				selectedLight = 0;
+			}
+
+			ImGui::BeginChild("Scrolling");			
+			for (int i = 0; i < lights.size(); i++)
+			{
+				std::stringstream ss;
+				ss << "Light " << i << std::endl;
+				if (ImGui::Selectable(ss.str().c_str(), selectedLight == i))
+					selectedLight = i;
+			}
+			ImGui::EndChild();
+			
 			ImGui::End();
 		}
 

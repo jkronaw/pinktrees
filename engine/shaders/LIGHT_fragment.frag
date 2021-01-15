@@ -16,8 +16,10 @@ uniform vec2 gScreenSize;
 uniform vec3 viewPos;
 
 // direct lighting
-const vec3 lightPositions[4] = { vec3(2, 3, 2), vec3(-2, 3,2), vec3(2, 3, -2), vec3(-2, 3, -2) };
-const vec3 lightColors[4] = { vec3(15), vec3(15), vec3(15), vec3(15) };
+#define MAX_LIGHT_COUNT 128
+uniform int lightCount;
+uniform vec3 lightPositions[MAX_LIGHT_COUNT];
+uniform vec3 lightColors[MAX_LIGHT_COUNT];
 
 // image based lighting
 uniform samplerCube irradianceMap;
@@ -98,7 +100,7 @@ void main()
 
     if(position != vec3(0,0,0)){
 
-        for(int i = 0; i < 4; ++i) 
+        for(int i = 0; i < lightCount; ++i) 
         {
             vec3 w_i = normalize(lightPositions[i] - position); // light vector
             vec3 h = normalize(w_0 + w_i); // halfway vector
