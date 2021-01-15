@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include "matrix.h"
 #include "exceptions.h"
 
@@ -19,6 +21,7 @@ namespace engine
 		GLuint getUniformLocation(const char*);
 		void setUniform(const char*, const Vector2&);
 		void setUniform(const char*, const Vector3&);
+		void setUniform(const char*, const std::vector<Vector3>);
 		void setUniform(const char*, const Vector4&);
 		void setUniform(const char*, const Matrix3&);
 		void setUniform(const char*, const Matrix4&);
