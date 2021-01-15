@@ -17,6 +17,8 @@ namespace engine
 
 	struct Vertex
 	{
+		Vertex() = default;
+		Vertex(Vector3 position, Vector2 texcoords, Vector3 normal);
 		Vector3 position;
 		Vector2 texcoords;
 		Vector3 normal;
@@ -38,7 +40,6 @@ namespace engine
 	public:
 		Mesh() = default;
 		Mesh(std::vector<Vertex> vertices);
-		Mesh(std::vector<Vector3> positions, std::vector<Vector2> texcoords, std::vector<Vector3> normals);
 		Mesh(aiMesh* mesh, const aiScene* scene, const std::map<std::string, Texture2D*>& loadedTextures);
 		~Mesh();
 

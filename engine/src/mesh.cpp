@@ -4,22 +4,17 @@
 
 namespace engine
 {
+	Vertex::Vertex(Vector3 position, Vector2 texcoords, Vector3 normal)
+	{
+		this->position = position;
+		this->texcoords = texcoords;
+		this->normal = normal;
+	}
+
 	Mesh::Mesh(std::vector<Vertex> vertices)
 	{
 		this->vertices = vertices;
-	}
-
-	Mesh::Mesh(std::vector<Vector3> positions, std::vector<Vector2> texcoords, std::vector<Vector3> normals)
-	{
-		for (int i = 0; i < positions.size(); i++)
-		{
-			Vertex v;
-			v.position = positions[i];
-			if (texcoords.size() > 0) v.texcoords = texcoords[i];
-			if (normals.size() > 0) v.normal = normals[i];
-			vertices.push_back(v);
-			indices.push_back(i);
-		}
+		for (int i = 0; i < vertices.size(); i++) { indices.push_back(i); }
 	}
 
 	Mesh::Mesh(aiMesh* mesh, const aiScene* scene, const std::map<std::string, Texture2D*>& loadedTextures)
