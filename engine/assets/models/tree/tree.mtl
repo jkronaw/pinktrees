@@ -1,0 +1,27 @@
+# Blender MTL File: 'uploads_files_2525751_Tree_Aesculus-hippocastanum.blend'
+# Material Count: 2
+
+newmtl Bark_Aesculus-hippocastanum
+Ns 20.249994
+Ka 1.000000 1.000000 1.000000
+Kd 0.500000 0.500000 0.500000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump bark_normal.png
+map_Kd bark_albedo.png
+
+
+newmtl Leaf_Aesculus-hippocastanum
+Ns 19.935012
+Ka 0.822222 0.822222 0.822222
+Kd 1.000000 1.000000 1.000000
+Ks 0.000000 0.000000 0.000000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 1
+map_Bump leaf_normal.png
+map_Kd leaf_albedo.png

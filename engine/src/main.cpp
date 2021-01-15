@@ -53,7 +53,7 @@ class MyApp : public App
 	bool showDemoWindow = false;
 	bool showGbufferContent = false;
 
-	Model* models[4];
+	Model* models[5];
 
 	GBuffer gbuffer;
 
@@ -98,6 +98,7 @@ class MyApp : public App
 		if (key == GLFW_KEY_2 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[1]);
 		if (key == GLFW_KEY_3 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[2]);
 		if (key == GLFW_KEY_4 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[3]);
+		if (key == GLFW_KEY_5 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[4]);
 
 		if (key == GLFW_KEY_T && action == GLFW_PRESS) {
 		/*	useTextures = !useTextures;
@@ -139,6 +140,7 @@ class MyApp : public App
 		models[1] = new Model("assets/models/sphere/sphere.obj");
 		models[2] = new Model("assets/models/teapot/teapot.obj");
 		models[3] = new Model("assets/models/car/car.obj");
+		models[4] = new Model("assets/models/tree/tree.obj");
 
 		lights.push_back(Light(Vector3(2.f, 3.f, 2.f), Vector3(1.f, 1.f, 1.f), 15.f));
 		lights.push_back(Light(Vector3(-2.f, 3.f, -2.f), Vector3(1.f, 1.f, 1.f), 15.f));
@@ -146,6 +148,7 @@ class MyApp : public App
 		sceneGraph = new SceneGraph();
 		SceneNode* root = sceneGraph->getRoot();
 		root->setDrawable(models[0]);
+		root->setMatrix(Matrix4::CreateTranslation(0, -3, 0));
 
 		quad = MeshFactory::createQuad();
 
