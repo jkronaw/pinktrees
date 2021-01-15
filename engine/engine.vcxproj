@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="src\postprocess.cpp" />
     <ClCompile Include="src\material.cpp" />
     <ClCompile Include="src\old_model.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
@@ -47,6 +48,7 @@
     <ClCompile Include="src\texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\postprocess.h" />
     <ClInclude Include="src\material.h" />
     <ClInclude Include="src\old_model.h" />
     <ClInclude Include="src\old_mesh.h" />

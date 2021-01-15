@@ -25,15 +25,15 @@ namespace engine {
 
 		void setBufferToRead(GB_TEX_TYPE texType);
 
-		GLuint fboGeo;
-		GLuint fboShaded;
-		GLuint fboBloom;
-		GLuint fboPingPong[2];
-		GLuint texturesGeo[GB_NUMBER_OF_TEXTURES];
-		GLuint textureShaded;
-		GLuint textureBloom;
+		GLuint fbo;
+		//GLuint fboShaded;
+		//GLuint fboBloom;
+		//GLuint fboPingPong[2];
+		GLuint texture[GB_NUMBER_OF_TEXTURES];
+		//GLuint textureShaded;
+		//GLuint textureBloom;
 		GLuint depthTexture;
-		GLuint shadedDepthTexture;
-		GLuint texturesPingPong[2];
+		//GLuint shadedDepthTexture;
+		//GLuint texturesPingPong[2];
 	};
 }

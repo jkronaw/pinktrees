@@ -2,6 +2,7 @@
 #include "model.h"
 #include "skybox.h"
 
+#include "postprocess.h"
 #include "meshfactory.h"
 
 using namespace engine;
@@ -53,6 +54,9 @@ class MyApp : public App
 	Model* models[5];
 
 	GBuffer gbuffer;
+	ShadedBuffer shadedBuffer;
+	BloomBuffer bloomBuffer;
+	PingPongBuffer pingPongBuffer;
 
 	void updateProjection()
 	{
@@ -76,6 +80,12 @@ class MyApp : public App
 		engine.windowHeight = newHeight;
 		gbuffer.deleteBufferData();
 		gbuffer.initialize(newWidth, newHeight);
+		shadedBuffer.deleteBufferData();
+		shadedBuffer.initialize(newWidth, newHeight);
+		bloomBuffer.deleteBufferData();
+		bloomBuffer.initialize(newWidth, newHeight);
+		pingPongBuffer.deleteBufferData();
+		pingPongBuffer.initialize(newWidth, newHeight);
 		glViewport(0, 0, newWidth, newHeight);
 		updateProjection();
 	}
@@ -173,6 +183,9 @@ class MyApp : public App
 		TextureInfo* brdfLUTinfo = new TextureInfo(GL_TEXTURE10, "brdfLUT", brdfLUT, nullptr);
 
 		gbuffer.initialize(engine.windowWidth, engine.windowHeight);
+		shadedBuffer.initialize(engine.windowWidth, engine.windowHeight);
+		bloomBuffer.initialize(engine.windowWidth, engine.windowHeight);
+		pingPongBuffer.initialize(engine.windowWidth, engine.windowHeight);
 
 		try
 		{
@@ -365,7 +378,7 @@ class MyApp : public App
 		Vector3 translation = viewMatrixInversed * Vector3(viewMatrix * Vector4(0, 0, 0, 1)) * -1;
 
 		// geometry pass	
-		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboGeo);
+		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		sceneGraph->getRoot()->setShaderProgram(geoProgram);
@@ -378,10 +391,10 @@ class MyApp : public App
 		}
 		else {
 			// lighting pass
-			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboShaded);
+			glBindFramebuffer(GL_FRAMEBUFFER, shadedBuffer.fbo);
 			for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
 				glActiveTexture(GL_TEXTURE0 + i);
-				glBindTexture(GL_TEXTURE_2D, gbuffer.texturesGeo[GBuffer::GB_POSITION + i]);
+				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_POSITION + i]);
 			}
 
 			// draw objects
@@ -391,18 +404,18 @@ class MyApp : public App
 			lightProgram->unuse();
 
 			// draw Skybox
-			glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.fboGeo);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, gbuffer.fboShaded);
+			glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.fbo);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, shadedBuffer.fbo);
 			glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, engine.windowWidth, engine.windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboShaded);
+			glBindFramebuffer(GL_FRAMEBUFFER, shadedBuffer.fbo);
 
 			skybox->draw();
 
 			// separate bright regions of shaded image and save into Pong FBO
 			if (useBloom) {
-				glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
+				glBindFramebuffer(GL_FRAMEBUFFER, pingPongBuffer.fbo[1]);
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
+				glBindTexture(GL_TEXTURE_2D, shadedBuffer.texture);
 				bloomSeparationProgram->use();
 				quad->draw();
 				bloomSeparationProgram->unuse();
@@ -413,28 +426,28 @@ class MyApp : public App
 				for (int i = 0; i < numBlurIterations; i++) {
 
 					// horizontal blur kernel: Read from Pong Texture, Write into Ping FBO (Texture)
-					glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[0]);
+					glBindFramebuffer(GL_FRAMEBUFFER, pingPongBuffer.fbo[0]);
 					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
+					glBindTexture(GL_TEXTURE_2D, pingPongBuffer.texture[1]);
 					horizontalBlurProgram->use();
 					quad->draw();
 					horizontalBlurProgram->unuse();
 
 					// vertikal blur kernel: Read from Ping Texture, Write into Pong FBO (Texture)
-					glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboPingPong[1]);
+					glBindFramebuffer(GL_FRAMEBUFFER, pingPongBuffer.fbo[1]);
 					glActiveTexture(GL_TEXTURE0);
-					glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[0]);
+					glBindTexture(GL_TEXTURE_2D, pingPongBuffer.texture[0]);
 					vertikalBlurProgram->use();
 					quad->draw();
 					vertikalBlurProgram->unuse();
 				}
 			}
 			// add blurred regions (currently in Pong FBO) to original image and save result in Bloom FBO
-			glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fboBloom);
+			glBindFramebuffer(GL_FRAMEBUFFER, bloomBuffer.fbo);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
+			glBindTexture(GL_TEXTURE_2D, shadedBuffer.texture);
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.texturesPingPong[1]);
+			glBindTexture(GL_TEXTURE_2D,pingPongBuffer.texture[1]);
 			bloomProgram->use();
 
 			if (useBloom)
@@ -454,12 +467,12 @@ class MyApp : public App
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
 				glActiveTexture(GL_TEXTURE0 + i);
-				glBindTexture(GL_TEXTURE_2D, gbuffer.texturesGeo[GBuffer::GB_POSITION + i]);
+				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_POSITION + i]);
 			}
 			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 0);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.textureShaded);
+			glBindTexture(GL_TEXTURE_2D, shadedBuffer.texture);
 			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 1);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.textureBloom);
+			glBindTexture(GL_TEXTURE_2D, bloomBuffer.texture);
 
 			glEnable(GL_BLEND);
 			glBlendEquation(GL_FUNC_ADD);
