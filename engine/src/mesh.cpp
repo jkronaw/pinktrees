@@ -1,9 +1,9 @@
-#include "mesh.h"
+#include "Mesh.h"
 
 #include "exceptions.h"
 
 namespace engine
-{
+{	
 	Vertex::Vertex(Vector3 position, Vector2 texcoords, Vector3 normal)
 	{
 		this->position = position;
@@ -17,7 +17,9 @@ namespace engine
 		for (int i = 0; i < vertices.size(); i++) { indices.push_back(i); }
 	}
 
-	Mesh::Mesh(aiMesh* mesh, const aiScene* scene, const std::map<std::string, Texture2D*>& loadedTextures)
+	
+
+	Mesh::Mesh(aiMesh* mesh, const aiScene* scene, Material* material)
 	{
 		bool texcoordsAvailable = mesh->mTextureCoords[0];
 
@@ -44,47 +46,7 @@ namespace engine
 			}
 		}
 
-		if (mesh->mMaterialIndex >= 0)
-		{
-			aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-			aiString aiStr;
-
-			for (int i = 0; i < NR_TEXTURE_TYPES; i++)
-			{
-				aiTextureType aiTextureType = toAiTextureType(static_cast<TextureType>(i));
-				if (material->GetTextureCount(aiTextureType) > 0)
-				{
-					material->GetTexture(aiTextureType, 0, &aiStr);
-					std::string path(aiStr.C_Str());
-
-					switch (i)
-					{
-					case ALBEDO:
-						albedoMap = loadedTextures.at(path);
-						textureInfos[i] = new TextureInfo(GL_TEXTURE0, "texAlbedo", albedoMap, nullptr);
-						break;
-					case NORMAL:
-						normalMap = loadedTextures.at(path);
-						textureInfos[i] = new TextureInfo(GL_TEXTURE1, "texNormal", normalMap, nullptr);
-						break;
-					case METALLIC:
-						metallicMap = loadedTextures.at(path);
-						textureInfos[i] = new TextureInfo(GL_TEXTURE2, "texMetallic", metallicMap, nullptr);
-						break;
-					case ROUGHNESS:
-						roughnessMap = loadedTextures.at(path);
-						textureInfos[i] = new TextureInfo(GL_TEXTURE3, "texRoughness", roughnessMap, nullptr);
-						break;
-					case AO:
-						aoMap = loadedTextures.at(path);
-						textureInfos[i] = new TextureInfo(GL_TEXTURE4, "texAO", aoMap, nullptr);
-						break;
-					default:
-						throw Exception("Should not happen");
-					}
-				}
-			}
-		}
+		this->material = material;
 	}
 
 	Mesh::~Mesh()
@@ -160,37 +122,34 @@ namespace engine
 	}
 
 	void Mesh::draw(ShaderProgram* program)
-	{
-		for (TextureInfo* tInfo : textureInfos)
-		{
-			if (tInfo != nullptr) tInfo->updateShader(program);
+	{	
+		if (material) {
+			// TODO: add checks if respective textures exist
+			glActiveTexture(GL_TEXTURE0);
+			material->albedoMap->bind();
+			program->setUniform("texAlbedo", 0);
+			glActiveTexture(GL_TEXTURE1);
+			material->normalMap->bind();
+			program->setUniform("texNormal", 1);
+			glActiveTexture(GL_TEXTURE2);
+			material->metallicMap->bind();
+			program->setUniform("texMetallic", 2);
+			glActiveTexture(GL_TEXTURE3);
+			material->roughnessMap->bind();
+			program->setUniform("texRoughness", 3);
+			glActiveTexture(GL_TEXTURE4);
+			material->aoMap->bind();
+			program->setUniform("texAO", 4);
+
+			program->setUniform("albedo", material->albedo);
+			program->setUniform("normal", material->normal);
+			program->setUniform("metallic", material->metallic);
+			program->setUniform("roughness", material->roughness);
+			program->setUniform("ao", material->ao);
 		}
 
 		glBindVertexArray(vaoId);
 		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
-
-		for (TextureInfo* tInfo : textureInfos) {
-			if (tInfo != nullptr) tInfo->unbindSampler();
-		}
-	}
-
-	aiTextureType toAiTextureType(TextureType textureType)
-	{
-		switch (textureType)
-		{
-		case ALBEDO:
-			return aiTextureType_DIFFUSE;
-		case NORMAL:
-			return aiTextureType_HEIGHT;
-		case METALLIC:
-			return aiTextureType_SPECULAR;
-		case ROUGHNESS:
-			return aiTextureType_SHININESS;
-		case AO:
-			return aiTextureType_AMBIENT;
-		default:
-			throw Exception("Should not happen");
-		}
 	}
 }
