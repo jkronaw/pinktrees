@@ -134,21 +134,19 @@ void main()
     // image based lighting
     vec3 F = fresnelSchlickRoughness(max(dot(n, w_0), 0.0), F0, roughness);
 
-    vec3 R = reflect(-w_0, n);  
-
     vec3 kS = F;
     vec3 kD = 1.0 - kS;
-    kD *= 1.0 - metallic;	  
-  
-    vec3 irradiance = texture(irradianceMap, n).rgb;
-    vec3 diffuse    = irradiance * albedo;
-  
+    kD *= 1.0 - metallic;
+
+    vec3 diffuse = texture(irradianceMap, n).rgb * albedo;
+
     const float MAX_REFLECTION_LOD = 4.0;
+    vec3 R = reflect(-w_0, n);
     vec3 prefilteredColor = textureLod(prefilterMap, R,  roughness * MAX_REFLECTION_LOD).rgb;   
     vec2 envBRDF  = texture(brdfLUT, vec2(max(dot(n, w_0), 0.0), roughness)).rg;
-    vec3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
-  
-    vec3 ambient = (kD * diffuse + specular) * ao; 
+    vec3 specular = prefilteredColor * (F * envBRDF.r + envBRDF.g);
+
+    vec3 ambient = (kD * diffuse + specular) * ao;
 
     vec3 color = L_0 + ambient;
 
@@ -158,6 +156,5 @@ void main()
     // gamma correct
     color = pow(color, vec3(1.0/2.2));
 
-//    color = texture(brdfLUT, exTexcoord).rgb;
     outColor = vec4(color, 1.0);
 }

@@ -8,6 +8,6 @@ uniform mat4 ProjectionMatrix;
 
 void main()
 {
-    exPosition = inPosition;  
+    exPosition = inPosition;
     gl_Position = ProjectionMatrix * ViewMatrix * vec4(inPosition, 1.0);
 }
