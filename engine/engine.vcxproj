@@ -101,17 +101,17 @@
     <None Include="shaders\bloom_separation.frag" />
     <None Include="shaders\blur_horizontal.frag" />
     <None Include="shaders\blur_vertikal.frag" />
-    <None Include="shaders\brdfLUT.frag" />
+    <None Include="shaders\preprocessing\brdfLUT.frag" />
     <None Include="shaders\debug.frag" />
-    <None Include="shaders\equirectToCubemap.frag" />
-    <None Include="shaders\equirectToCubemap.vert" />
+    <None Include="shaders\preprocessing\equirectToCubemap.frag" />
+    <None Include="shaders\preprocessing\cubemap.vert" />
     <None Include="shaders\GEO_fragment.frag" />
     <None Include="shaders\GEO_vertex.vert" />
-    <None Include="shaders\irradianceMapConvolution.frag" />
+    <None Include="shaders\preprocessing\irradianceMapConvolution.frag" />
     <None Include="shaders\LIGHT_fragment.frag" />
     <None Include="shaders\LIGHT_vertex.vert" />
     <None Include="shaders\DOF.frag" />
-    <None Include="shaders\prefilterMapConvolution.frag" />
+    <None Include="shaders\preprocessing\prefilterMapConvolution.frag" />
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />
   </ItemGroup>

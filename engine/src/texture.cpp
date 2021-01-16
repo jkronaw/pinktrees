@@ -149,7 +149,7 @@ namespace engine
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, id, 0);
 
 		ShaderProgram* program = new ShaderProgram();
-		program->init("shaders/LIGHT_vertex.vert", "shaders/brdfLUT.frag");
+		program->init("shaders/LIGHT_vertex.vert", "shaders/preprocessing/brdfLUT.frag");
 		program->link();
 
 		program->use();
@@ -248,7 +248,7 @@ namespace engine
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRbo);
 
 		ShaderProgram* program = new ShaderProgram();
-		program->init("shaders/equirectToCubemap.vert", "shaders/equirectToCubemap.frag");
+		program->init("shaders/preprocessing/cubemap.vert", "shaders/preprocessing/equirectToCubemap.frag");
 		program->link();
 
 		program->use();
@@ -309,7 +309,7 @@ namespace engine
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRbo);
 
 		ShaderProgram* program = new ShaderProgram();
-		program->init("shaders/equirectToCubemap.vert", "shaders/irradianceMapConvolution.frag");
+		program->init("shaders/preprocessing/cubemap.vert", "shaders/preprocessing/irradianceMapConvolution.frag");
 		program->link();
 
 		program->use();
@@ -371,7 +371,7 @@ namespace engine
 		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, captureRbo);
 
 		ShaderProgram* program = new ShaderProgram();
-		program->init("shaders/equirectToCubemap.vert", "shaders/prefilterMapConvolution.frag");
+		program->init("shaders/preprocessing/cubemap.vert", "shaders/preprocessing/prefilterMapConvolution.frag");
 		program->link();
 
 		program->use();
