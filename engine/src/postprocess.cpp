@@ -60,6 +60,56 @@ namespace engine {
 			glDeleteTextures(1, &texture);
 	}
 
+	ReflectionsBuffer::ReflectionsBuffer() {};
+	ReflectionsBuffer::~ReflectionsBuffer() { ReflectionsBuffer::deleteBufferData(); };
+
+	void ReflectionsBuffer::initialize(unsigned int windowWidth, unsigned int windowHeight) {
+		glGenFramebuffers(1, &fbo);
+		glGenTextures(1, &texture);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		GLenum DrawBuffersReflection[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, DrawBuffersReflection);
+	}
+
+	void ReflectionsBuffer::deleteBufferData() {
+		if (fbo != 0)
+			glDeleteFramebuffers(1, &fbo);
+		if (texture != 0)
+			glDeleteTextures(1, &texture);
+	}
+
+	BlurBuffer::BlurBuffer() {};
+	BlurBuffer::~BlurBuffer() { BlurBuffer::deleteBufferData(); };
+
+	void BlurBuffer::initialize(unsigned int windowWidth, unsigned int windowHeight) {
+		glGenFramebuffers(1, &fbo);
+		glGenTextures(1, &texture);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		GLenum DrawBuffersBlur[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, DrawBuffersBlur);
+	}
+
+	void BlurBuffer::deleteBufferData() {
+		if (fbo != 0)
+			glDeleteFramebuffers(1, &fbo);
+		if (texture != 0)
+			glDeleteTextures(1, &texture);
+	}
+
 	PingPongBuffer::PingPongBuffer() {};
 	PingPongBuffer::~PingPongBuffer() { PingPongBuffer::deleteBufferData(); };
 

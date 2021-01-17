@@ -37,6 +37,32 @@ namespace engine {
 		void deleteBufferData();
 	};
 
+	class ReflectionsBuffer : public PostProcessBuffer {
+	public:
+
+		ReflectionsBuffer();
+		~ReflectionsBuffer();
+
+		GLuint fbo = 0;
+		GLuint texture = 0;
+
+		void initialize(unsigned int windowWidth, unsigned int windowHeight);
+		void deleteBufferData();
+	};
+
+	class BlurBuffer : public PostProcessBuffer {
+	public:
+
+		BlurBuffer();
+		~BlurBuffer();
+
+		GLuint fbo = 0;
+		GLuint texture = 0;
+
+		void initialize(unsigned int windowWidth, unsigned int windowHeight);
+		void deleteBufferData();
+	};
+
 	class PingPongBuffer : public PostProcessBuffer {
 	public:
 

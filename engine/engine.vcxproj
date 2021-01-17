@@ -101,6 +101,7 @@
     <None Include="shaders\bloom_separation.frag" />
     <None Include="shaders\blur_horizontal.frag" />
     <None Include="shaders\blur_vertikal.frag" />
+    <None Include="shaders\fastBoxBlur.frag" />
     <None Include="shaders\preprocessing\brdfLUT.frag" />
     <None Include="shaders\debug.frag" />
     <None Include="shaders\preprocessing\equirectToCubemap.frag" />

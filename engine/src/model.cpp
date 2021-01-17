@@ -63,7 +63,7 @@ namespace engine
 			// Load Material values
 			aiColor3D color(0.f, 0.f, 0.f);
 
-			if(material->Get(AI_MATKEY_COLOR_DIFFUSE, color))
+			if(material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == 0)
 				mat->albedo = Vector3(color.r, color.b, color.g);
 			//if(material->Get(AI_MATKEY_COLOR_SPECULAR, color))			// Not sure, which ones will be used later on
 			//	mat->metallic = Vector3(color.r, color.b, color.g);

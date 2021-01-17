@@ -7,7 +7,7 @@ layout (location = 3) in vec3 inTangent;
 
 out vec2 exTexcoord;
 out vec3 exNormal;
-out vec3 exPosition;
+out vec4 exPosition;
 out mat3 exTBN;
 
 uniform mat4 ModelMatrix;
@@ -23,7 +23,7 @@ void main(void)
 {
     vec4 inPosition4 = vec4(inPosition, 1.0);
 
-	exPosition = (ModelMatrix * inPosition4).xyz;
+	exPosition = (ModelMatrix * inPosition4);
 	exTexcoord = inTexcoord;
 	exNormal = inNormal;
 	

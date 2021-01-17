@@ -2,10 +2,10 @@
 
 in vec2 exTexcoord;
 in vec3 exNormal;
-in vec3 exPosition;
+in vec4 exPosition;
 in mat3 exTBN;
 
-layout (location = 0) out vec3 WorldPosOut;
+layout (location = 0) out vec4 WorldPosOut;
 layout (location = 1) out vec3 AlbedoOut;
 layout (location = 2) out vec3 NormalOut;
 layout (location = 3) out vec3 MetallicRoughnessAOOut;
@@ -44,7 +44,7 @@ void main()
     MetallicRoughnessAOOut.b = useAoTex ? texture(texAO, texcoord).r : ao;
 
     // position image
-    WorldPosOut = exPosition;
+    WorldPosOut = vec4(exPosition);
 
     // normal image
     vec3 normalTemp = useNormalTex ? texture(texNormal, texcoord).rgb * 2.0 - 1.0 : normal; // map into range [-1, 1]
