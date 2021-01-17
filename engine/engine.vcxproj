@@ -22,7 +22,6 @@
     <ClCompile Include="src\light.cpp" />
     <ClCompile Include="src\postprocess.cpp" />
     <ClCompile Include="src\material.cpp" />
-    <ClCompile Include="src\old_model.cpp" />
     <ClCompile Include="src\imgui\imgui.cpp" />
     <ClCompile Include="src\imgui\imgui_demo.cpp" />
     <ClCompile Include="src\imgui\imgui_draw.cpp" />
@@ -30,7 +29,6 @@
     <ClCompile Include="src\imgui\imgui_impl_opengl3.cpp" />
     <ClCompile Include="src\imgui\imgui_tables.cpp" />
     <ClCompile Include="src\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="src\old_mesh.cpp" />
     <ClCompile Include="src\meshfactory.cpp" />
     <ClCompile Include="src\mesh.cpp" />
     <ClCompile Include="src\model.cpp" />
@@ -52,8 +50,6 @@
     <ClInclude Include="src\light.h" />
     <ClInclude Include="src\postprocess.h" />
     <ClInclude Include="src\material.h" />
-    <ClInclude Include="src\old_model.h" />
-    <ClInclude Include="src\old_mesh.h" />
     <ClInclude Include="src\meshfactory.h" />
     <ClInclude Include="src\imgui\imconfig.h" />
     <ClInclude Include="src\imgui\imgui.h" />
