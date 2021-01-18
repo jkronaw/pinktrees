@@ -85,28 +85,27 @@
       <DeploymentContent>true</DeploymentContent>
     </CopyFileToFolders>
     <None Include="imgui.ini" />
-    <None Include="shaders\alternative_bloom.frag" />
-    <None Include="shaders\bloom_blend.frag" />
-    <None Include="shaders\bloom_separation.frag" />
-    <None Include="shaders\blur_horizontal.frag" />
-    <None Include="shaders\blur_vertikal.frag" />
-    <None Include="shaders\fastBoxBlur.frag" />
+    <None Include="shaders\postprocessing\alternative_bloom.frag" />
+    <None Include="shaders\postprocessing\bloom_blend.frag" />
+    <None Include="shaders\postprocessing\bloom_separation.frag" />
+    <None Include="shaders\postprocessing\blur_horizontal.frag" />
+    <None Include="shaders\postprocessing\blur_vertikal.frag" />
+    <None Include="shaders\postprocessing\blur_fastBox.frag" />
     <None Include="shaders\preprocessing\brdfLUT.frag" />
-    <None Include="shaders\debug.frag" />
     <None Include="shaders\preprocessing\equirectToCubemap.frag" />
     <None Include="shaders\preprocessing\cubemap.vert" />
-    <None Include="shaders\GEO_fragment.frag" />
-    <None Include="shaders\GEO_vertex.vert" />
+    <None Include="shaders\general\GBUFFER.frag" />
+    <None Include="shaders\general\GBUFFER.vert" />
     <None Include="shaders\preprocessing\irradianceMapConvolution.frag" />
-    <None Include="shaders\LIGHT_fragment.frag" />
-    <None Include="shaders\LIGHT_vertex.vert" />
-    <None Include="shaders\DOF.frag" />
+    <None Include="shaders\general\PBR.frag" />
+    <None Include="shaders\general\quad2D.vert" />
+    <None Include="shaders\postprocessing\DOF.frag" />
     <None Include="shaders\preprocessing\prefilterMapConvolution.frag" />
-    <None Include="shaders\reflection_blend.frag" />
-    <None Include="shaders\ScreenSpaceReflections.frag" />
-    <None Include="shaders\skybox.frag" />
-    <None Include="shaders\skybox.vert" />
-    <None Include="shaders\SSAO.frag" />
+    <None Include="shaders\postprocessing\reflection_blend.frag" />
+    <None Include="shaders\postprocessing\SSR.frag" />
+    <None Include="shaders\general\skybox.frag" />
+    <None Include="shaders\general\skybox.vert" />
+    <None Include="shaders\postprocessing\SSAO.frag" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="assets\**\*.*">

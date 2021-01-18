@@ -38,7 +38,6 @@ class MyApp : public App
 	ShaderProgram* horizontalBlurProgram;
 	ShaderProgram* vertikalBlurProgram;
 	ShaderProgram* bloomProgram;
-	ShaderProgram* debugProgram;
 	ShaderProgram* reflectionsProgram;
 	ShaderProgram* fastBoxBlurProgram;
 	ShaderProgram* ssaoProgram;
@@ -234,13 +233,13 @@ class MyApp : public App
 		try
 		{
 			geoProgram = new ShaderProgram();
-			geoProgram->init("shaders/GEO_vertex.vert", "shaders/GEO_fragment.frag");
+			geoProgram->init("shaders/general/GBUFFER.vert", "shaders/general/GBUFFER.frag");
 			geoProgram->link();
 			geoProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
 			sceneGraph->getRoot()->setShaderProgram(geoProgram);
 
 			lightProgram = new ShaderProgram();
-			lightProgram->init("shaders/LIGHT_vertex.vert", "shaders/LIGHT_fragment.frag");
+			lightProgram->init("shaders/general/quad2D.vert", "shaders/general/PBR.frag");
 			lightProgram->link();
 
 			lightProgram->use();
@@ -257,7 +256,7 @@ class MyApp : public App
 			lightProgram->unuse();
 
 			dofProgram = new ShaderProgram();
-			dofProgram->init("shaders/LIGHT_vertex.vert", "shaders/DOF.frag");
+			dofProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/DOF.frag");
 			dofProgram->link();
 			dofProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
 
@@ -272,26 +271,26 @@ class MyApp : public App
 			dofProgram->unuse();
 
 			horizontalBlurProgram = new ShaderProgram();
-			horizontalBlurProgram->init("shaders/LIGHT_vertex.vert", "shaders/blur_horizontal.frag");
+			horizontalBlurProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/blur_horizontal.frag");
 			horizontalBlurProgram->link();
 
 			vertikalBlurProgram = new ShaderProgram();
-			vertikalBlurProgram->init("shaders/LIGHT_vertex.vert", "shaders/blur_vertikal.frag");
+			vertikalBlurProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/blur_vertikal.frag");
 			vertikalBlurProgram->link();
 
 			bloomSeparationProgram = new ShaderProgram();
-			bloomSeparationProgram->init("shaders/LIGHT_vertex.vert", "shaders/bloom_separation.frag");
+			bloomSeparationProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/bloom_separation.frag");
 			bloomSeparationProgram->link();
 			bloomSeparationProgram->use();
 			bloomSeparationProgram->setUniform("gShaded", 0);
 			bloomSeparationProgram->unuse();
 
 			bloomProgram = new ShaderProgram();
-			bloomProgram->init("shaders/LIGHT_vertex.vert", "shaders/bloom_blend.frag");
+			bloomProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/bloom_blend.frag");
 			bloomProgram->link();
 
 			reflectionsProgram = new ShaderProgram();
-			reflectionsProgram->init("shaders/LIGHT_vertex.vert", "shaders/ScreenSpaceReflections.frag");
+			reflectionsProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/SSR.frag");
 			reflectionsProgram->link();
 			reflectionsProgram->use();
 			reflectionsProgram->setUniform("gPosition", 0);
@@ -303,14 +302,14 @@ class MyApp : public App
 			reflectionsProgram->unuse();
 
 			fastBoxBlurProgram = new ShaderProgram();
-			fastBoxBlurProgram->init("shaders/LIGHT_vertex.vert", "shaders/fastBoxBlur.frag");
+			fastBoxBlurProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/blur_fastBox.frag");
 			fastBoxBlurProgram->link();
 			fastBoxBlurProgram->use();
 			fastBoxBlurProgram->setUniform("gShaded", 0);
 			fastBoxBlurProgram->unuse();
 
 			ssaoProgram = new ShaderProgram();
-			ssaoProgram->init("shaders/LIGHT_vertex.vert", "shaders/SSAO.frag");
+			ssaoProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/SSAO.frag");
 			ssaoProgram->link();
 			ssaoProgram->use();
 			ssaoProgram->setUniform("gPosition", 0);
@@ -322,7 +321,7 @@ class MyApp : public App
 			ssaoProgram->unuse();
 			
 			reflectionBlendProgram = new ShaderProgram;
-			reflectionBlendProgram->init("shaders/LIGHT_vertex.vert", "shaders/reflection_blend.frag");
+			reflectionBlendProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/reflection_blend.frag");
 			reflectionBlendProgram->link();
 			reflectionBlendProgram->use();
 			reflectionBlendProgram->setUniform("gReflection", 0);
@@ -331,9 +330,6 @@ class MyApp : public App
 			reflectionBlendProgram->setUniform("gShaded", 3);
 			reflectionBlendProgram->unuse();
 
-			debugProgram = new ShaderProgram();
-			debugProgram->init("shaders/LIGHT_vertex.vert", "shaders/debug.frag");
-			debugProgram->link();
 
 		}
 		catch (Exception e)
