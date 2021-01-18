@@ -11,6 +11,7 @@ uniform sampler2D gAlbedo;
 uniform sampler2D gNormal;
 uniform sampler2D gMetallicRoughnessAO;
 uniform sampler2D gTexCoord;
+uniform sampler2D gSsao;
 
 uniform vec2 gScreenSize;
 uniform vec3 viewPos;
@@ -27,6 +28,8 @@ uniform samplerCube prefilterMap;
 uniform sampler2D   brdfLUT;
 
 const float PI = 3.14159265359;
+
+uniform int useSsao;
 
 // normal distribution function
 float trowbridgeReitzGGX(vec3 N, vec3 H, float roughness)
@@ -84,6 +87,7 @@ void main()
     float metallic = texture(gMetallicRoughnessAO, exTexcoord).r;
     float roughness = texture(gMetallicRoughnessAO, exTexcoord).g;
     float ao = texture(gMetallicRoughnessAO, exTexcoord).b;
+    ao = ao * (useSsao == 1 ? texture(gSsao, exTexcoord).r : 1);
 
     // gamma correct albedo to get into linear space
     albedo = pow(albedo, vec3(2.2));

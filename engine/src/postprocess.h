@@ -1,6 +1,8 @@
 #pragma once
 
 #include <GL/glew.h>
+#include <vector>
+#include "vector.h"
 
 namespace engine {
 
@@ -74,6 +76,24 @@ namespace engine {
 
 		void initialize(unsigned int windowWidth, unsigned int windowHeight);
 		void deleteBufferData();
+	};
+
+	class SsaoBuffer : public PostProcessBuffer {
+	public: 
+		SsaoBuffer();
+		~SsaoBuffer();
+
+		GLuint fbo = 0;
+		GLuint texture = 0;
+
+		GLuint noiseTexture = 0;
+
+		std::vector<Vector3> ssaoKernel;
+
+		void initialize(unsigned int windowWidth, unsigned int windowHeight);
+		void deleteBufferData();
+		void generateSampleKernel();
+		void generateNoiseTexture();
 	};
 }
 

@@ -23,7 +23,7 @@ void main(void)
 {
     vec4 inPosition4 = vec4(inPosition, 1.0);
 
-	exPosition = (ModelMatrix * inPosition4);
+	exPosition = ModelMatrix * inPosition4;
 	exTexcoord = inTexcoord;
 	exNormal = inNormal;
 	

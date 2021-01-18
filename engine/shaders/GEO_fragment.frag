@@ -44,7 +44,7 @@ void main()
     MetallicRoughnessAOOut.b = useAoTex ? texture(texAO, texcoord).r : ao;
 
     // position image
-    WorldPosOut = vec4(exPosition);
+    WorldPosOut = exPosition;
 
     // normal image
     vec3 normalTemp = useNormalTex ? texture(texNormal, texcoord).rgb * 2.0 - 1.0 : normal; // map into range [-1, 1]

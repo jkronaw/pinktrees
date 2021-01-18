@@ -41,6 +41,7 @@ class MyApp : public App
 	ShaderProgram* debugProgram;
 	ShaderProgram* reflectionsProgram;
 	ShaderProgram* fastBoxBlurProgram;
+	ShaderProgram* ssaoProgram;
 
 	//bool useTextures = true;
 	float roughness = 0.5;
@@ -49,9 +50,22 @@ class MyApp : public App
 
 	float bloomExposure = 0.2f;
 	bool useBloom = false;
+	int bloomBlur = 5;
 
 	bool useDOF = false;
 	float focalDepth = 2.0f;
+	int dofSamples = 25;
+
+	bool useSsr = false;
+	bool useSsao = false;
+
+	float maxRayDistance = 25;
+	float stepResolution = 0.4;
+	int stepIterations = 400;
+	float tolerance = 0.1;
+
+	float ambientRadius = 0.5;
+	float ambientBias = 0.025;
 
 	bool showDemoWindow = false;
 	bool showGbufferContent = false;
@@ -64,6 +78,7 @@ class MyApp : public App
 	PingPongBuffer pingPongBuffer;
 	ReflectionsBuffer reflectionsBuffer;
 	BlurBuffer blurBuffer;
+	SsaoBuffer ssaoBuffer;
 
 	std::vector<Light> lights;
 
@@ -99,6 +114,8 @@ class MyApp : public App
 		reflectionsBuffer.initialize(newWidth, newHeight);
 		blurBuffer.deleteBufferData();
 		blurBuffer.initialize(newWidth, newHeight);
+		ssaoBuffer.deleteBufferData();
+		ssaoBuffer.initialize(newWidth, newHeight);
 		glViewport(0, 0, newWidth, newHeight);
 		updateProjection();
 	}
@@ -206,6 +223,9 @@ class MyApp : public App
 		pingPongBuffer.initialize(engine.windowWidth, engine.windowHeight);
 		reflectionsBuffer.initialize(engine.windowWidth, engine.windowHeight);
 		blurBuffer.initialize(engine.windowWidth, engine.windowHeight);
+		ssaoBuffer.initialize(engine.windowWidth, engine.windowHeight);
+		ssaoBuffer.generateSampleKernel();
+		ssaoBuffer.generateNoiseTexture();
 
 		try
 		{
@@ -226,6 +246,7 @@ class MyApp : public App
 			lightProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
 			lightProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
 			lightProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
+			lightProgram->setUniform("gSsao", GBuffer::GB_TEXCOORD + 1);
 			irradianceMapInfo->updateShader(lightProgram);
 			prefilterMapInfo->updateShader(lightProgram);
 			brdfLUTinfo->updateShader(lightProgram);
@@ -275,7 +296,6 @@ class MyApp : public App
 			reflectionsProgram->setUniform("gShaded", 2);
 			reflectionsProgram->setUniform("gBlur", 3);
 			reflectionsProgram->setUniform("gMetallicRoughnessAO", 4);
-			//reflectionsProgram->setUniform("gDepth", 3);
 			reflectionsProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
 			reflectionsProgram->unuse();
 
@@ -285,6 +305,18 @@ class MyApp : public App
 			fastBoxBlurProgram->use();
 			fastBoxBlurProgram->setUniform("gShaded", 0);
 			fastBoxBlurProgram->unuse();
+
+			ssaoProgram = new ShaderProgram();
+			ssaoProgram->init("shaders/LIGHT_vertex.vert", "shaders/SSAO.frag");
+			ssaoProgram->link();
+			ssaoProgram->use();
+			ssaoProgram->setUniform("gPosition", 0);
+			ssaoProgram->setUniform("gNormal", 1);
+			ssaoProgram->setUniform("texNoise", 2);
+			ssaoProgram->setUniform("gDepth", 3);
+			ssaoProgram->setUniform("samples", ssaoBuffer.ssaoKernel);
+			ssaoProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
+			ssaoProgram->unuse();
 
 			debugProgram = new ShaderProgram();
 			debugProgram->init("shaders/LIGHT_vertex.vert", "shaders/debug.frag");
@@ -430,17 +462,38 @@ class MyApp : public App
 			showGbuffer();
 		}
 		else {
+
+			// SSAO Pass 
+			if (useSsao) {
+				glBindFramebuffer(GL_FRAMEBUFFER, ssaoBuffer.fbo);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_POSITION]);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_NORMAL]);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, ssaoBuffer.noiseTexture);
+
+				ssaoProgram->use();
+				ssaoProgram->setUniform("viewPos", translation);
+				ssaoProgram->setUniform("radius", ambientRadius);
+				ssaoProgram->setUniform("bias", ambientBias);
+				quad->draw();
+				ssaoProgram->unuse();
+			}
+
 			// lighting pass
 			glBindFramebuffer(GL_FRAMEBUFFER, shadedBuffer.fbo);
 			for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
 				glActiveTexture(GL_TEXTURE0 + i);
 				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_POSITION + i]);
 			}
-
+			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES);
+			glBindTexture(GL_TEXTURE_2D, ssaoBuffer.texture);
+			
 			// draw objects
 			lightProgram->use();
 			lightProgram->setUniform("lightCount", (int) lights.size());
-
+			
 			// direct light sources
 			std::vector<Vector3> lightPositions;
 			std::vector<Vector3> lightColors;
@@ -451,57 +504,66 @@ class MyApp : public App
 			}
 			lightProgram->setUniform("lightPositions", lightPositions);
 			lightProgram->setUniform("lightColors", lightColors);
-
 			lightProgram->setUniform("viewPos", translation);
+			lightProgram->setUniform("useSsao", useSsao);
 			quad->draw();
 			lightProgram->unuse();
-
+			
 			// draw Skybox
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.fbo);
 			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, shadedBuffer.fbo);
 			glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, engine.windowWidth, engine.windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 			glBindFramebuffer(GL_FRAMEBUFFER, shadedBuffer.fbo);
-
+			
 			skybox->draw();
-
+			
+			// Blur Shaded Image (for rough reflections)
 			glBindFramebuffer(GL_FRAMEBUFFER, blurBuffer.fbo);
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, shadedBuffer.texture);
 			fastBoxBlurProgram->use();
 			quad->draw();
 			fastBoxBlurProgram->unuse();
+			
+			// Calculate Screen Space Reflections
+			if (useSsr) {
+				glBindFramebuffer(GL_FRAMEBUFFER, reflectionsBuffer.fbo);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_POSITION]);
+				glActiveTexture(GL_TEXTURE1);
+				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_NORMAL]);
+				glActiveTexture(GL_TEXTURE2);
+				glBindTexture(GL_TEXTURE_2D, shadedBuffer.texture);
+				glActiveTexture(GL_TEXTURE3);
+				glBindTexture(GL_TEXTURE_2D, blurBuffer.texture);
+				glActiveTexture(GL_TEXTURE4);
+				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_METALLIC_ROUGHNESS_AO]);
 
-			glBindFramebuffer(GL_FRAMEBUFFER, reflectionsBuffer.fbo);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_POSITION]);
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_NORMAL]);
-			glActiveTexture(GL_TEXTURE2);
-			glBindTexture(GL_TEXTURE_2D, shadedBuffer.texture);
-			glActiveTexture(GL_TEXTURE3);
-			glBindTexture(GL_TEXTURE_2D, blurBuffer.texture);
-			glActiveTexture(GL_TEXTURE4);
-			glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_METALLIC_ROUGHNESS_AO]);
+				reflectionsProgram->use();
+				reflectionsProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
+				reflectionsProgram->setUniform("viewPos", translation);
 
-			reflectionsProgram->use();
-			reflectionsProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
-			reflectionsProgram->setUniform("viewPos", translation);
-			quad->draw();
-			reflectionsProgram->unuse();
+				reflectionsProgram->setUniform("maxRayDistance", maxRayDistance);
+				reflectionsProgram->setUniform("stepResolution", stepResolution);
+				reflectionsProgram->setUniform("stepIterations", stepIterations);
+				reflectionsProgram->setUniform("tolerance", tolerance);
+				quad->draw();
+				reflectionsProgram->unuse();
+			}
 
 			//separate bright regions of shaded image and save into Pong FBO
 			if (useBloom) {
 				glBindFramebuffer(GL_FRAMEBUFFER, pingPongBuffer.fbo[1]);
 				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, reflectionsBuffer.texture);
+				
+				glBindTexture(GL_TEXTURE_2D, useSsr ? reflectionsBuffer.texture : shadedBuffer.texture);
 				bloomSeparationProgram->use();
 				quad->draw();
 				bloomSeparationProgram->unuse();
 			
 				// bloom: apply blur to bright regions
 				bool firstBlurIteration = true;
-				int numBlurIterations = 20;
-				for (int i = 0; i < numBlurIterations; i++) {
+				for (int i = 0; i < bloomBlur; i++) {
 			
 					// horizontal blur kernel: Read from Pong Texture, Write into Ping FBO (Texture)
 					glBindFramebuffer(GL_FRAMEBUFFER, pingPongBuffer.fbo[0]);
@@ -523,7 +585,7 @@ class MyApp : public App
 			// add blurred regions (currently in Pong FBO) to original image and save result in Bloom FBO
 			glBindFramebuffer(GL_FRAMEBUFFER, bloomBuffer.fbo);
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, reflectionsBuffer.texture);
+			glBindTexture(GL_TEXTURE_2D, useSsr ? reflectionsBuffer.texture : shadedBuffer.texture);
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D,pingPongBuffer.texture[1]);
 			bloomProgram->use();
@@ -541,6 +603,7 @@ class MyApp : public App
 			dofProgram->setUniform("useDOF", useDOF);
 			dofProgram->setUniform("viewPos", translation);
 			dofProgram->setUniform("focalDepth", focalDepth);
+			dofProgram->setUniform("dofSamples", dofSamples);
 			
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
@@ -548,7 +611,7 @@ class MyApp : public App
 				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_POSITION + i]);
 			}
 			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 0);
-			glBindTexture(GL_TEXTURE_2D, reflectionsBuffer.texture);
+			glBindTexture(GL_TEXTURE_2D, useSsr ? reflectionsBuffer.texture : shadedBuffer.texture);
 			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES + 1);
 			glBindTexture(GL_TEXTURE_2D, bloomBuffer.texture);
 			
@@ -558,7 +621,7 @@ class MyApp : public App
 			
 			quad->draw();
 			dofProgram->unuse();
-
+			
 			glDisable(GL_BLEND);
 		}
 
@@ -587,9 +650,25 @@ class MyApp : public App
 
 			ImGui::Checkbox("Enable Bloom", &useBloom);
 			ImGui::Checkbox("Enable DOF", &useDOF);
+			ImGui::Checkbox("Enable Reflections", &useSsr);
+			ImGui::Checkbox("Enable Ambient Occlusion", &useSsao);
+
+			ImGui::SliderFloat("SSAO Radius", &ambientRadius, 0.1f, 1.0f);
+			ImGui::SliderFloat("SSAO Bias", &ambientBias, 0.01, 0.05);
+
 			ImGui::SliderFloat("Bloom Exposure", &bloomExposure, 0.0f, 1.0f);
-			ImGui::SliderFloat("Focal Depth", &focalDepth, -50.0f, 50.0f);
-			ImGui::End();
+			ImGui::SliderInt("Bloom Blur Amount", &bloomBlur, 0, 20);
+
+			ImGui::SliderFloat("Focal Depth", &focalDepth, -25.0f, 25.0f);
+			ImGui::SliderInt("Number DOF Samples", &dofSamples, 1, 150);
+
+
+			ImGui::SliderFloat("Max Reflection Ray Length", &maxRayDistance, 1.0, 50.0);
+			ImGui::SliderFloat("Reflect Resolution", &stepResolution, 0.1, 1.0);
+			ImGui::SliderInt("Iterations", &stepIterations, 50, 800);
+			ImGui::SliderFloat("Hit Tolerance", &tolerance, 0.025, 0.9);
+
+
 		}
 
 		{

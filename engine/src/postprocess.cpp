@@ -1,6 +1,9 @@
 #include "postprocess.h"
 
 #include <cstddef>
+#include <random>
+#include <cmath>
+#include <math.h>
 
 namespace engine {
 
@@ -134,5 +137,68 @@ namespace engine {
 			glDeleteFramebuffers(2, fbo);
 		if (texture[0] != 0)
 			glDeleteTextures(2, texture);
+	}
+
+	SsaoBuffer::SsaoBuffer() {};
+	SsaoBuffer::~SsaoBuffer() { 
+		SsaoBuffer::deleteBufferData();
+		if (noiseTexture != 0)
+			glDeleteTextures(1, &noiseTexture);
+	};
+
+	void SsaoBuffer::initialize(unsigned int windowWidth, unsigned int windowHeight) {
+		glGenFramebuffers(1, &fbo);
+		glGenTextures(1, &texture);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		GLenum DrawBuffersBlur[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, DrawBuffersBlur);
+	}
+
+	void SsaoBuffer::deleteBufferData() {
+		if (fbo != 0)
+			glDeleteFramebuffers(1, &fbo);
+		if (texture != 0)
+			glDeleteTextures(1, &texture);
+	}
+
+	void SsaoBuffer::generateSampleKernel() {
+		std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
+		std::default_random_engine generator;
+		for (unsigned int i = 0; i < 64; ++i)
+		{
+			Vector3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
+			sample = (sample).normalized();
+			sample *= randomFloats(generator);
+			float scale = float(i) / 64.0;
+			scale = 0.1f + 1.0f * (scale * scale);
+			sample *= scale;
+			ssaoKernel.push_back(sample);
+		}
+	}
+
+	void SsaoBuffer::generateNoiseTexture() {
+		std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
+		std::default_random_engine generator;
+		std::vector<Vector3> ssaoNoise;
+		for (unsigned int i = 0; i < 16; i++)
+		{
+			Vector3 noise(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, 0.0f); // rotate around z-axis (in tangent space)
+			ssaoNoise.push_back(noise);
+		}
+		glGenTextures(1, &noiseTexture);
+		glBindTexture(GL_TEXTURE_2D, noiseTexture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
 	}
 }

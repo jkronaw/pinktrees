@@ -11,6 +11,11 @@ uniform sampler2D gMetallicRoughnessAO;
 uniform vec2 gScreenSize;
 uniform vec3 viewPos;
 
+uniform float maxRayDistance;
+uniform float stepResolution;
+uniform int stepIterations;
+uniform float tolerance;
+
 layout(shared) uniform SharedMatrices
 {
 	mat4 ViewMatrix;
@@ -23,13 +28,15 @@ void main() {
 	
 	
     vec2 texSize  = textureSize(gShaded, 0).xy;
-	float maxRayDistance = 15;
-	float stepResolution = 0.5;
-	int searchSteps = 5;
-	float tolerance = 0.3;
+
+	int searchSteps = 10;
 
 	vec4 texPos = vec4(0);
 	float visibility = 0;
+
+	vec2 finalLookupPos;
+	vec4 finalLookupFragPositionView;
+	vec4 finalLookupFragPositionWs;
 	
 	vec4 fragPos = texture(gPosition, exTexcoord);
 	if (fragPos.x != 0 && fragPos.y != 0 && fragPos.z != 0){
@@ -41,7 +48,7 @@ void main() {
 
 		vec3 reflectionRay = normalize(reflect(viewDir, fragN));
 	
-		vec4 reflectionRayStartWs = vec4(fragPos.xyz, 1);
+		vec4 reflectionRayStartWs = vec4(fragPos.xyz + reflectionRay * 0.1, 1);
 		vec4 reflectionRayEndWs = vec4(fragPos.xyz + reflectionRay * maxRayDistance, 1);
 
 		vec4 reflectionRayStartView = ViewMatrix * reflectionRayStartWs;
@@ -60,7 +67,7 @@ void main() {
 		reflectionRayEnd.xy *= texSize;
 
 		vec2 lookupFrag = reflectionRayStart.xy;
-		texPos.xy = lookupFrag / gScreenSize;
+		texPos.xy = lookupFrag / texSize;
 
 		float deltaX = reflectionRayEnd.x - reflectionRayStart.x;
 		float deltaY = reflectionRayEnd.y - reflectionRayStart.y;
@@ -82,11 +89,11 @@ void main() {
 		vec4 lookupFragPositionWs = vec4(0);
 		vec4 lookupFragPositionView = vec4(0);
 
-		for (int i = 0; i < 500; ++i){
+		for (int i = 0; i < stepIterations; ++i){
 			lookupFrag += stepSize;
 			texPos.xy = lookupFrag / texSize;
 			lookupFragPositionWs = texture(gPosition, texPos.xy);
-			lookupFragPositionView = ViewMatrix * vec4(lookupFragPositionWs.xyz,1);
+			lookupFragPositionView = ViewMatrix * lookupFragPositionWs;
 	
 			nextSearchStep = mix((lookupFrag.y - reflectionRayStart.y) / deltaY, 
 						  (lookupFrag.x - reflectionRayStart.x) / deltaX,
@@ -94,11 +101,11 @@ void main() {
 		
 			nextSearchStep = clamp(nextSearchStep, 0, 1);
 
-			viewDistance = (reflectionRayStartView.z * (reflectionRayEndView.z)) / mix(reflectionRayEndView.z, reflectionRayStartView.z, nextSearchStep);
+			viewDistance = -(reflectionRayStartView.z * (reflectionRayEndView.z)) / mix(reflectionRayEndView.z, reflectionRayStartView.z, nextSearchStep);
 		
-			depthDiff = (-viewDistance) - (-lookupFragPositionView.z);
+			depthDiff = (viewDistance) - (-lookupFragPositionView.z);
 	
-			if (lookupFragPositionWs.r != 0 && depthDiff > 0 && depthDiff < tolerance){
+			if (depthDiff > 0 && depthDiff < tolerance){
 				firstPassHit = 1;
 				break;
 			} else {
@@ -110,27 +117,36 @@ void main() {
 		nextSearchStep = lastSearchStep + ((nextSearchStep - lastSearchStep) * 0.5);
 	
 		searchSteps *= firstPassHit;
-	
+		
+		finalLookupPos = texPos.xy;
+		finalLookupFragPositionView = lookupFragPositionView;
+		finalLookupFragPositionWs = lookupFragPositionWs;
+
 		for (int i = 0; i < searchSteps; ++i){
 			lookupFrag = mix(reflectionRayStart.xy, reflectionRayEnd.xy, nextSearchStep);
 			texPos.xy = lookupFrag / texSize;
 			lookupFragPositionWs = texture(gPosition, texPos.xy);
-			lookupFragPositionView = ViewMatrix * vec4(lookupFragPositionWs.xyz, 1);
+			lookupFragPositionView = ViewMatrix * lookupFragPositionWs;
 
-			viewDistance = (reflectionRayStartView.z * reflectionRayEndView.z) / mix(reflectionRayEndView.z, reflectionRayStartView.z, nextSearchStep);
+			viewDistance = -(reflectionRayStartView.z * reflectionRayEndView.z) / mix(reflectionRayEndView.z, reflectionRayStartView.z, nextSearchStep);
 		
-			depthDiff = (-viewDistance) - (-lookupFragPositionView.z);
+			depthDiff = (viewDistance) - (-lookupFragPositionView.z);
 	
-			if (lookupFragPositionWs.r != 0 && depthDiff > 0 && depthDiff < tolerance){
+			if (depthDiff > 0 &&  depthDiff < tolerance ) {
 				secondPassHit = 1;
 				nextSearchStep = lastSearchStep + ((nextSearchStep - lastSearchStep) * 0.5);
 			} else {
 				float searchTemp = nextSearchStep;
-				nextSearchStep = lastSearchStep + ((nextSearchStep - lastSearchStep) * 0.5);
+				nextSearchStep = nextSearchStep + ((nextSearchStep - lastSearchStep) * 0.5);
 				lastSearchStep = searchTemp;
 			}
 		}
-		
+		if (secondPassHit == 1){
+			finalLookupPos = texPos.xy;
+			finalLookupFragPositionView = lookupFragPositionView;
+			finalLookupFragPositionWs = lookupFragPositionWs;
+		}
+
 		float metallic = texture(gMetallicRoughnessAO, exTexcoord).r;
 		
 		
@@ -139,17 +155,19 @@ void main() {
 		
 		float angle = dot(reflectionRay, texture(gNormal,texPos.xy).rgb);
 
-		visibility = ((secondPassHit == 1 || firstPassHit == 1) ? 1 : 0)
+		visibility = ((secondPassHit == 1 || firstPassHit == 1) ? 1 : 0) 
+						   * finalLookupFragPositionWs.w
 						   * fragPos.r == 0 ? 0 : 1 
-						   * lookupFragPositionWs.r == 0 ? 0 : 1 
-						   * (1 - max(angle >= 0 ? 1 : angle , 0))
+						   //* lookupFragPositionWs.r == 0 ? 0 : 1 
+						   * (1 - max(angle >= 0 ? 1 : angle , 0))				// if we reflect through geometry
 						   * (1 - max(dot(-viewDir, reflectionRay), 0))			// if we look at the geometry from behind
 						   * (1 - clamp(depthDiff / tolerance * 0.1, 0, 1))			// if we did not hit exactly
-						   * (1 - clamp(length(lookupFragPositionView - reflectionRayStartView) / maxRayDistance, 0, 1)) // fade out reflection strength depending on travelled ray distance
+						   * (1 - clamp(length(finalLookupFragPositionView - reflectionRayStartView) / maxRayDistance, 0, 1)) // fade out reflection strength depending on travelled ray distance
 						   * (texPos.x < 0 || texPos.x > 1 ? 0 : 1)		// if texture coordinate is outside of texture
 						   * (texPos.y < 0 || texPos.y > 1 ? 0 : 1)
 						   * screenEdgefactor
-						   * metallic;
+						   * metallic
+						   ;
 	
 		visibility = clamp(visibility, 0, 1);
 	}
@@ -157,8 +175,9 @@ void main() {
 	
 	float roughness = texture(gMetallicRoughnessAO, exTexcoord).g;
 	vec4 baseColor = texture(gShaded, exTexcoord);
-	vec4 reflectionColorBlur = texture(gBlur, texPos.xy); 
-	vec4 reflectionColor = texture(gShaded, texPos.xy);
+	vec4 reflectionColorBlur = texture(gBlur, finalLookupPos.xy); 
+	vec4 reflectionColor = texture(gShaded, finalLookupPos.xy);
 	vec3 ref = mix(reflectionColorBlur.rgb, reflectionColor.rgb, roughness);
+
 	fragColor = vec4(mix(baseColor.rgb, ref.rgb, visibility), 1);
 }

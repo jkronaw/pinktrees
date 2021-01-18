@@ -18,6 +18,7 @@ uniform vec2 gScreenSize;
 uniform vec3 viewPos;
 
 uniform float focalDepth;
+uniform int dofSamples;
 
 layout (shared) uniform SharedMatrices
 {
@@ -88,11 +89,11 @@ void main()
 			depth_diff = abs(50 - focalDepth);
 			z = 999999999;
 		}
-		float disc_radius = depth_diff * 0.0003;
+		float disc_radius = depth_diff * 0.00009;
 		vec4 color_sum = vec4(0.0);// vec4(color, 1.0);
 		float num_valid = 0;
 		
-		for(int i = 0; i < 75; i++){
+		for(int i = 0; i < dofSamples; i++){
 			
 			vec2 sample_pos = sample_disc(state);
 			sample_pos = sample_pos * disc_radius;
