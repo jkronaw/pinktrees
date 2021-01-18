@@ -52,6 +52,7 @@ class MyApp : public App
 	float bloomExposure = 0.2f;
 	bool useBloom = false;
 	int bloomBlur = 5;
+	float bloomThreshold = 0.2;
 
 	bool useDOF = false;
 	float focalDepth = 2.0f;
@@ -543,7 +544,7 @@ class MyApp : public App
 			skybox->draw();
 			
 			// Calculate Screen Space Reflections
-			if (true) {
+			if (useSsr) {
 				glBindFramebuffer(GL_FRAMEBUFFER, reflectionsBuffer.fbo);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_POSITION]);
@@ -598,13 +599,14 @@ class MyApp : public App
 				
 				glBindTexture(GL_TEXTURE_2D, useSsr? reflectionsBlendBuffer.texture : shadedBuffer.texture);
 				bloomSeparationProgram->use();
+				bloomSeparationProgram->setUniform("bloomThreshold", bloomThreshold);
 				quad->draw();
 				bloomSeparationProgram->unuse();
-			
+				
 				// bloom: apply blur to bright regions
 				bool firstBlurIteration = true;
 				for (int i = 0; i < bloomBlur; i++) {
-			
+				
 					// horizontal blur kernel: Read from Pong Texture, Write into Ping FBO (Texture)
 					glBindFramebuffer(GL_FRAMEBUFFER, pingPongBuffer.fbo[0]);
 					glActiveTexture(GL_TEXTURE0);
@@ -612,7 +614,7 @@ class MyApp : public App
 					horizontalBlurProgram->use();
 					quad->draw();
 					horizontalBlurProgram->unuse();
-			
+				
 					// vertikal blur kernel: Read from Ping Texture, Write into Pong FBO (Texture)
 					glBindFramebuffer(GL_FRAMEBUFFER, pingPongBuffer.fbo[1]);
 					glActiveTexture(GL_TEXTURE0);
@@ -627,7 +629,7 @@ class MyApp : public App
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, useSsr ? reflectionsBlendBuffer.texture : shadedBuffer.texture);
 			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D,pingPongBuffer.texture[1]);
+			glBindTexture(GL_TEXTURE_2D, pingPongBuffer.texture[1]);
 			bloomProgram->use();
 			
 			if (useBloom)
@@ -696,6 +698,7 @@ class MyApp : public App
 
 			ImGui::SliderFloat("BLOOM Exposure", &bloomExposure, 0.0f, 1.0f);
 			ImGui::SliderInt("BLOOM Blur Amount", &bloomBlur, 0, 20);
+			ImGui::SliderFloat("BLOOM Threshold", &bloomThreshold, 0.01, 1);
 
 			ImGui::SliderFloat("DOF Focal Depth", &focalDepth, -25.0f, 25.0f);
 			ImGui::SliderInt("DOF #Samples", &dofSamples, 1, 150);
