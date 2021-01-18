@@ -634,7 +634,10 @@ class MyApp : public App
 			glDisable(GL_BLEND);
 		}
 
-		handleImGui();
+		if (!catchCursor) handleImGui();
+
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		/*if (!useTextures) {
 			for (PBRModel* m : models)
@@ -728,9 +731,7 @@ class MyApp : public App
 			ImGui::End();
 		}
 
-		// render windows
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
 	}
 };
 
