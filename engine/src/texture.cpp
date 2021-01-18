@@ -210,9 +210,6 @@ namespace engine
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
 
-		int width, height, channels;
-		unsigned char* data;
-
 		for (unsigned int i = 0; i < 6; i++)
 		{
 			std::string filename = directoryName + "/" + CUBEMAP_FILENAMES[i] + ".png";
@@ -393,8 +390,8 @@ namespace engine
 
 		for (unsigned int mipmapLevel = 0; mipmapLevel < NR_MIPMAP_LEVELS; mipmapLevel++)
 		{
-			unsigned int mipmapWidth = INTERNAL_CUBEMAP_SIDELENGTH * std::pow(0.5, mipmapLevel);
-			unsigned int mipmapHeight = INTERNAL_CUBEMAP_SIDELENGTH * std::pow(0.5, mipmapLevel);
+			GLuint mipmapWidth  = (GLuint)(INTERNAL_CUBEMAP_SIDELENGTH * std::pow(0.5, mipmapLevel));
+			GLuint mipmapHeight = (GLuint)(INTERNAL_CUBEMAP_SIDELENGTH * std::pow(0.5, mipmapLevel));
 
 			glBindRenderbuffer(GL_RENDERBUFFER, captureRbo);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipmapWidth, mipmapHeight);
