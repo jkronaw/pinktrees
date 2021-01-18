@@ -3,6 +3,7 @@
 #include <string>
 
 #include "shader.h"
+#include "constants.h"
 
 namespace engine
 {

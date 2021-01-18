@@ -21,8 +21,7 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
+#include "constants.h"
 
 namespace engine {
 
