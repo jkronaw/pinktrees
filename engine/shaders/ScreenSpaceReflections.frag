@@ -149,8 +149,8 @@ void main() {
 
 		float metallic = texture(gMetallicRoughnessAO, exTexcoord).r;
 		
-		//vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - texPos.xy));
-		//float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
+		vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - texPos.xy));
+		float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
 		
 		float angle = dot(reflectionRay, texture(gNormal,texPos.xy).rgb);
 
@@ -163,7 +163,7 @@ void main() {
 					* (1 - clamp(length(finalLookupFragPositionView - reflectionRayStartView) / maxRayDistance, 0, 1)) // fade out reflection strength depending on travelled ray distance
 					* (texPos.x < 0 || texPos.x > 1 ? 0 : 1)				// if texture coordinate is outside of texture
 					* (texPos.y < 0 || texPos.y > 1 ? 0 : 1)
-					//* screenEdgefactor										
+					* screenEdgefactor										
 					* metallic												// reflectivity of material 
 					;
 	
