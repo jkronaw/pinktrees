@@ -88,6 +88,31 @@ namespace engine {
 			glDeleteTextures(1, &texture);
 	}
 
+	ReflectionsBlendBuffer::ReflectionsBlendBuffer() {};
+	ReflectionsBlendBuffer::~ReflectionsBlendBuffer() { ReflectionsBlendBuffer::deleteBufferData(); };
+
+	void ReflectionsBlendBuffer::initialize(unsigned int windowWidth, unsigned int windowHeight) {
+		glGenFramebuffers(1, &fbo);
+		glGenTextures(1, &texture);
+		glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, windowWidth, windowHeight, 0, GL_RGBA, GL_FLOAT, NULL);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		GLenum DrawBuffersReflection[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, DrawBuffersReflection);
+	}
+
+	void ReflectionsBlendBuffer::deleteBufferData() {
+		if (fbo != 0)
+			glDeleteFramebuffers(1, &fbo);
+		if (texture != 0)
+			glDeleteTextures(1, &texture);
+	}
+
 	BlurBuffer::BlurBuffer() {};
 	BlurBuffer::~BlurBuffer() { BlurBuffer::deleteBufferData(); };
 

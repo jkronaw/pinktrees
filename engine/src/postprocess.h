@@ -52,6 +52,19 @@ namespace engine {
 		void deleteBufferData();
 	};
 
+	class ReflectionsBlendBuffer : public PostProcessBuffer {
+	public:
+
+		ReflectionsBlendBuffer();
+		~ReflectionsBlendBuffer();
+
+		GLuint fbo = 0;
+		GLuint texture = 0;
+
+		void initialize(unsigned int windowWidth, unsigned int windowHeight);
+		void deleteBufferData();
+	};
+
 	class BlurBuffer : public PostProcessBuffer {
 	public:
 

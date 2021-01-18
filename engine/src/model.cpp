@@ -65,8 +65,10 @@ namespace engine
 
 			if(material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == 0)
 				mat->albedo = Vector3(color.r, color.b, color.g);
-			//if(material->Get(AI_MATKEY_COLOR_SPECULAR, color))			// Not sure, which ones will be used later on
-			//	mat->metallic = Vector3(color.r, color.b, color.g);
+			if(material->Get(AI_MATKEY_COLOR_SPECULAR, color) == 0)			
+				mat->metallic = color.r;
+			if (material->Get(AI_MATKEY_SHININESS, color) == 0)
+				mat->roughness = color.r;
 
 			materials.insert(std::pair<int, Material*>(i, mat));
 		}

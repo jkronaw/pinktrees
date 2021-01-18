@@ -10,7 +10,6 @@ uniform sampler2D gAlbedo;
 uniform sampler2D gNormal;
 uniform sampler2D gMetallicRoughnessAO;
 uniform sampler2D gTexCoord;
-uniform sampler2D gShaded;
 uniform sampler2D gBloom;
 
 uniform bool useDOF;
@@ -25,6 +24,9 @@ layout (shared) uniform SharedMatrices
 	mat4 ViewMatrix;
 	mat4 ProjectionMatrix;
 };
+
+
+// functions to generate pseudo random numbers: Found on http://www.reedbeta.com/blog/quick-and-easy-gpu-random-numbers-in-d3d11/
 
 uint wang_hash(uint n)
 {
@@ -44,6 +46,7 @@ uint xor_shift(inout uint state)
 	return state;
 }
 
+// inout to change state after every sample
 float random_float(inout uint state)
 {
 	uint value = xor_shift(state);
@@ -58,6 +61,7 @@ vec2 sample_disc(inout uint state)
 	return radius * vec2( cos( angle ), sin( angle ) );
 }
 
+// random seed generator
 uint init_rng()
 {
 	uint pixelID = uint(gl_FragCoord.x) + 2048u * uint(gl_FragCoord.y);
@@ -70,13 +74,9 @@ void main()
 {   
     
 	// Without DOF:
-
 	vec3 color = texture(gBloom, exTexcoord).rgb;
 	FragmentColor = vec4(color, 1.0);
 
-
-	// very simple DOF:
-	// TODO: integrate BackGround with DOF in a better way
 	if(useDOF){
 
 		uint state = init_rng();

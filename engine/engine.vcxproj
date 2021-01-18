@@ -101,6 +101,7 @@
     <None Include="shaders\LIGHT_vertex.vert" />
     <None Include="shaders\DOF.frag" />
     <None Include="shaders\preprocessing\prefilterMapConvolution.frag" />
+    <None Include="shaders\reflection_blend.frag" />
     <None Include="shaders\ScreenSpaceReflections.frag" />
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\skybox.vert" />

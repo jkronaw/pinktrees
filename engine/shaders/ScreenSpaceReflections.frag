@@ -149,25 +149,23 @@ void main() {
 
 		float metallic = texture(gMetallicRoughnessAO, exTexcoord).r;
 		
-		
-		vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - texPos.xy));
-		float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
+		//vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - texPos.xy));
+		//float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
 		
 		float angle = dot(reflectionRay, texture(gNormal,texPos.xy).rgb);
 
-		visibility = ((secondPassHit == 1 || firstPassHit == 1) ? 1 : 0) 
-						   * finalLookupFragPositionWs.w
-						   * fragPos.r == 0 ? 0 : 1 
-						   //* lookupFragPositionWs.r == 0 ? 0 : 1 
-						   * (1 - max(angle >= 0 ? 1 : angle , 0))				// if we reflect through geometry
-						   * (1 - max(dot(-viewDir, reflectionRay), 0))			// if we look at the geometry from behind
-						   * (1 - clamp(depthDiff / tolerance * 0.1, 0, 1))			// if we did not hit exactly
-						   * (1 - clamp(length(finalLookupFragPositionView - reflectionRayStartView) / maxRayDistance, 0, 1)) // fade out reflection strength depending on travelled ray distance
-						   * (texPos.x < 0 || texPos.x > 1 ? 0 : 1)		// if texture coordinate is outside of texture
-						   * (texPos.y < 0 || texPos.y > 1 ? 0 : 1)
-						   * screenEdgefactor
-						   * metallic
-						   ;
+		visibility = ((secondPassHit == 1 || firstPassHit == 1) ? 1 : 0)	// check if any geometry has been hit
+					* finalLookupFragPositionWs.w							// discard background reflections
+					* fragPos.r == 0 ? 0 : 1								// discard ray reflected from background
+					* (1 - max(angle >= 0 ? 1 : angle , 0))					// discard ray that hit geometry from the inside
+					* (1 - max(dot(-viewDir, reflectionRay), 0))			// if we look at the geometry from behind
+					* (1 - clamp(depthDiff / tolerance * 0.5, 0, 1))		// if we did not hit exactly
+					* (1 - clamp(length(finalLookupFragPositionView - reflectionRayStartView) / maxRayDistance, 0, 1)) // fade out reflection strength depending on travelled ray distance
+					* (texPos.x < 0 || texPos.x > 1 ? 0 : 1)				// if texture coordinate is outside of texture
+					* (texPos.y < 0 || texPos.y > 1 ? 0 : 1)
+					//* screenEdgefactor										
+					* metallic												// reflectivity of material 
+					;
 	
 		visibility = clamp(visibility, 0, 1);
 	}
@@ -179,5 +177,5 @@ void main() {
 	vec4 reflectionColor = texture(gShaded, finalLookupPos.xy);
 	vec3 ref = mix(reflectionColorBlur.rgb, reflectionColor.rgb, roughness);
 
-	fragColor = vec4(mix(baseColor.rgb, ref.rgb, visibility), 1);
+	fragColor = vec4(reflectionColor.rgb * visibility, visibility);
 }
