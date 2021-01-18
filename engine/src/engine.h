@@ -48,6 +48,7 @@ namespace engine {
 
         int getKey(int key);
         int getMouseButton(int button);
+        Vector2 getCursorPos();
     private:
         GLFWwindow* window = nullptr;
         App* app = nullptr;
@@ -64,6 +65,7 @@ namespace engine {
     class App
     {
     public:
+        GLFWwindow* window = nullptr;
         Engine& engine = Engine::getInstance();
 
         virtual void start() = 0;

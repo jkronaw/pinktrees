@@ -6,6 +6,9 @@
 
 namespace engine
 {
+	const float CAMERA_MOUSE_SENSITIVITY = 0.002f;
+	const float CAMERA_SPEED = 2.5f;
+
 	class Camera
 	{
 	public:
@@ -14,27 +17,31 @@ namespace engine
 
 		GLuint getUboBP() const;
 
-		void bind();
-
-		void lookAt(Vector3 eye, Vector3 center, Vector3 up);
+		// projection matrix
+		Matrix4 getProjectionMatrix() const;
 		void setOrtho(float l, float r, float b, float t, float n, float f);
 		void setPerspective(float fov, float aspect, float n, float f);
 
-		Matrix4 getViewMatrix();
-		void setViewMatrix(Matrix4);
+		// view matrix
+		Matrix4 getViewMatrix() const;
+		void lookAt(Vector3 eye, Vector3 center);
 
-		Matrix3 getViewMatrixInversed();
-		Matrix4 getProjectionMatrix();
+		// camera properties
+		float getPitch();
+		float getYaw();
+		Vector3 getPosition();
+
+		void update(double elapsedSecs, Vector2 cursorDiff);
 
 	private:
-		Matrix4 viewMatrix;
-		Matrix3 viewMatrixInversed;
-
-		Matrix4 projectionMatrix;
-
-		bool viewMatrixInversedUpToDate = false;
-
 		GLuint uboId;
 		GLuint uboBP;
+
+		Matrix4 projectionMatrix;
+		Matrix4 viewMatrix;
+
+		float pitch = 0;
+		float yaw = 0;
+		Vector3 position;
 	};
 }

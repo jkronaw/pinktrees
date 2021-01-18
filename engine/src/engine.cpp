@@ -23,6 +23,7 @@ namespace engine {
 #endif
 		setupImGui();
 
+		app->window = window;
 		app->start();
     }
 
@@ -79,7 +80,8 @@ namespace engine {
 
 		auto mouseCallback = [](GLFWwindow* w, double x, double y)
 		{
-			if (!ImGui::GetIO().WantCaptureMouse) {
+			if (!ImGui::GetIO().WantCaptureMouse)
+			{
 				static_cast<App*>(glfwGetWindowUserPointer(w))->mouseCallback(Vector2(x, y));
 			}
 		};
@@ -87,7 +89,10 @@ namespace engine {
 
 		auto mouseButtonCallback = [](GLFWwindow* w, int button, int action, int mods)
 		{
-			static_cast<App*>(glfwGetWindowUserPointer(w))->mouseButtonCallback(button, action, mods);
+			if (!ImGui::GetIO().WantCaptureMouse)
+			{
+				static_cast<App*>(glfwGetWindowUserPointer(w))->mouseButtonCallback(button, action, mods);
+			}
 		};
 		glfwSetMouseButtonCallback(window, mouseButtonCallback);
 
@@ -188,6 +193,13 @@ namespace engine {
 	int Engine::getMouseButton(int button)
 	{
 		return glfwGetMouseButton(window, button);
+	}
+
+	Vector2 Engine::getCursorPos()
+	{
+		double x, y;
+		glfwGetCursorPos(window, &x, &y);
+		return Vector2(x, y);
 	}
 
 	void glfwErrorCallback(int error, const char* description)

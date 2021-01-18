@@ -44,6 +44,9 @@ class MyApp : public App
 	ShaderProgram* ssaoProgram;
 	ShaderProgram* reflectionBlendProgram;
 
+	bool catchCursor = false;
+	Vector2 lastCursorPos;
+
 	//bool useTextures = true;
 	float roughness = 0.5;
 	float metallic = 0.4;
@@ -89,7 +92,7 @@ class MyApp : public App
 	{
 		float aspectRatio = engine.windowWidth / (float)engine.windowHeight;
 		// M_PI / 3 is aproximately 60 degrees FOV
-		camera->setPerspective(M_PI / 3, aspectRatio, 0.1, 50);
+		camera->setPerspective(M_PI / 3, aspectRatio, 0.1, 100);
 	}
 
 	#pragma region Callbacks
@@ -131,7 +134,7 @@ class MyApp : public App
 		if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) windowCloseCallback();
 
 		// show gbuffer content
-		if (key == GLFW_KEY_C && action == GLFW_PRESS) showGbufferContent = !showGbufferContent;
+		if (key == GLFW_KEY_X && action == GLFW_PRESS) showGbufferContent = !showGbufferContent;
 
 		// model switching
 		if (key == GLFW_KEY_1 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[0]);
@@ -151,20 +154,16 @@ class MyApp : public App
 			}*/
 		}
 		if (key == GLFW_KEY_B && action == GLFW_PRESS) useBloom = !useBloom;
-		if (key == GLFW_KEY_D && action == GLFW_PRESS) useDOF = !useDOF;
 		if (key == GLFW_KEY_I && action == GLFW_PRESS) showDemoWindow = !showDemoWindow; // I to toggle the ImGui debug window
 	}
-
-	void mouseCallback(Vector2 mousePosition) override { mouseCurrentPos = mousePosition; }
 
 	void mouseButtonCallback(int button, int action, int mods) override
 	{
 		if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS)
 		{
-			mouseStartingPos = mouseCurrentPos;
-
-			oldCameraViewMatrix = camera->getViewMatrix();
-			oldCameraViewMatrixInversed = camera->getViewMatrixInversed();
+			catchCursor = !catchCursor;
+			glfwSetInputMode(window, GLFW_CURSOR, catchCursor ? GLFW_CURSOR_DISABLED : GLFW_CURSOR_NORMAL);
+			lastCursorPos = engine.getCursorPos();
 		}
 	}
 
@@ -199,8 +198,7 @@ class MyApp : public App
 
 		camera->lookAt(
 			Vector3(0, 0, 5),
-			Vector3(0, 0, 1),
-			Vector3(0, 1, 0)
+			Vector3(0, 0, 1)
 		);
 
 		updateProjection();
@@ -368,34 +366,13 @@ class MyApp : public App
 
 	void update(double elapsedSecs) override
 	{
-		if (engine.getMouseButton(GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) // camera rotation using mouse
-		{
-			Vector2 diff = mouseCurrentPos - mouseStartingPos;
-			diff *= CAMERA_ROTATE_SPEED;
+		// update camera
+		Vector2 cursorPos = engine.getCursorPos();
+		Vector2 cursorDiff = cursorPos - lastCursorPos;
+		lastCursorPos = cursorPos;
 
-			Vector3 oldCameraSide = oldCameraViewMatrixInversed * Vector3(1, 0, 0);
-
-			Matrix4 rotationSide = Matrix4::CreateRotationY(diff.x);
-			Matrix4 rotationUp = Matrix4::CreateRotation(-diff.y, oldCameraSide);
-
-			camera->setViewMatrix(oldCameraViewMatrix * rotationUp * rotationSide);
-		}
-		else // camera translation using keys
-		{
-			Vector3 cameraVelocity = Vector3(0, 0, 0);
-
-			bool upArrowPressed = engine.getKey(GLFW_KEY_UP) == GLFW_PRESS;
-			bool downArrowPressed = engine.getKey(GLFW_KEY_DOWN) == GLFW_PRESS;
-
-			if (upArrowPressed && !downArrowPressed) cameraVelocity.z = CAMERA_SPEED;
-			if (!upArrowPressed && downArrowPressed) cameraVelocity.z = -CAMERA_SPEED;
-
-			Matrix4 translationMatrix = Matrix4::CreateTranslation(camera->getViewMatrixInversed() * cameraVelocity * elapsedSecs);
-			Matrix4 out = camera->getViewMatrix() * translationMatrix;
-			camera->setViewMatrix(out);
-		}
-
-		camera->bind();
+		if (!catchCursor) cursorDiff = Vector2(0, 0);
+		camera->update(elapsedSecs, cursorDiff);
 
 		if (useBloom) {
 			int multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1 : 1;
@@ -461,9 +438,7 @@ class MyApp : public App
 			}*/
 		//}
 
-		Matrix4 viewMatrix = camera->getViewMatrix();
-		Matrix3 viewMatrixInversed = camera->getViewMatrixInversed();
-		Vector3 translation = viewMatrixInversed * Vector3(viewMatrix * Vector4(0, 0, 0, 1)) * -1;
+		Vector3 translation = camera->getPosition();
 
 		// geometry pass	
 		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fbo);
@@ -677,8 +652,6 @@ class MyApp : public App
 			}
 		}*/
 	}
-
-	int selectedLight;
 
 	void handleImGui()
 	{
