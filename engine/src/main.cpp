@@ -17,7 +17,7 @@ class MyApp : public App
 
 	Skybox* skybox = new Skybox(camera);
 
-	// for debugging output
+	// for debugging
 	TextureCubemap* environmentMap, *irradianceMap, *prefilterMap;
 
 	ShaderProgram* geoProgram;
@@ -31,11 +31,6 @@ class MyApp : public App
 	ShaderProgram* fastBoxBlurProgram;
 	ShaderProgram* ssaoProgram;
 	ShaderProgram* reflectionBlendProgram;
-
-	//bool useTextures = true;
-	float roughness = 0.5f;
-	float metallic = 0.4f;
-	float ao = 1.0f;
 
 	float bloomExposure = 0.2f;
 	bool useBloom = false;
@@ -60,6 +55,7 @@ class MyApp : public App
 	bool showDemoWindow = false;
 	bool showGbufferContent = false;
 
+	unsigned int selectedModel = 0;
 	Model* models[6];
 
 	GBuffer gbuffer;
@@ -84,9 +80,11 @@ class MyApp : public App
 	void windowCloseCallback() override
 	{
 		engine.stop();
+
 		delete sceneGraph;
 		delete quad;
 		delete skybox;
+		delete camera;
 	}
 
 	void windowSizeCallback(int newWidth, int newHeight)
@@ -122,24 +120,15 @@ class MyApp : public App
 		if (key == GLFW_KEY_X && action == GLFW_PRESS) showGbufferContent = !showGbufferContent;
 
 		// model switching
-		if (key == GLFW_KEY_1 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[0]);
-		if (key == GLFW_KEY_2 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[1]);
-		if (key == GLFW_KEY_3 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[2]);
-		if (key == GLFW_KEY_4 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[3]);
-		if (key == GLFW_KEY_5 && action == GLFW_PRESS) sceneGraph->getRoot()->setDrawable(models[4]);
+		if (key == GLFW_KEY_1 && action == GLFW_PRESS) selectedModel = 0;
+		if (key == GLFW_KEY_2 && action == GLFW_PRESS) selectedModel = 1;
+		if (key == GLFW_KEY_3 && action == GLFW_PRESS) selectedModel = 2;
+		if (key == GLFW_KEY_4 && action == GLFW_PRESS) selectedModel = 3;
+		if (key == GLFW_KEY_5 && action == GLFW_PRESS) selectedModel = 4;
+		sceneGraph->getRoot()->setDrawable(models[selectedModel]);
 
-		if (key == GLFW_KEY_T && action == GLFW_PRESS) {
-		/*	useTextures = !useTextures;
-			std::cout << "Use Textures: " << (useTextures ? "Yes" : "No") << std::endl;
-			if (useTextures) {
-				for (PBRModel* m : models)
-				{
-					m->useLoadedTextures();
-				}
-			}*/
-		}
-		if (key == GLFW_KEY_B && action == GLFW_PRESS) useBloom = !useBloom;
-		if (key == GLFW_KEY_I && action == GLFW_PRESS) showDemoWindow = !showDemoWindow; // I to toggle the ImGui debug window
+		// press I to toggle the ImGui debug window
+		if (key == GLFW_KEY_I && action == GLFW_PRESS) showDemoWindow = !showDemoWindow; 
 	}
 
 	void mouseButtonCallback(int button, int action, int mods) override
@@ -171,7 +160,7 @@ class MyApp : public App
 		lights.push_back(Light(Vector3(-2.f, 3.f, -2.f), Vector3(1.f, 1.f, 1.f), 15.f));
 
 		SceneNode* root = sceneGraph->getRoot();
-		root->setDrawable(models[0]);
+		root->setDrawable(models[selectedModel]);
 		SceneNode* groundNode = root->createNode();
 		groundNode->setDrawable(models[5]);
 		groundNode->setMatrix(Matrix4::CreateTranslation(0, -1, 0));
@@ -355,59 +344,6 @@ class MyApp : public App
 				std::cout << "Bloom Exposure: " << bloomExposure << std::endl;
 			}	
 		}
-	
-		/*if (!useTextures) {
-			int multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1 : 1;
-
-			if (engine.getKey(GLFW_KEY_R) == GLFW_PRESS)
-			{
-				roughness += 0.02 * multiplier;
-				if (roughness > 1) roughness = 1;
-				if (roughness < 0) roughness = 0;
-				std::cout << "Roughness: " << roughness << std::endl;
-			}
-
-			if (engine.getKey(GLFW_KEY_M) == GLFW_PRESS)
-			{
-				metallic += 0.02 * multiplier;
-				if (metallic > 1) metallic = 1;
-				if (metallic < 0) metallic = 0;
-				std::cout << "Metallic: " << metallic << std::endl;
-			}
-
-			if (engine.getKey(GLFW_KEY_A) == GLFW_PRESS)
-			{
-				ao += 0.02 * multiplier;
-				if (ao > 1) ao = 1;
-				if (ao < 0) ao = 0;
-				std::cout << "Ambient Occlusion: " << ao << std::endl;
-			}*/
-
-			/*if (!useTextures) {
-				for (PBRModel* m : models)
-				{
-					Texture2D* texAlbedo = new Texture2D();
-					texAlbedo->createFromColorRGB(Vector3(1, 0, 0));
-					m->activeTextures[0]->texture = texAlbedo;
-
-					Texture2D* texNormal = new Texture2D();
-					texNormal->createFromColorRGB(Vector3(0.5, 0.5, 1));
-					m->activeTextures[1]->texture = texNormal;
-
-					Texture2D* texRoughness = new Texture2D();
-					texRoughness->createFromColorGrayscale(roughness);
-					m->activeTextures[2]->texture = texRoughness;
-
-					Texture2D* texMetallic = new Texture2D();
-					texMetallic->createFromColorGrayscale(metallic);
-					m->activeTextures[3]->texture = texMetallic;
-
-					Texture2D* texAO = new Texture2D();
-					texAO->createFromColorGrayscale(ao);
-					m->activeTextures[4]->texture = texAO;
-				}
-			}*/
-		//}
 
 		Vector3 translation = camera->getPosition();
 
@@ -613,20 +549,12 @@ class MyApp : public App
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		/*if (!useTextures) {
-			for (PBRModel* m : models)
-			{
-				for (int i = 0; i < 5; i++)
-				{
-					delete m->activeTextures[i]->texture;
-				}
-			}
-		}*/
 	}
 
 	void handleImGui()
 	{
+		const ImVec4 accentColor(0.5f, 1.f, 1.f, 1.f);
+
 		// ImGui demo window (toggle with I)
 		if (showDemoWindow) ImGui::ShowDemoWindow(&showDemoWindow);
 		{
@@ -647,7 +575,6 @@ class MyApp : public App
 			ImGui::SliderFloat("DOF Focal Depth", &focalDepth, -25.0f, 25.0f);
 			ImGui::SliderInt("DOF #Samples", &dofSamples, 1, 150);
 
-
 			ImGui::SliderFloat("SSR Max Ray Length", &maxRayDistance, 1.0f, 50.0f);
 			ImGui::SliderFloat("SSR Resolution", &stepResolution, 0.1f, 1.0f);
 			ImGui::SliderInt("SSR Iterations", &stepIterations, 50, 800);
@@ -659,12 +586,35 @@ class MyApp : public App
 		{
 			ImGui::Begin("Physically Based Rendering Options");
 
+			// material properties (only applies to debug objects)
+			ImGui::TextColored(accentColor, "Material Properties (only debug objects)");
+
+			Material* material = models[selectedModel]->getMeshes()[0]->getMaterial();
+
+			ImGui::Checkbox("Use albedo from texture", &material->useAlbedoMap);
+			if (!material->useAlbedoMap) ImGui::ColorEdit3("Albedo", (float*)&material->albedo);
+
+			ImGui::Checkbox("Use normals from texture", &material->useNormalMap);
+			if (!material->useNormalMap) ImGui::DragFloat3("Normal", (float*)&material->normal, 0.1f, -1.f, 1.f);
+
+			ImGui::Checkbox("Use metallic from texture", &material->useMetallicMap);
+			if (!material->useMetallicMap) ImGui::SliderFloat("Metallic", &material->metallic, 0.0f, 1.0f);
+
+			ImGui::Checkbox("Use roughness from texture", &material->useRoughnessMap);
+			if (!material->useRoughnessMap) ImGui::SliderFloat("Roughness", &material->roughness, 0.0f, 1.0f);
+
+			ImGui::Checkbox("Use ambient occlusion from texture", &material->useAoMap);
+			if (!material->useAoMap) ImGui::SliderFloat("AO", &material->ao, 0.0f, 1.0f);
+
+			// indirect lighting section
+			ImGui::TextColored(accentColor, "Indirect lighting");
 			ImGui::Text("Displayed Cube Map:");
+
 			static int map = 0;
 			ImGui::RadioButton("Environment map (default)", &map, 0);
 			ImGui::RadioButton("Irradiance map (for debugging)", &map, 1);
 			ImGui::RadioButton("Prefilter map (max mipmap level, for debugging)", &map, 2);
-			
+
 			switch (map)
 			{
 			case 0: skybox->setCubemap(environmentMap); break;
@@ -673,27 +623,22 @@ class MyApp : public App
 			default: break;
 			}
 
-			ImGui::SliderFloat("Roughness", &roughness, 0.0f, 1.0f);
-			ImGui::SliderFloat("Metallic", &metallic, 0.0f, 1.0f);
-			ImGui::SliderFloat("AO", &ao, 0.0f, 1.0f);
-
-
-			ImGui::Text("Direct Lights:");
-			static int selectedLight = 0;			
+			// direct lighting
+			ImGui::TextColored(accentColor, "Direct Lighting:");
+			static int selectedLight = 0;
 			ImGui::DragFloat3("Light Position", (float*)&lights[selectedLight].position, 0.1f, -15.f, 15.f);
 			ImGui::ColorEdit3("Color", (float*)&lights[selectedLight].color);
 			ImGui::DragFloat("Brightness", (float*)&lights[selectedLight].brightness, 0.1f, 0.f, 100.f);
-			
+
 			if (ImGui::Button("Add Light")) { lights.push_back(Light(Vector3(), Vector3(1.f, 1.f, 1.f), 15.f)); }
-
 			ImGui::SameLine();
-
-			if (ImGui::Button("Remove Light") && lights.size() > 0) {
+			if (ImGui::Button("Remove Light") && lights.size() > 0)
+			{
 				lights.erase(lights.begin() + selectedLight);
 				selectedLight = 0;
 			}
 
-			ImGui::BeginChild("Scrolling");			
+			ImGui::BeginChild("Scrolling");
 			for (int i = 0; i < lights.size(); i++)
 			{
 				std::stringstream ss;
@@ -702,7 +647,7 @@ class MyApp : public App
 					selectedLight = i;
 			}
 			ImGui::EndChild();
-			
+
 			ImGui::End();
 		}
 	}

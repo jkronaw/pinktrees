@@ -36,7 +36,7 @@ namespace engine {
         Engine(Engine const&) = delete;
         void operator=(Engine const&) = delete;
 
-        const char* windowTitle = "Jakobs' Engine";
+        const char* windowTitle = "Cherry Blossom";
         int windowWidth = 1200, windowHeight = 700;
         bool fullscreen = false;
 

@@ -119,6 +119,8 @@ namespace engine
 		glBindVertexArray(0);
 	}
 
+	Material* Mesh::getMaterial() { return material; }
+
 	void Mesh::draw(ShaderProgram* program)
 	{	
 		if (material) {

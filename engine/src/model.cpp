@@ -95,6 +95,11 @@ namespace engine
 		}
 	}
 
+	std::vector<Mesh*> Model::getMeshes()
+	{
+		return meshes;
+	}
+
 	void Model::draw(ShaderProgram* program) const
 	{
 		for (Mesh* mesh : meshes)

@@ -44,6 +44,7 @@ namespace engine {
 
 		void calculateTangents();
 		void setup();
+		Material* getMaterial();
 		void draw(ShaderProgram * program = nullptr);
 
 		// vertex attributes
