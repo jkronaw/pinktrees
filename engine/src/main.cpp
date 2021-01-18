@@ -451,7 +451,7 @@ class MyApp : public App
 		else {
 
 			// SSAO Pass 
-			if (true) {
+			if (useSsao) {
 				glBindFramebuffer(GL_FRAMEBUFFER, ssaoBuffer.fbo);
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_POSITION]);
@@ -508,9 +508,7 @@ class MyApp : public App
 			
 			// draw Skybox
 			glBindFramebuffer(GL_READ_FRAMEBUFFER, gbuffer.fbo);
-			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, shadedBuffer.fbo);
 			glBlitFramebuffer(0, 0, engine.windowWidth, engine.windowHeight, 0, 0, engine.windowWidth, engine.windowHeight, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-			glBindFramebuffer(GL_FRAMEBUFFER, shadedBuffer.fbo);
 			
 			skybox->draw();
 			

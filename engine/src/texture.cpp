@@ -160,8 +160,6 @@ namespace engine
 
 		Mesh* quad = MeshFactory::createQuad();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
-
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		quad->draw();
 		program->unuse();
@@ -263,7 +261,6 @@ namespace engine
 
 		Mesh* cube = MeshFactory::createCube();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
 		for (unsigned int i = 0; i < 6; ++i)
 		{
 			program->setUniform("ViewMatrix", CUBEMAP_CAPTURE_VIEW_MATRICES[i]);
@@ -325,7 +322,6 @@ namespace engine
 
 		Mesh* cube = MeshFactory::createCube();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
 		for (unsigned int i = 0; i < 6; ++i)
 		{
 			program->setUniform("ViewMatrix", CUBEMAP_CAPTURE_VIEW_MATRICES[i]);
@@ -386,14 +382,11 @@ namespace engine
 
 		Mesh* cube = MeshFactory::createCube();
 
-		glBindFramebuffer(GL_FRAMEBUFFER, captureFbo);
-
 		for (unsigned int mipmapLevel = 0; mipmapLevel < NR_MIPMAP_LEVELS; mipmapLevel++)
 		{
 			GLuint mipmapWidth  = (GLuint)(INTERNAL_CUBEMAP_SIDELENGTH * std::pow(0.5, mipmapLevel));
 			GLuint mipmapHeight = (GLuint)(INTERNAL_CUBEMAP_SIDELENGTH * std::pow(0.5, mipmapLevel));
 
-			glBindRenderbuffer(GL_RENDERBUFFER, captureRbo);
 			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT24, mipmapWidth, mipmapHeight);
 			glViewport(0, 0, mipmapWidth, mipmapHeight);
 
