@@ -286,7 +286,7 @@ namespace engine
 	}
 	void TextureCubemap::convoluteIrradianceMapFromCubemap(TextureCubemap* cubemap) const
 	{
-		const unsigned int INTERNAL_CUBEMAP_SIDELENGTH = 128;
+		const unsigned int INTERNAL_CUBEMAP_SIDELENGTH = 32;
 
 		setupEmpty(INTERNAL_CUBEMAP_SIDELENGTH);
 

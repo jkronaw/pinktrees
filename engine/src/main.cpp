@@ -557,6 +557,7 @@ class MyApp : public App
 
 		// ImGui demo window (toggle with I)
 		if (showDemoWindow) ImGui::ShowDemoWindow(&showDemoWindow);
+
 		{
 			ImGui::Begin("Post Processing Effects");
 
@@ -585,6 +586,8 @@ class MyApp : public App
 
 		{
 			ImGui::Begin("Physically Based Rendering Options");
+
+			ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
 
 			// material properties (only applies to debug objects)
 			ImGui::TextColored(accentColor, "Material Properties (only debug objects)");
