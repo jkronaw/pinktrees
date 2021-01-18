@@ -334,20 +334,9 @@ class MyApp : public App
 		if (!catchCursor) cursorDiff = Vector2(0.0, 0.0);
 		camera->update((float)elapsedSecs, cursorDiff);
 
-		if (useBloom) {
-			float multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1.f : 1.f;
-			if (engine.getKey(GLFW_KEY_E) == GLFW_PRESS)
-			{	
-				bloomExposure += 0.02f * multiplier;
-				if (bloomExposure > 1.f) bloomExposure = 1.f;
-				if (bloomExposure < 0.f) bloomExposure = 0.f;
-				std::cout << "Bloom Exposure: " << bloomExposure << std::endl;
-			}	
-		}
-
 		Vector3 translation = camera->getPosition();
 
-		// geometry pass	
+		// geometry pass
 		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
