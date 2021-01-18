@@ -149,7 +149,7 @@ namespace engine
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, id, 0);
 
 		ShaderProgram* program = new ShaderProgram();
-		program->init("shaders/LIGHT_vertex.vert", "shaders/preprocessing/brdfLUT.frag");
+		program->init("shaders/general/quad2D.vert", "shaders/preprocessing/brdfLUT.frag");
 		program->link();
 
 		program->use();

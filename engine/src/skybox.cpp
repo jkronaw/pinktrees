@@ -12,7 +12,7 @@ namespace engine {
 		if (program == nullptr)
 		{
 			program = new ShaderProgram();
-			program->init("shaders/skybox.vert", "shaders/skybox.frag");
+			program->init("shaders/general/skybox.vert", "shaders/general/skybox.frag");
 			program->link();
 			program->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
 		}
