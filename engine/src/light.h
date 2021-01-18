@@ -9,6 +9,6 @@ namespace engine
 		Light(Vector3 position, Vector3 color, float brightness);
 		Vector3 position;
 		Vector3 color;
-		float brightness;
+		float brightness = 1.f;
 	};
 }

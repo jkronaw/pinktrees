@@ -15,7 +15,7 @@ namespace engine
 	class Texture
 	{
 	protected:
-		GLuint id = -1;
+		GLuint id = 0;
 	public:
 		Texture();
 		~Texture();
@@ -63,7 +63,7 @@ namespace engine
 	class Sampler
 	{
 	protected:
-		GLuint id = -1;
+		GLuint id = 0;
 		Sampler();
 	public:
 		~Sampler();

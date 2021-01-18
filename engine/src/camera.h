@@ -37,14 +37,14 @@ namespace engine
 		void update(double elapsedSecs, Vector2 cursorDiff);
 
 	private:
-		GLuint uboId;
-		GLuint uboBP;
+		GLuint uboId = 0;
+		GLuint uboBP = 0;
 
 		Matrix4 projectionMatrix;
 		Matrix4 viewMatrix;
 
-		float pitch = 0;
-		float yaw = 0;
+		float pitch = 0.f;
+		float yaw = 0.f;
 		Vector3 position;
 	};
 }

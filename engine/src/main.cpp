@@ -1,32 +1,21 @@
 #include <sstream>
 
 #include "engine.h"
-#include "model.h"
 #include "skybox.h"
-#include "light.h"
-
-#include "postprocess.h"
-#include "meshfactory.h"
 
 using namespace engine;
 
 class MyApp : public App
 {
-	const float CAMERA_SPEED = 5.0f;
-	const float CAMERA_ROTATE_SPEED = 0.01f;
+	SceneGraph* sceneGraph = new SceneGraph();
+	Mesh* quad = MeshFactory::createQuad();
 
-	Vector2 mouseStartingPos;
-	Vector2 mouseCurrentPos;
+	// camera
+	Camera* camera = new Camera(0);
+	bool catchCursor = false;
+	Vector2 lastCursorPos;
 
-	Matrix4 oldCameraViewMatrix;
-	Matrix3 oldCameraViewMatrixInversed;
-
-	SceneGraph* sceneGraph;
-
-	Camera* camera;
-	Mesh* quad;
-
-	Skybox* skybox;
+	Skybox* skybox = new Skybox(camera);
 
 	// for debugging output
 	TextureCubemap* environmentMap, *irradianceMap, *prefilterMap;
@@ -42,9 +31,6 @@ class MyApp : public App
 	ShaderProgram* fastBoxBlurProgram;
 	ShaderProgram* ssaoProgram;
 	ShaderProgram* reflectionBlendProgram;
-
-	bool catchCursor = false;
-	Vector2 lastCursorPos;
 
 	//bool useTextures = true;
 	float roughness = 0.5;
@@ -184,25 +170,16 @@ class MyApp : public App
 		lights.push_back(Light(Vector3(2.f, 3.f, 2.f), Vector3(1.f, 1.f, 1.f), 15.f));
 		lights.push_back(Light(Vector3(-2.f, 3.f, -2.f), Vector3(1.f, 1.f, 1.f), 15.f));
 
-		sceneGraph = new SceneGraph();
 		SceneNode* root = sceneGraph->getRoot();
 		root->setDrawable(models[0]);
 		SceneNode* groundNode = root->createNode();
 		groundNode->setDrawable(models[5]);
 		groundNode->setMatrix(Matrix4::CreateTranslation(0, -1, 0));
 
-		quad = MeshFactory::createQuad();
-
-		camera = new Camera(0);
-
-		camera->lookAt(
-			Vector3(0, 0, 5),
-			Vector3(0, 0, 1)
-		);
+		camera->lookAt(Vector3(0, 0, 5), Vector3(0, 0, 1));
 
 		updateProjection();
 
-		skybox = new Skybox(camera);
 		//skybox->loadCubemapFromDiskSingleFiles("assets/cubemaps/palermo");
 		skybox->loadCubemapFromDiskHDR("assets/hdris/kiaradawn4k.hdr");
 		environmentMap = skybox->getCubemap();
@@ -329,8 +306,6 @@ class MyApp : public App
 			reflectionBlendProgram->setUniform("gMetallicRoughnessAO", 2);
 			reflectionBlendProgram->setUniform("gShaded", 3);
 			reflectionBlendProgram->unuse();
-
-
 		}
 		catch (Exception e)
 		{
@@ -730,14 +705,13 @@ class MyApp : public App
 			
 			ImGui::End();
 		}
-
-
 	}
 };
 
 int main(int argc, char* argv[])
 {
 	Engine& engine = Engine::getInstance();
+	engine.setup();
 
 	MyApp* myApp = new MyApp();
 	engine.setApp(myApp);

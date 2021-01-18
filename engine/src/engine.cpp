@@ -10,21 +10,18 @@ namespace engine {
 
     void Engine::setApp(App* app) {
         this->app = app;
+		setupCallbacks();
     }
 
-    void Engine::start() {
+    void Engine::setup() {
 		setupGLFW();
 		setupWindow();
-		setupCallbacks();
 		setupGLEW();
 		setupOpenGL();
 #ifdef ERROR_CALLBACK
 		setupErrorCallback();
 #endif
 		setupImGui();
-
-		app->window = window;
-		app->start();
     }
 
 	void Engine::setupGLFW()
@@ -151,6 +148,12 @@ namespace engine {
 		ImGui_ImplOpenGL3_Init("#version 330");
 		// Setup Dear ImGui style
 		ImGui::StyleColorsDark();
+	}
+
+	void Engine::start()
+	{
+		app->window = window;
+		app->start();
 	}
 
     void Engine::run() {

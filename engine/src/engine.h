@@ -12,8 +12,11 @@
 
 #include "scenegraph.h"
 #include "shader.h"
-
+#include "light.h"
+#include "model.h"
 #include "geometrybuffer.h"
+#include "postprocess.h"
+#include "meshfactory.h"
 
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
@@ -41,6 +44,7 @@ namespace engine {
         int glMajor = 3, glMinor = 3;
         bool vysnc = true;
 
+        void setup();
         void setApp(App* app);
         void start();
         void run();
