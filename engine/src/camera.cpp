@@ -1,12 +1,5 @@
 #include "camera.h"
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-
-#include <math.h>
-
-#include "engine.h"
-
 namespace engine
 {
 	Camera::Camera(GLuint uboBP) : uboBP(uboBP)
@@ -57,6 +50,9 @@ namespace engine
 		pitch += -cursorDiff.y * CAMERA_MOUSE_SENSITIVITY;
 		yaw += cursorDiff.x * CAMERA_MOUSE_SENSITIVITY;
 
+		if (pitch > MAX_TILT) pitch = MAX_TILT;
+		if (pitch < -MAX_TILT) pitch = -MAX_TILT;
+
 		// handle keyboard
 		bool forwardPressed = engine.getKey(GLFW_KEY_W) == GLFW_PRESS;
 		bool backwardsPressed = engine.getKey(GLFW_KEY_S) == GLFW_PRESS;
@@ -82,9 +78,17 @@ namespace engine
 		Vector3 right = front.cross(Vector3::up()).normalized();
 		Vector3 up = right.cross(front).normalized();
 
-		position += cameraVelocity.x * CAMERA_SPEED * elapsedSecs * right;
-		position += cameraVelocity.y * CAMERA_SPEED * elapsedSecs * up;
-		position += cameraVelocity.z * CAMERA_SPEED * elapsedSecs * front;
+		Vector3 frontWithoutY = front;
+		frontWithoutY.y = 0;
+		frontWithoutY.normalize();
+
+		Vector3 rightWithoutY = right;
+		rightWithoutY.y = 0;
+		rightWithoutY.normalize();
+
+		position += cameraVelocity.x * CAMERA_SPEED * elapsedSecs * rightWithoutY;
+		position += cameraVelocity.y * CAMERA_SPEED * elapsedSecs * Vector3::up();
+		position += cameraVelocity.z * CAMERA_SPEED * elapsedSecs * frontWithoutY;
 
 		viewMatrix = Matrix4(
 			right.x, right.y, right.z, -right.dot(position),

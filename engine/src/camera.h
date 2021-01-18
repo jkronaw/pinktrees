@@ -1,13 +1,16 @@
 #pragma once
 
-#include "shader.h"
-#include "vector.h"
-#include "matrix.h"
+#define _USE_MATH_DEFINES
+#include <math.h>
+
+#include "engine.h"
 
 namespace engine
 {
 	const float CAMERA_MOUSE_SENSITIVITY = 0.002f;
-	const float CAMERA_SPEED = 2.5f;
+	const float CAMERA_SPEED = 2.0f;
+
+	const float MAX_TILT = 0.95 * M_PI_2;
 
 	class Camera
 	{

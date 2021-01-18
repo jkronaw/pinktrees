@@ -651,7 +651,6 @@ class MyApp : public App
 	{
 		// ImGui demo window (toggle with I)
 		if (showDemoWindow) ImGui::ShowDemoWindow(&showDemoWindow);
-
 		{
 			ImGui::Begin("Post Processing Effects");
 
@@ -676,7 +675,7 @@ class MyApp : public App
 			ImGui::SliderInt("SSR Iterations", &stepIterations, 50, 800);
 			ImGui::SliderFloat("SSR Hit Tolerance", &tolerance, 0.025, 0.9);
 
-
+			ImGui::End();
 		}
 
 		{
