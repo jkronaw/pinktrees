@@ -250,7 +250,7 @@ namespace engine
 
 		hdrInfo->updateShader(program);
 
-		Matrix4 projectionMatrix = Matrix4::CreatePerspectiveProjection(M_PI / 2, 1.0f, 0.1f, 10.0f);
+		Matrix4 projectionMatrix = Matrix4::CreatePerspectiveProjection((float)M_PI / 2.0f, 1.0f, 0.1f, 10.0f);
 		program->setUniform("ProjectionMatrix", projectionMatrix);
 
 		// change global OpenGL settings
@@ -311,7 +311,7 @@ namespace engine
 		TextureInfo* cubemapInfo = new TextureInfo(GL_TEXTURE0, "cubemap", cubemap, nullptr);
 		cubemapInfo->updateShader(program);
 
-		Matrix4 projectionMatrix = Matrix4::CreatePerspectiveProjection(M_PI / 2, 1.0f, 0.1f, 10.0f);
+		Matrix4 projectionMatrix = Matrix4::CreatePerspectiveProjection((float)M_PI / 2.0f, 1.0f, 0.1f, 10.0f);
 		program->setUniform("ProjectionMatrix", projectionMatrix);
 
 		// change global OpenGL settings
@@ -372,7 +372,7 @@ namespace engine
 		TextureInfo* cubemapInfo = new TextureInfo(GL_TEXTURE0, "cubemap", cubemap, nullptr);
 		cubemapInfo->updateShader(program);
 
-		Matrix4 projectionMatrix = Matrix4::CreatePerspectiveProjection(M_PI / 2, 1.0f, 0.1f, 10.0f);
+		Matrix4 projectionMatrix = Matrix4::CreatePerspectiveProjection((float)M_PI / 2.0f, 1.0f, 0.1f, 10.0f);
 		program->setUniform("ProjectionMatrix", projectionMatrix);
 
 		// change global OpenGL settings

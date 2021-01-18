@@ -33,14 +33,14 @@ class MyApp : public App
 	ShaderProgram* reflectionBlendProgram;
 
 	//bool useTextures = true;
-	float roughness = 0.5;
-	float metallic = 0.4;
-	float ao = 1;
+	float roughness = 0.5f;
+	float metallic = 0.4f;
+	float ao = 1.0f;
 
 	float bloomExposure = 0.2f;
 	bool useBloom = false;
 	int bloomBlur = 5;
-	float bloomThreshold = 0.2;
+	float bloomThreshold = 0.2f;
 
 	bool useDOF = false;
 	float focalDepth = 2.0f;
@@ -50,12 +50,12 @@ class MyApp : public App
 	bool useSsao = false;
 
 	float maxRayDistance = 25;
-	float stepResolution = 0.4;
+	float stepResolution = 0.4f;
 	int stepIterations = 400;
-	float tolerance = 0.1;
+	float tolerance = 0.1f;
 
-	float ambientRadius = 0.5;
-	float ambientBias = 0.025;
+	float ambientRadius = 0.5f;
+	float ambientBias = 0.025f;
 
 	bool showDemoWindow = false;
 	bool showGbufferContent = false;
@@ -77,7 +77,7 @@ class MyApp : public App
 	{
 		float aspectRatio = engine.windowWidth / (float)engine.windowHeight;
 		// M_PI / 3 is aproximately 60 degrees FOV
-		camera->setPerspective(M_PI / 3, aspectRatio, 0.1, 100);
+		camera->setPerspective((float)M_PI / 3.f, aspectRatio, 0.1f, 100.f);
 	}
 
 	#pragma region Callbacks
@@ -154,7 +154,7 @@ class MyApp : public App
 
 	void mouseScrollCallback(double xoffset, double yoffset) override
 	{
-		focalDepth += 0.5 * yoffset;
+		focalDepth += 0.5f * (float)yoffset;
 	}
 #pragma endregion
 
@@ -220,7 +220,7 @@ class MyApp : public App
 			lightProgram->link();
 
 			lightProgram->use();
-			lightProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
+			lightProgram->setUniform("gScreenSize", Vector2((float)engine.windowWidth, (float)engine.windowHeight));
 			lightProgram->setUniform("gPosition", GBuffer::GB_POSITION);
 			lightProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
 			lightProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
@@ -238,7 +238,7 @@ class MyApp : public App
 			dofProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
 
 			dofProgram->use();
-			dofProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
+			dofProgram->setUniform("gScreenSize", Vector2((float)engine.windowWidth, (float)engine.windowHeight));
 			dofProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
 			dofProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
 			dofProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
@@ -342,16 +342,16 @@ class MyApp : public App
 		Vector2 cursorDiff = cursorPos - lastCursorPos;
 		lastCursorPos = cursorPos;
 
-		if (!catchCursor) cursorDiff = Vector2(0, 0);
-		camera->update(elapsedSecs, cursorDiff);
+		if (!catchCursor) cursorDiff = Vector2(0.0, 0.0);
+		camera->update((float)elapsedSecs, cursorDiff);
 
 		if (useBloom) {
-			int multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1 : 1;
+			float multiplier = engine.getKey(GLFW_KEY_LEFT_ALT) == GLFW_PRESS ? -1.f : 1.f;
 			if (engine.getKey(GLFW_KEY_E) == GLFW_PRESS)
 			{	
-				bloomExposure += 0.02 * multiplier;
-				if (bloomExposure > 1) bloomExposure = 1;
-				if (bloomExposure < 0) bloomExposure = 0;
+				bloomExposure += 0.02f * multiplier;
+				if (bloomExposure > 1.f) bloomExposure = 1.f;
+				if (bloomExposure < 0.f) bloomExposure = 0.f;
 				std::cout << "Bloom Exposure: " << bloomExposure << std::endl;
 			}	
 		}
@@ -502,7 +502,7 @@ class MyApp : public App
 				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_METALLIC_ROUGHNESS_AO]);
 
 				reflectionsProgram->use();
-				reflectionsProgram->setUniform("gScreenSize", Vector2(engine.windowWidth, engine.windowHeight));
+				reflectionsProgram->setUniform("gScreenSize", Vector2((float)engine.windowWidth, (float)engine.windowHeight));
 				reflectionsProgram->setUniform("viewPos", translation);
 
 				reflectionsProgram->setUniform("maxRayDistance", maxRayDistance);
@@ -638,20 +638,20 @@ class MyApp : public App
 			ImGui::Checkbox("Enable Ambient Occlusion", &useSsao);
 
 			ImGui::SliderFloat("SSAO Radius", &ambientRadius, 0.1f, 1.0f);
-			ImGui::SliderFloat("SSAO Bias", &ambientBias, 0.01, 0.05);
+			ImGui::SliderFloat("SSAO Bias", &ambientBias, 0.01f, 0.05f);
 
 			ImGui::SliderFloat("BLOOM Exposure", &bloomExposure, 0.0f, 1.0f);
 			ImGui::SliderInt("BLOOM Blur Amount", &bloomBlur, 0, 20);
-			ImGui::SliderFloat("BLOOM Threshold", &bloomThreshold, 0.01, 1);
+			ImGui::SliderFloat("BLOOM Threshold", &bloomThreshold, 0.01f, 1.f);
 
 			ImGui::SliderFloat("DOF Focal Depth", &focalDepth, -25.0f, 25.0f);
 			ImGui::SliderInt("DOF #Samples", &dofSamples, 1, 150);
 
 
-			ImGui::SliderFloat("SSR Max Ray Length", &maxRayDistance, 1.0, 50.0);
-			ImGui::SliderFloat("SSR Resolution", &stepResolution, 0.1, 1.0);
+			ImGui::SliderFloat("SSR Max Ray Length", &maxRayDistance, 1.0f, 50.0f);
+			ImGui::SliderFloat("SSR Resolution", &stepResolution, 0.1f, 1.0f);
 			ImGui::SliderInt("SSR Iterations", &stepIterations, 50, 800);
-			ImGui::SliderFloat("SSR Hit Tolerance", &tolerance, 0.025, 0.9);
+			ImGui::SliderFloat("SSR Hit Tolerance", &tolerance, 0.025f, 0.9f);
 
 			ImGui::End();
 		}
@@ -680,9 +680,9 @@ class MyApp : public App
 
 			ImGui::Text("Direct Lights:");
 			static int selectedLight = 0;			
-			ImGui::DragFloat3("Light Position", (float*)&lights[selectedLight].position, 0.1, -15, 15);
+			ImGui::DragFloat3("Light Position", (float*)&lights[selectedLight].position, 0.1f, -15.f, 15.f);
 			ImGui::ColorEdit3("Color", (float*)&lights[selectedLight].color);
-			ImGui::DragFloat("Brightness", (float*)&lights[selectedLight].brightness, 0.1, 0, 100);
+			ImGui::DragFloat("Brightness", (float*)&lights[selectedLight].brightness, 0.1f, 0.f, 100.f);
 			
 			if (ImGui::Button("Add Light")) { lights.push_back(Light(Vector3(), Vector3(1.f, 1.f, 1.f), 15.f)); }
 

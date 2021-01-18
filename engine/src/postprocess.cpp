@@ -194,14 +194,14 @@ namespace engine {
 	}
 
 	void SsaoBuffer::generateSampleKernel() {
-		std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
+		std::uniform_real_distribution<GLfloat> randomFloats(0.0f, 1.0f); // generates random floats between 0.0 and 1.0
 		std::default_random_engine generator;
 		for (unsigned int i = 0; i < 64; ++i)
 		{
-			Vector3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
+			Vector3 sample(randomFloats(generator) * 2.0f - 1.0f, randomFloats(generator) * 2.0f - 1.0f, randomFloats(generator));
 			sample = (sample).normalized();
 			sample *= randomFloats(generator);
-			float scale = float(i) / 64.0;
+			float scale = i / 64.0f;
 			scale = 0.1f + 1.0f * (scale * scale);
 			sample *= scale;
 			ssaoKernel.push_back(sample);
@@ -214,7 +214,7 @@ namespace engine {
 		std::vector<Vector3> ssaoNoise;
 		for (unsigned int i = 0; i < 16; i++)
 		{
-			Vector3 noise(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, 0.0f); // rotate around z-axis (in tangent space)
+			Vector3 noise(randomFloats(generator) * 2.0f - 1.0f, randomFloats(generator) * 2.0f - 1.0f, 0.0f); // rotate around z-axis (in tangent space)
 			ssaoNoise.push_back(noise);
 		}
 		glGenTextures(1, &noiseTexture);

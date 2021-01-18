@@ -100,7 +100,7 @@ namespace engine
 	void ShaderProgram::setUniform(const char* name, const std::vector<Vector3> vectors)
 	{
 		GLuint location = glGetUniformLocation(programId, name);
-		glUniform3fv(location, vectors.size(), (GLfloat*)&vectors[0]);
+		glUniform3fv(location, (GLsizei)vectors.size(), (GLfloat*)&vectors[0]);
 	}
 
 	void ShaderProgram::setUniform(const char* name, const Vector4& vector)

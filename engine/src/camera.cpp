@@ -42,7 +42,7 @@ namespace engine
 	float Camera::getYaw() { return yaw; }
 	Vector3 Camera::getPosition() { return position; }
 
-	void Camera::update(double elapsedSecs, Vector2 cursorDiff)
+	void Camera::update(float elapsedSecs, Vector2 cursorDiff)
 	{
 		Engine& engine = Engine::getInstance();
 

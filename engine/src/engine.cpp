@@ -79,7 +79,7 @@ namespace engine {
 		{
 			if (!ImGui::GetIO().WantCaptureMouse)
 			{
-				static_cast<App*>(glfwGetWindowUserPointer(w))->mouseCallback(Vector2(x, y));
+				static_cast<App*>(glfwGetWindowUserPointer(w))->mouseCallback(Vector2((float)x, (float)y));
 			}
 		};
 		glfwSetCursorPosCallback(window, mouseCallback);
@@ -202,7 +202,7 @@ namespace engine {
 	{
 		double x, y;
 		glfwGetCursorPos(window, &x, &y);
-		return Vector2(x, y);
+		return Vector2((float)x, (float)y);
 	}
 
 	void glfwErrorCallback(int error, const char* description)

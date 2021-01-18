@@ -15,7 +15,7 @@ namespace engine
 
 		std::string directory = path.substr(0, path.find_last_of('/') + 1);
 
-		for (int i = 0; i < scene->mNumMaterials; i++)
+		for (unsigned int i = 0; i < scene->mNumMaterials; i++)
 		{
 			Material* mat = new Material();
 			aiMaterial* material = scene->mMaterials[i];

@@ -17,8 +17,6 @@ namespace engine
 		for (int i = 0; i < vertices.size(); i++) { indices.push_back(i); }
 	}
 
-	
-
 	Mesh::Mesh(aiMesh* mesh, const aiScene* scene, Material* material)
 	{
 		bool texcoordsAvailable = mesh->mTextureCoords[0];
@@ -128,7 +126,7 @@ namespace engine
 		}
 
 		glBindVertexArray(vaoId);
-		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+		glDrawElements(GL_TRIANGLES, (GLsizei)indices.size(), GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
 }
