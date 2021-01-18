@@ -90,7 +90,8 @@ void main()
         
     }
     // account for misses (background samples)
-    occlusion = 1.0 - (occlusion / (kernelSize - rejectedSamples));
+    int leftOver = kernelSize - rejectedSamples;
+    occlusion = (leftOver <= 0) ? 1.0 : (1.0 - (occlusion / leftOver));
     
     FragColor = vec3(occlusion);
 }
