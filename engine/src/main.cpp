@@ -49,7 +49,7 @@ class MyApp : public App
 	float maxRayDistance = 25;
 	float stepResolution = 0.4f;
 	int stepIterations = 400;
-	float tolerance = 0.1f;
+	float tolerance = 0.2f;
 
 	float ambientRadius = 0.5f;
 	float ambientBias = 0.025f;
