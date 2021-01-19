@@ -165,7 +165,6 @@ void main() {
 
 		visibility =((secondPassHit == 1 || firstPassHit == 1) ? 1 : 0)	// check if any geometry has been hit
 					* finalLookupFragPositionWs.w							// discard background reflections
-					* finalLookupPos
 					* fragPos.r == 0 ? 0 : 1								// discard ray reflected from background
 					* (1 - max(angle >= 0 ? 1 : angle , 0))					// discard ray that hit geometry from the inside
 					* (1 - max(dot(-viewDir, reflectionRay), 0))			// if we look at the geometry from behind
