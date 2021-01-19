@@ -86,7 +86,6 @@
       <DeploymentContent>true</DeploymentContent>
     </CopyFileToFolders>
     <None Include="imgui.ini" />
-    <None Include="shaders\postprocessing\alternative_bloom.frag" />
     <None Include="shaders\postprocessing\bloom_blend.frag" />
     <None Include="shaders\postprocessing\bloom_separation.frag" />
     <None Include="shaders\postprocessing\blur_horizontal.frag" />

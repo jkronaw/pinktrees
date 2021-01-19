@@ -74,31 +74,49 @@ void main()
 	vec3 color = texture(gBloom, exTexcoord).rgb;
 	FragmentColor = vec4(color, 1.0);
 
+	// With DOF:
 	if(useDOF){
 
 		uint state = init_rng();
+
+		// retrieve fragment properties
 		vec3 position = texture(gPosition, exTexcoord).rgb;
 		vec3 normal = texture(gNormal, exTexcoord).rgb;
+
+		// get distance to camera
 		float z = (ViewMatrix * vec4(position ,1.0)).z;
 		
+		// calculate difference to focal depth
 		float depth_diff = abs(z - focalDepth);
+
+		// set difference for background framgent manually
 		if(position == vec3(0,0,0) || (normal == vec3(0,0,0))){
 			depth_diff = abs(50 - focalDepth);
 			z = 999999999;
 		}
+
+		// calculate sample radius
 		float disc_radius = depth_diff * 0.00009;
-		vec4 color_sum = vec4(0.0);// vec4(color, 1.0);
+
+		vec4 color_sum = vec4(0.0);
 		float num_valid = 0;
 		
 		for(int i = 0; i < dofSamples; i++){
 			
+			// sample a direction according to radis of confusion
 			vec2 sample_pos = sample_disc(state);
 			sample_pos = sample_pos * disc_radius;
+
+			// get distance to geometry at sampled coordinate
 			vec3 sample_pos_ws = texture(gPosition, exTexcoord + sample_pos).rgb;
 			float sample_z = (ViewMatrix * vec4(sample_pos_ws, 1.0)).z;
+
+			// manually set value for background
 			if(sample_pos_ws == vec3(0,0,0)){
 				sample_z = 999999999;
 			}
+
+			// only accumulate color of fragments that are behind center fragment (+ tolerance)
 			if (z <= sample_z + 100){
 				vec4 sample_color = vec4(texture(gBloom, exTexcoord + sample_pos).rgb , 1.0);
 				
@@ -106,6 +124,8 @@ void main()
 				num_valid++;
 			}
 		}
+
+		// normalize
 		FragmentColor = color_sum / num_valid;
 	}
 }

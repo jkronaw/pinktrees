@@ -13,7 +13,6 @@ void main()
     // bloom separation
 
     vec3 color = texture(gShaded, exTexcoord).rgb;
-    //vec3 threshold = vec3(0.5126, 0.4152, 0.352) * bloomThreshold;
     
     vec3 threshold = vec3(0.0126, 0.0152, 1.52) * 5 * bloomThreshold;
     

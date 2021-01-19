@@ -46,10 +46,10 @@ class MyApp : public App
 	bool useSsr = false;
 	bool useSsao = false;
 
-	float maxRayDistance = 25;
+	float maxRayDistance = 50;
 	float stepResolution = 0.4f;
 	int stepIterations = 400;
-	float tolerance = 0.2f;
+	float tolerance = 0.5f;
 
 	int ambientSamples = 32;
 	float ambientRadius = 0.5f;
