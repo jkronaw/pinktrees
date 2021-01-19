@@ -55,7 +55,6 @@ class MyApp : public App
 	float ambientRadius = 0.5f;
 	float ambientBias = 0.025f;
 
-	bool showDemoWindow = false;
 	bool showGbufferContent = false;
 
 	Model* models[6];
@@ -124,9 +123,6 @@ class MyApp : public App
 
 		// show gbuffer content
 		if (key == GLFW_KEY_X && action == GLFW_PRESS) showGbufferContent = !showGbufferContent;
-
-		// press I to toggle the ImGui debug window
-		if (key == GLFW_KEY_I && action == GLFW_PRESS) showDemoWindow = !showDemoWindow; 
 	}
 
 	void mouseButtonCallback(int button, int action, int mods) override
@@ -625,9 +621,6 @@ class MyApp : public App
 	void handleImGui()
 	{
 		const ImVec4 accentColor(0.5f, 1.f, 1.f, 1.f);
-
-		// ImGui demo window (toggle with I)
-		if (showDemoWindow) ImGui::ShowDemoWindow(&showDemoWindow);
 
 		{
 			ImGui::Begin("Post Processing Effects");
