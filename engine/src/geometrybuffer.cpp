@@ -18,6 +18,8 @@ namespace engine {
 			glDeleteFramebuffers(1, &fbo);
 		if (texture[0] != 0)
 			glDeleteTextures(GBuffer::GB_NUMBER_OF_TEXTURES, texture);
+		if (depthTexture)
+			glDeleteTextures(1, &depthTexture);
 	}
 
 	void GBuffer::initialize(unsigned int windowWidth, unsigned int windowHeight) {

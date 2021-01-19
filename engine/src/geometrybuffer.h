@@ -13,7 +13,6 @@ namespace engine {
 			GB_ALBEDO,
 			GB_NORMAL,
 			GB_METALLIC_ROUGHNESS_AO,
-			GB_TEXCOORD,
 			GB_NUMBER_OF_TEXTURES		// Not a texture type, but used to count textures 
 		};
 
@@ -25,15 +24,8 @@ namespace engine {
 
 		void setBufferToRead(GB_TEX_TYPE texType);
 
-		GLuint fbo;
-		//GLuint fboShaded;
-		//GLuint fboBloom;
-		//GLuint fboPingPong[2];
+		GLuint fbo;;
 		GLuint texture[GB_NUMBER_OF_TEXTURES];
-		//GLuint textureShaded;
-		//GLuint textureBloom;
 		GLuint depthTexture;
-		//GLuint shadedDepthTexture;
-		//GLuint texturesPingPong[2];
 	};
 }
