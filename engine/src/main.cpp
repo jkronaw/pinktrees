@@ -9,8 +9,6 @@ class MyApp : public App
 {
 	SceneGraph* sceneGraph = new SceneGraph();
 
-	SceneNode* showcaseObjectNode;
-
 	Mesh* quad = MeshFactory::createQuad();
 
 	// camera
@@ -21,6 +19,7 @@ class MyApp : public App
 	Skybox* skybox = new Skybox(camera);
 
 	// for debugging
+	int selectedMaterial = 0;
 	TextureCubemap* environmentMap, *irradianceMap, *prefilterMap;
 
 	ShaderProgram* geoProgram;
@@ -58,8 +57,8 @@ class MyApp : public App
 	bool showDemoWindow = false;
 	bool showGbufferContent = false;
 
-	unsigned int selectedModel = 0;
-	Model* models[7];
+	Model* models[6];
+	std::vector<Material*> allMaterials;
 
 	GBuffer gbuffer;
 	ShadedBuffer shadedBuffer;
@@ -121,13 +120,6 @@ class MyApp : public App
 		// show gbuffer content
 		if (key == GLFW_KEY_X && action == GLFW_PRESS) showGbufferContent = !showGbufferContent;
 
-		// model switching
-		if (key == GLFW_KEY_1 && action == GLFW_PRESS) selectedModel = 0;
-		if (key == GLFW_KEY_2 && action == GLFW_PRESS) selectedModel = 1;
-		if (key == GLFW_KEY_3 && action == GLFW_PRESS) selectedModel = 2;
-		if (key == GLFW_KEY_4 && action == GLFW_PRESS) selectedModel = 3;
-		showcaseObjectNode->setDrawable(models[selectedModel]);
-
 		// press I to toggle the ImGui debug window
 		if (key == GLFW_KEY_I && action == GLFW_PRESS) showDemoWindow = !showDemoWindow; 
 	}
@@ -155,14 +147,13 @@ class MyApp : public App
 		models[2] = new Model("assets/models/teapot/teapot.obj");
 		models[3] = new Model("assets/models/car/car.obj");
 		models[4] = new Model("assets/models/tree/tree.obj");
-		//models[5] = new Model("assets/models/tree2/tree2.obj");
-		models[6] = new Model("assets/models/ground/ground.obj");
+		models[5] = new Model("assets/models/ground/ground.obj");
 
 		lights.push_back(Light(Vector3(2.f, 3.f, 2.f), Vector3(1.f, 1.f, 1.f), 15.f));
 		lights.push_back(Light(Vector3(-2.f, 3.f, -2.f), Vector3(1.f, 1.f, 1.f), 15.f));
 
 		SceneNode* root = sceneGraph->getRoot();
-		root->setDrawable(models[6]); // assign ground to root
+		root->setDrawable(models[5]); // assign ground to root
 
 		SceneNode* tree1 = root->createNode();
 		tree1->setDrawable(models[4]);
@@ -189,11 +180,29 @@ class MyApp : public App
 		tree8->setDrawable(models[4]);
 		tree8->setMatrix(Matrix4::CreateTranslation(17, 0, -12));
 
-		showcaseObjectNode= root->createNode();
-		showcaseObjectNode->setDrawable(models[selectedModel]);
-		showcaseObjectNode->setMatrix(Matrix4::CreateTranslation(0, 2, 0));
+		SceneNode* lantern = root->createNode();
+		lantern->setDrawable(models[0]);
+		lantern->setMatrix(Matrix4::CreateTranslation(-6, 2, 0));
 
-		camera->lookAt(Vector3(5, 2, 0), Vector3(0, 2, 0));
+		SceneNode* sphere = root->createNode();
+		sphere->setDrawable(models[1]);
+		sphere->setMatrix(Matrix4::CreateTranslation(-2, 2, 0));
+
+		SceneNode* teapot = root->createNode();
+		teapot->setDrawable(models[2]);
+		teapot->setMatrix(Matrix4::CreateTranslation(2, 2, 0));
+
+		SceneNode* car = root->createNode();
+		car->setDrawable(models[3]);
+		car->setMatrix(Matrix4::CreateTranslation(6, 2, 0));
+
+		for (Model* m : models)
+		{
+			std::vector<Material*> materials = m->getMaterials();
+			allMaterials.insert(allMaterials.end(), materials.begin(), materials.end());
+		}
+
+		camera->lookAt(Vector3(0, 2, 8), Vector3(0, 2, 0));
 
 		updateProjection();
 
@@ -623,9 +632,10 @@ class MyApp : public App
 			ImGui::Text("%.1f FPS", ImGui::GetIO().Framerate);
 
 			// material properties (only applies to debug objects)
-			ImGui::TextColored(accentColor, "Material Properties (only debug objects)");
+			ImGui::TextColored(accentColor, "Material Properties");
 			
-			Material* material = models[6]->getMeshes()[0]->getMaterial();
+			ImGui::SliderInt("Selected material ID", &selectedMaterial, 0, allMaterials.size() - 1);
+			Material* material = allMaterials[selectedMaterial];
 
 			ImGui::Checkbox("Use albedo from texture", &material->useAlbedoMap);
 			if (!material->useAlbedoMap) ImGui::ColorEdit3("Albedo", (float*)&material->albedo);

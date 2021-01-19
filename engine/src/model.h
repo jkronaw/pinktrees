@@ -20,6 +20,7 @@ namespace engine
         Model(const std::string& path);
         void draw(ShaderProgram* program) const override;
         std::vector<Mesh*> getMeshes();
+        std::vector<Material*> getMaterials();
     private:
         std::vector<Mesh*> meshes;
         std::map<std::string, Texture2D*> loadedTextures;
