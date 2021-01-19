@@ -162,19 +162,23 @@ namespace engine {
 
 		while (!glfwWindowShouldClose(window))
 		{
-			double time = glfwGetTime();
-			double elapsed_time = time - last_time;
-			last_time = time;
+			if (!glfwGetWindowAttrib(window, GLFW_ICONIFIED))
+			{
+				double time = glfwGetTime();
+				double elapsed_time = time - last_time;
+				last_time = time;
 
-			// inform ImGui that a new frame has started
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
+				// inform ImGui that a new frame has started
+				ImGui_ImplOpenGL3_NewFrame();
+				ImGui_ImplGlfw_NewFrame();
+				ImGui::NewFrame();
 
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			app->update(elapsed_time);
+				glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+				app->update(elapsed_time);
 
-			glfwSwapBuffers(window);
+				glfwSwapBuffers(window);
+			}
+
 			glfwPollEvents();
 #ifndef ERROR_CALLBACK
 			checkOpenGLError("ERROR: MAIN/RUN");
