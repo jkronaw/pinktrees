@@ -19,3 +19,5 @@ mainMac.cpp
 mainMac*
 
 engine/imgui.ini
+
+*.blend1

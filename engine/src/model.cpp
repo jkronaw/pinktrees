@@ -63,12 +63,10 @@ namespace engine
 			// Load Material values
 			aiColor3D color(0.f, 0.f, 0.f);
 
-			if(material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == 0)
-				mat->albedo = Vector3(color.r, color.b, color.g);
-			if(material->Get(AI_MATKEY_COLOR_SPECULAR, color) == 0)			
-				mat->metallic = color.r;
-			if (material->Get(AI_MATKEY_SHININESS, color) == 0)
-				mat->roughness = color.r;
+			if (material->Get(AI_MATKEY_COLOR_DIFFUSE, color) == 0) mat->albedo = Vector3(color.r, color.g, color.b);
+			if (material->Get(AI_MATKEY_COLOR_SPECULAR, color) == 0) mat->metallic = color.r;
+			if (material->Get(AI_MATKEY_COLOR_AMBIENT, color) == 0) mat->ao = color.r;
+			if (material->Get(AI_MATKEY_SHININESS, color) == 0) mat->roughness = color.r;
 
 			materials.insert(std::pair<int, Material*>(i, mat));
 		}
@@ -113,14 +111,19 @@ namespace engine
 		switch (textureType)
 		{
 		case ALBEDO:
+			// obj file map_Kd
 			return aiTextureType_DIFFUSE;
 		case NORMAL:
+			// obj file map_Bump
 			return aiTextureType_HEIGHT;
 		case METALLIC:
+			// obj file: map_Ks
 			return aiTextureType_SPECULAR;
 		case ROUGHNESS:
+			// obj file: map_Ns
 			return aiTextureType_SHININESS;
 		case AO:
+			// obj file: map_Ka
 			return aiTextureType_AMBIENT;
 		default:
 			throw Exception("Should not happen");

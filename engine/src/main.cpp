@@ -8,6 +8,9 @@ using namespace engine;
 class MyApp : public App
 {
 	SceneGraph* sceneGraph = new SceneGraph();
+
+	SceneNode* showcaseObjectNode;
+
 	Mesh* quad = MeshFactory::createQuad();
 
 	// camera
@@ -123,8 +126,7 @@ class MyApp : public App
 		if (key == GLFW_KEY_2 && action == GLFW_PRESS) selectedModel = 1;
 		if (key == GLFW_KEY_3 && action == GLFW_PRESS) selectedModel = 2;
 		if (key == GLFW_KEY_4 && action == GLFW_PRESS) selectedModel = 3;
-		if (key == GLFW_KEY_5 && action == GLFW_PRESS) selectedModel = 4;
-		sceneGraph->getRoot()->setDrawable(models[selectedModel]);
+		showcaseObjectNode->setDrawable(models[selectedModel]);
 
 		// press I to toggle the ImGui debug window
 		if (key == GLFW_KEY_I && action == GLFW_PRESS) showDemoWindow = !showDemoWindow; 
@@ -154,16 +156,13 @@ class MyApp : public App
 		models[3] = new Model("assets/models/car/car.obj");
 		models[4] = new Model("assets/models/tree/tree.obj");
 		//models[5] = new Model("assets/models/tree2/tree2.obj");
-		models[6] = new Model("assets/models/scene/scene.obj");
+		models[6] = new Model("assets/models/ground/ground.obj");
 
 		lights.push_back(Light(Vector3(2.f, 3.f, 2.f), Vector3(1.f, 1.f, 1.f), 15.f));
 		lights.push_back(Light(Vector3(-2.f, 3.f, -2.f), Vector3(1.f, 1.f, 1.f), 15.f));
 
 		SceneNode* root = sceneGraph->getRoot();
-		root->setDrawable(models[selectedModel]);
-		SceneNode* groundNode = root->createNode();
-		groundNode->setDrawable(models[6]);
-		groundNode->setMatrix(Matrix4::CreateTranslation(0, 0, 0));
+		root->setDrawable(models[6]); // assign ground to root
 
 		SceneNode* tree1 = root->createNode();
 		tree1->setDrawable(models[4]);
@@ -177,7 +176,6 @@ class MyApp : public App
 		SceneNode* tree4 = root->createNode();
 		tree4->setDrawable(models[4]);
 		tree4->setMatrix(Matrix4::CreateTranslation(5.123, 0, -3.456));
-
 		SceneNode* tree5 = root->createNode();
 		tree5->setDrawable(models[4]);
 		tree5->setMatrix(Matrix4::CreateTranslation(-20, 0, -15));
@@ -191,7 +189,11 @@ class MyApp : public App
 		tree8->setDrawable(models[4]);
 		tree8->setMatrix(Matrix4::CreateTranslation(17, 0, -12));
 
-		camera->lookAt(Vector3(0, 0, 5), Vector3(0, 0, 1));
+		showcaseObjectNode= root->createNode();
+		showcaseObjectNode->setDrawable(models[selectedModel]);
+		showcaseObjectNode->setMatrix(Matrix4::CreateTranslation(0, 2, 0));
+
+		camera->lookAt(Vector3(0, 0, 0), Vector3(0, 5, 5));
 
 		updateProjection();
 
@@ -281,17 +283,17 @@ class MyApp : public App
 			bloomProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/bloom_blend.frag");
 			bloomProgram->link();
 
-			reflectionsProgram = new ShaderProgram();
-			reflectionsProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/SSR.frag");
-			reflectionsProgram->link();
-			reflectionsProgram->use();
-			reflectionsProgram->setUniform("gPosition", 0);
-			reflectionsProgram->setUniform("gNormal", 1);
-			reflectionsProgram->setUniform("gShaded", 2);
-			reflectionsProgram->setUniform("gBlur", 3);
-			reflectionsProgram->setUniform("gMetallicRoughnessAO", 4);
-			reflectionsProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
-			reflectionsProgram->unuse();
+			//reflectionsProgram = new ShaderProgram();
+			//reflectionsProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/SSR.frag");
+			//reflectionsProgram->link();
+			//reflectionsProgram->use();
+			//reflectionsProgram->setUniform("gPosition", 0);
+			//reflectionsProgram->setUniform("gNormal", 1);
+			//reflectionsProgram->setUniform("gShaded", 2);
+			//reflectionsProgram->setUniform("gBlur", 3);
+			//reflectionsProgram->setUniform("gMetallicRoughnessAO", 4);
+			//reflectionsProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
+			//reflectionsProgram->unuse();
 
 			fastBoxBlurProgram = new ShaderProgram();
 			fastBoxBlurProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/blur_fastBox.frag");
@@ -622,8 +624,8 @@ class MyApp : public App
 
 			// material properties (only applies to debug objects)
 			ImGui::TextColored(accentColor, "Material Properties (only debug objects)");
-
-			Material* material = models[selectedModel]->getMeshes()[0]->getMaterial();
+			
+			Material* material = models[6]->getMeshes()[0]->getMaterial();
 
 			ImGui::Checkbox("Use albedo from texture", &material->useAlbedoMap);
 			if (!material->useAlbedoMap) ImGui::ColorEdit3("Albedo", (float*)&material->albedo);
