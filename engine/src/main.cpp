@@ -93,12 +93,16 @@ class MyApp : public App
 	{
 		engine.windowWidth = newWidth;
 		engine.windowHeight = newHeight;
+		glActiveTexture(GL_TEXTURE0);
 		gbuffer.deleteBufferData();
 		gbuffer.initialize(newWidth, newHeight);
+		glActiveTexture(GL_TEXTURE1);
 		shadedBuffer.deleteBufferData();
 		shadedBuffer.initialize(newWidth, newHeight);
+		glActiveTexture(GL_TEXTURE2);
 		bloomBuffer.deleteBufferData();
 		bloomBuffer.initialize(newWidth, newHeight);
+		glActiveTexture(GL_TEXTURE3);
 		pingPongBuffer.deleteBufferData();
 		pingPongBuffer.initialize(newWidth, newHeight);
 		reflectionsBuffer.deleteBufferData();
