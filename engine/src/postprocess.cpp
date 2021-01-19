@@ -182,8 +182,8 @@ namespace engine {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-		GLenum DrawBuffersBlur[] = { GL_COLOR_ATTACHMENT0 };
-		glDrawBuffers(1, DrawBuffersBlur);
+		GLenum DrawBuffersSsao[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, DrawBuffersSsao);
 	}
 
 	void SsaoBuffer::deleteBufferData() {

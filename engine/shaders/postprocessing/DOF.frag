@@ -6,9 +6,7 @@ in vec2 exTexcoord;
 
 // GBuffer
 uniform sampler2D gPosition;
-uniform sampler2D gAlbedo;
 uniform sampler2D gNormal;
-uniform sampler2D gMetallicRoughnessAO;
 uniform sampler2D gBloom;
 
 uniform bool useDOF;
