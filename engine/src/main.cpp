@@ -220,7 +220,7 @@ class MyApp : public App
 		Texture2D* brdfLUT = new Texture2D();
 		brdfLUT->createBRDFLookupTexture();
 		TextureInfo* brdfLUTinfo = new TextureInfo(GL_TEXTURE10, "brdfLUT", brdfLUT, nullptr);
-
+		
 		gbuffer.initialize(engine.windowWidth, engine.windowHeight);
 		shadedBuffer.initialize(engine.windowWidth, engine.windowHeight);
 		bloomBuffer.initialize(engine.windowWidth, engine.windowHeight);
@@ -264,10 +264,8 @@ class MyApp : public App
 			dofProgram->use();
 			dofProgram->setUniform("gScreenSize", Vector2((float)engine.windowWidth, (float)engine.windowHeight));
 			dofProgram->setUniform("gPosiion", GBuffer::GB_POSITION);
-			dofProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
-			dofProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
-			dofProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
-			dofProgram->setUniform("gBloom", GBuffer::GB_NUMBER_OF_TEXTURES);
+			dofProgram->setUniform("gNormal", 1);
+			dofProgram->setUniform("gBloom", 2);
 			dofProgram->unuse();
 
 			horizontalBlurProgram = new ShaderProgram();
@@ -296,8 +294,7 @@ class MyApp : public App
 			reflectionsProgram->setUniform("gPosition", 0);
 			reflectionsProgram->setUniform("gNormal", 1);
 			reflectionsProgram->setUniform("gShaded", 2);
-			reflectionsProgram->setUniform("gBlur", 3);
-			reflectionsProgram->setUniform("gMetallicRoughnessAO", 4);
+			reflectionsProgram->setUniform("gMetallicRoughnessAO", 3);
 			reflectionsProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
 			reflectionsProgram->unuse();
 
@@ -408,7 +405,7 @@ class MyApp : public App
 				fastBoxBlurProgram->use();
 				fastBoxBlurProgram->setUniform("kernelSize", 1);
 				fastBoxBlurProgram->setUniform("kernelSeparation", 1);
-				quad->draw();					 
+				quad->draw();
 				fastBoxBlurProgram->unuse();
 			}
 
@@ -459,8 +456,6 @@ class MyApp : public App
 				glActiveTexture(GL_TEXTURE2);
 				glBindTexture(GL_TEXTURE_2D, shadedBuffer.texture);
 				glActiveTexture(GL_TEXTURE3);
-				glBindTexture(GL_TEXTURE_2D, blurBuffer.texture);
-				glActiveTexture(GL_TEXTURE4);
 				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_METALLIC_ROUGHNESS_AO]);
 
 				reflectionsProgram->use();
@@ -489,7 +484,7 @@ class MyApp : public App
 				glActiveTexture(GL_TEXTURE0);
 				glBindTexture(GL_TEXTURE_2D, reflectionsBuffer.texture);
 				glActiveTexture(GL_TEXTURE1);
-				glBindTexture(GL_TEXTURE_2D, reflectionsBuffer.texture);
+				glBindTexture(GL_TEXTURE_2D, blurBuffer.texture);
 				glActiveTexture(GL_TEXTURE2);
 				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_METALLIC_ROUGHNESS_AO]);
 				glActiveTexture(GL_TEXTURE3);
@@ -505,7 +500,7 @@ class MyApp : public App
 				glClear(GL_COLOR_BUFFER_BIT);
 				glActiveTexture(GL_TEXTURE0);
 				
-				glBindTexture(GL_TEXTURE_2D, useSsr? reflectionsBlendBuffer.texture : shadedBuffer.texture);
+				glBindTexture(GL_TEXTURE_2D, useSsr ? reflectionsBlendBuffer.texture : shadedBuffer.texture);
 				bloomSeparationProgram->use();
 				bloomSeparationProgram->setUniform("bloomThreshold", bloomThreshold);
 				quad->draw();
@@ -553,15 +548,16 @@ class MyApp : public App
 			dofProgram->setUniform("viewPos", translation);
 			dofProgram->setUniform("focalDepth", focalDepth);
 			dofProgram->setUniform("dofSamples", dofSamples);
-
+			
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			glClear(GL_COLOR_BUFFER_BIT);
-			for (unsigned int i = 0; i < GBuffer::GB_NUMBER_OF_TEXTURES; i++) {
-				glActiveTexture(GL_TEXTURE0 + i);
-				glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_POSITION + i]);
-			}
-			glActiveTexture(GL_TEXTURE0 + GBuffer::GB_NUMBER_OF_TEXTURES);
 			
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_POSITION]);
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, gbuffer.texture[GBuffer::GB_NORMAL]);
+			glActiveTexture(GL_TEXTURE2);
+
 			if (useBloom) {
 				glBindTexture(GL_TEXTURE_2D, bloomBuffer.texture);
 			}

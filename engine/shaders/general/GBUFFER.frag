@@ -9,7 +9,6 @@ layout (location = 0) out vec4 WorldPosOut;
 layout (location = 1) out vec3 AlbedoOut;
 layout (location = 2) out vec3 NormalOut;
 layout (location = 3) out vec3 MetallicRoughnessAOOut;
-layout (location = 4) out vec3 TexcoordOut;
 
 uniform sampler2D texAlbedo;
 uniform sampler2D texNormal;

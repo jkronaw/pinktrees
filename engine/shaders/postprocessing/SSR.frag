@@ -5,7 +5,6 @@ out vec4 fragColor;
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gShaded;
-uniform sampler2D gBlur;
 uniform sampler2D gMetallicRoughnessAO;
 
 uniform vec2 gScreenSize;
@@ -181,9 +180,9 @@ void main() {
 
 	
 	vec4 baseColor = texture(gShaded, exTexcoord);
-	vec4 reflectionColorBlur = texture(gBlur, finalLookupPos.xy); 
+	//vec4 reflectionColorBlur = texture(gBlur, finalLookupPos.xy); 
 	vec4 reflectionColor = texture(gShaded, finalLookupPos.xy);
-	vec3 ref = mix(reflectionColorBlur.rgb, reflectionColor.rgb, roughness);
+	//vec3 ref = mix(reflectionColorBlur.rgb, reflectionColor.rgb, roughness);
 
 	fragColor = vec4(reflectionColor.rgb * visibility, visibility);
 }
