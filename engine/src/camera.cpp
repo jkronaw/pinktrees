@@ -34,7 +34,7 @@ namespace engine
 
 		Vector3 view = center - eye;
 		pitch = atan(view.y);
-		yaw = atan2(view.x, view.z);
+		yaw = atan2(view.z, view.x);
 		position = eye;
 	}
 

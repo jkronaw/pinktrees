@@ -193,7 +193,7 @@ class MyApp : public App
 		showcaseObjectNode->setDrawable(models[selectedModel]);
 		showcaseObjectNode->setMatrix(Matrix4::CreateTranslation(0, 2, 0));
 
-		camera->lookAt(Vector3(0, 0, 0), Vector3(0, 5, 5));
+		camera->lookAt(Vector3(5, 2, 0), Vector3(0, 2, 0));
 
 		updateProjection();
 
