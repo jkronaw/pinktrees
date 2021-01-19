@@ -85,7 +85,13 @@
       <ExcludedFromBuild>false</ExcludedFromBuild>
       <DeploymentContent>true</DeploymentContent>
     </CopyFileToFolders>
-    <None Include="imgui.ini" />
+    <CopyFileToFolders Include="imgui.ini">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='release|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='release|x64'">true</DeploymentContent>
+      <FileType>Document</FileType>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='debug|x64'">false</ExcludedFromBuild>
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='debug|x64'">true</DeploymentContent>
+    </CopyFileToFolders>
     <None Include="shaders\postprocessing\bloom_blend.frag" />
     <None Include="shaders\postprocessing\bloom_separation.frag" />
     <None Include="shaders\postprocessing\blur_horizontal.frag" />
