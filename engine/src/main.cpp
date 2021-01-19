@@ -373,8 +373,6 @@ class MyApp : public App
 		// geometry pass
 		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-		//sceneGraph->getRoot()->setShaderProgram(geoProgram);
 		sceneGraph->draw();
 
 		// debug view of geometry buffer
@@ -382,9 +380,9 @@ class MyApp : public App
 		{
 			showGbuffer();
 		}
-		else {
-
-			// SSAO Pass 
+		else
+		{
+			// SSAO Pass
 			if (useSsao) {
 				glBindFramebuffer(GL_FRAMEBUFFER, ssaoBuffer.fbo);
 				glClear(GL_COLOR_BUFFER_BIT);
