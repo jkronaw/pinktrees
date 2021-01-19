@@ -98,6 +98,16 @@ namespace engine
 		return meshes;
 	}
 
+	std::vector<Material*> Model::getMaterials()
+	{
+		std::vector<Material*> materialsVec;
+		for (std::pair<int, Material*> pair : materials)
+		{
+			materialsVec.push_back(pair.second);
+		}
+		return materialsVec;
+	}
+
 	void Model::draw(ShaderProgram* program) const
 	{
 		for (Mesh* mesh : meshes)
