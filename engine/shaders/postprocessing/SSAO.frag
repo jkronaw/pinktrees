@@ -86,7 +86,12 @@ void main()
         
         // add to occlusion if geometry detected
         float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPos.z - offsetPosition.z));
-        occlusion += (offsetPosition.z >= samplePos.z + bias ? 1.0 : 0.0) *rangeCheck * (add ? 1 : 0);  
+
+        occlusion += (offsetPosition.z >= samplePos.z + bias ? 1.0 : 0.0) 
+                     * rangeCheck 
+                     * (add ? 1 : 0)
+                     * (offset.x < 0 || offset.x > 1 ? 0 : 1)				// if texture coordinate is outside of texture
+					 * (offset.y < 0 || offset.y > 1 ? 0 : 1);  
         
     }
     // account for misses (background samples)
