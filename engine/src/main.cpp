@@ -149,36 +149,68 @@ class MyApp : public App
 		models[4] = new Model("assets/models/tree/tree.obj");
 		models[5] = new Model("assets/models/ground/ground.obj");
 
-		lights.push_back(Light(Vector3(2.f, 3.f, 2.f), Vector3(1.f, 1.f, 1.f), 15.f));
-		lights.push_back(Light(Vector3(-2.f, 3.f, -2.f), Vector3(1.f, 1.f, 1.f), 15.f));
-
 		SceneNode* root = sceneGraph->getRoot();
 		root->setDrawable(models[5]); // assign ground to root
 
-		SceneNode* tree1 = root->createNode();
-		tree1->setDrawable(models[4]);
-		tree1->setMatrix(Matrix4::CreateTranslation(-7, 0, 12));
-		SceneNode* tree2 = root->createNode();
-		tree2->setDrawable(models[4]);
-		tree2->setMatrix(Matrix4::CreateTranslation(-5, 0, -9));
-		SceneNode* tree3 = root->createNode();
-		tree3->setDrawable(models[4]);
-		tree3->setMatrix(Matrix4::CreateTranslation(7, 0, 16));
-		SceneNode* tree4 = root->createNode();
-		tree4->setDrawable(models[4]);
-		tree4->setMatrix(Matrix4::CreateTranslation(5.123, 0, -3.456));
-		SceneNode* tree5 = root->createNode();
-		tree5->setDrawable(models[4]);
-		tree5->setMatrix(Matrix4::CreateTranslation(-20, 0, -15));
-		SceneNode* tree6 = root->createNode();
-		tree6->setDrawable(models[4]);
-		tree6->setMatrix(Matrix4::CreateTranslation(-18, 0, 10));
-		SceneNode* tree7 = root->createNode();
-		tree7->setDrawable(models[4]);
-		tree7->setMatrix(Matrix4::CreateTranslation(15, 0, 13));
-		SceneNode* tree8 = root->createNode();
-		tree8->setDrawable(models[4]);
-		tree8->setMatrix(Matrix4::CreateTranslation(17, 0, -12));
+		// behind camera, to the left
+		lights.push_back(Light(Vector3(-20, 4.f, 18.f), Vector3(1.f, 0.6f, 0.2f), 40.f));
+
+		// three lights above water
+		lights.push_back(Light(Vector3(20, 2, 8.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
+		lights.push_back(Light(Vector3(17, 2, 10.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
+		lights.push_back(Light(Vector3(20, 2, 12.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
+
+		// randomly distributed
+		lights.push_back(Light(Vector3(20, 2, -22.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
+		lights.push_back(Light(Vector3(-5, 2, -7.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
+		lights.push_back(Light(Vector3(-10, 2, 17.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
+		lights.push_back(Light(Vector3(0, 2, -16.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
+		lights.push_back(Light(Vector3(9, 2, 2.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
+		lights.push_back(Light(Vector3(-19, 2, 5.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
+		lights.push_back(Light(Vector3(1, 2, 9.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
+		lights.push_back(Light(Vector3(16, 2, -12.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
+
+
+		const std::vector<Vector3> treeLocations = {
+			// back row
+			Vector3(-24, 2, -24),
+			Vector3(-23, 1, -16),
+			Vector3(-20, 1, -19),
+			Vector3(-15, 0.5, -23),
+			Vector3(-10, 1, -22),
+			Vector3(-5, 1, -24),
+			Vector3(7, 0, -24),
+			Vector3(18, 0, -24),
+			Vector3(24, 1, -24),
+
+			// in front of camera
+			Vector3(8, 0, -15),
+			Vector3(-10, 0, -15),
+
+			// left side of map
+			Vector3(-23, 0.5, -9),
+			Vector3(-24, 0, -6),
+			Vector3(-24, 0, 0),
+
+			// left behind camera
+			Vector3(-24, 0, 24),
+			Vector3(-22, 0, 16),
+			Vector3(-18, 0, 23),
+			
+			// single tree
+			Vector3(5, 0, 15),
+
+			// right behind camera
+			Vector3(24, 0, 24),
+			Vector3(18, 0, 23)
+		};
+
+		for (int i = 0; i < treeLocations.size(); i++)
+		{
+			SceneNode* tree = root->createNode();
+			tree->setDrawable(models[4]);
+			tree->setMatrix(Matrix4::CreateTranslation(treeLocations.at(i)) * Matrix4::CreateRotationY(i));
+		}
 
 		SceneNode* lantern = root->createNode();
 		lantern->setDrawable(models[0]);
@@ -202,7 +234,7 @@ class MyApp : public App
 			allMaterials.insert(allMaterials.end(), materials.begin(), materials.end());
 		}
 
-		camera->lookAt(Vector3(0, 2, 8), Vector3(0, 2, 0));
+		camera->lookAt(Vector3(0, 4, 9), Vector3(0, 2, 0));
 
 		updateProjection();
 
@@ -670,7 +702,7 @@ class MyApp : public App
 			// direct lighting
 			ImGui::TextColored(accentColor, "Direct Lighting:");
 			static int selectedLight = 0;
-			ImGui::DragFloat3("Light Position", (float*)&lights[selectedLight].position, 0.1f, -15.f, 15.f);
+			ImGui::DragFloat3("Light Position", (float*)&lights[selectedLight].position, 0.2f, -25.f, 25.f);
 			ImGui::ColorEdit3("Color", (float*)&lights[selectedLight].color);
 			ImGui::DragFloat("Brightness", (float*)&lights[selectedLight].brightness, 0.1f, 0.f, 100.f);
 

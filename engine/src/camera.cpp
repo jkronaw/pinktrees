@@ -33,7 +33,7 @@ namespace engine
 		Matrix4 matrix = Matrix4::CreateLookAt(eye, center, up);
 
 		Vector3 view = center - eye;
-		pitch = atan(view.y);
+		pitch = atan(view.y / sqrt(view.x * view.x + view.z * view.z));
 		yaw = atan2(view.z, view.x);
 		position = eye;
 	}
