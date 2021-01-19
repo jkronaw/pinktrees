@@ -206,8 +206,7 @@ class MyApp : public App
 
 		updateProjection();
 
-		//skybox->loadCubemapFromDiskSingleFiles("assets/cubemaps/palermo");
-		skybox->loadCubemapFromDiskHDR("assets/hdris/kiaradawn4k.hdr");
+		skybox->loadCubemapFromDiskHDR("assets/hdris/dikhololo_night_2k.hdr");
 		environmentMap = skybox->getCubemap();
 
 		irradianceMap = new TextureCubemap();
