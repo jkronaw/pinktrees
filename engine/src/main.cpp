@@ -283,17 +283,17 @@ class MyApp : public App
 			bloomProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/bloom_blend.frag");
 			bloomProgram->link();
 
-			//reflectionsProgram = new ShaderProgram();
-			//reflectionsProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/SSR.frag");
-			//reflectionsProgram->link();
-			//reflectionsProgram->use();
-			//reflectionsProgram->setUniform("gPosition", 0);
-			//reflectionsProgram->setUniform("gNormal", 1);
-			//reflectionsProgram->setUniform("gShaded", 2);
-			//reflectionsProgram->setUniform("gBlur", 3);
-			//reflectionsProgram->setUniform("gMetallicRoughnessAO", 4);
-			//reflectionsProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
-			//reflectionsProgram->unuse();
+			reflectionsProgram = new ShaderProgram();
+			reflectionsProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/SSR.frag");
+			reflectionsProgram->link();
+			reflectionsProgram->use();
+			reflectionsProgram->setUniform("gPosition", 0);
+			reflectionsProgram->setUniform("gNormal", 1);
+			reflectionsProgram->setUniform("gShaded", 2);
+			reflectionsProgram->setUniform("gBlur", 3);
+			reflectionsProgram->setUniform("gMetallicRoughnessAO", 4);
+			reflectionsProgram->setUniformBlockBinding("SharedMatrices", camera->getUboBP());
+			reflectionsProgram->unuse();
 
 			fastBoxBlurProgram = new ShaderProgram();
 			fastBoxBlurProgram->init("shaders/general/quad2D.vert", "shaders/postprocessing/blur_fastBox.frag");
