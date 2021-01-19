@@ -171,6 +171,12 @@ class MyApp : public App
 		lights.push_back(Light(Vector3(1, 2, 9.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
 		lights.push_back(Light(Vector3(16, 2, -12.f), Vector3(1.f, 0.6f, 0.2f), 15.f));
 
+		// in trees
+		lights.push_back(Light(Vector3(-12.4, 5.2, -19.8f), Vector3(1.f, 0.6f, 0.2f), 50.0));
+		lights.push_back(Light(Vector3(21.2, 3.6, 23.2), Vector3(1.f, 0.6f, 0.2f), 50.0));
+		lights.push_back(Light(Vector3(-22.6, 1.8, -2.6f), Vector3(1.f, 0.6f, 0.2f), 40.0));
+		lights.push_back(Light(Vector3(1.6, 3.8, 0.0), Vector3(1.f, 0.6f, 0.2f), 20.0));
+
 
 		const std::vector<Vector3> treeLocations = {
 			// back row
