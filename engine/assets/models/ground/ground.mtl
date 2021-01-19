@@ -23,3 +23,17 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
+
+newmtl RoadMaterial
+Ns 0.9
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.0 0.0 0.0
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd road_albedo.jpg
+map_Bump road_normal.jpg
+map_Ka road_ao.jpg
+map_Ns road_roughness.jpg 
