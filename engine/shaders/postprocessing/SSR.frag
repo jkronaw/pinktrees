@@ -48,7 +48,7 @@ void main() {
 	
 	bool range = (length(fragPos.xyz - viewPos) <= 50);
 
-	if (fragPos.x != 0 && fragPos.y != 0 && fragPos.z != 0 && range){
+	if (fragPos.x != 0 && fragPos.y != 0 && fragPos.z != 0 && metallic == 1.0 && range){
 
 		vec3 fragN = normalize(texture(gNormal, exTexcoord).rgb);
 	
