@@ -374,7 +374,7 @@ class MyApp : public App
 		glBindFramebuffer(GL_FRAMEBUFFER, gbuffer.fbo);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		sceneGraph->getRoot()->setShaderProgram(geoProgram);
+		//sceneGraph->getRoot()->setShaderProgram(geoProgram);
 		sceneGraph->draw();
 
 		// debug view of geometry buffer
