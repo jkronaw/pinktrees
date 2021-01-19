@@ -1,0 +1,25 @@
+# Blender MTL File: 'Pinktrees_Sceneblend.blend'
+# Material Count: 2
+
+newmtl Material.001
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.145455 0.145455 0.145455
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump normal.jpg
+map_Kd albedo.jpg
+map_Ns roughness.jpg
+map_Ka ao.jpg
+map_Ks metallic.jpg
+
+newmtl None
+Ns 1.0
+Ka 0.8 0.8 0.8
+Kd 0.8 0.8 0.8
+Ks 1.0 0.8 0.8
+d 1
+illum 2

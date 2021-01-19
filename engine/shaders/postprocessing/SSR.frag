@@ -38,8 +38,17 @@ void main() {
 	vec4 finalLookupFragPositionView;
 	vec4 finalLookupFragPositionWs;
 	
+	
+	float roughness = texture(gMetallicRoughnessAO, exTexcoord).g;
+	
+	float metallic = texture(gMetallicRoughnessAO, exTexcoord).r;
+
 	vec4 fragPos = texture(gPosition, exTexcoord);
-	if (fragPos.x != 0 && fragPos.y != 0 && fragPos.z != 0){
+	
+	
+	bool range = (length(fragPos.xyz - viewPos) <= 50);
+
+	if (fragPos.x != 0 && fragPos.y != 0 && fragPos.z != 0 && metallic == 1.0 && range){
 
 		vec3 fragN = normalize(texture(gNormal, exTexcoord).rgb);
 	
@@ -98,12 +107,14 @@ void main() {
 			nextSearchStep = mix((lookupFrag.y - reflectionRayStart.y) / deltaY, 
 						  (lookupFrag.x - reflectionRayStart.x) / deltaX,
 						  useDeltaX);
-		
+			
 			nextSearchStep = clamp(nextSearchStep, 0, 1);
 
 			viewDistance = -(reflectionRayStartView.z * (reflectionRayEndView.z)) / mix(reflectionRayEndView.z, reflectionRayStartView.z, nextSearchStep);
 		
 			depthDiff = (viewDistance) - (-lookupFragPositionView.z);
+			if (lookupFragPositionWs.r == 0 && lookupFragPositionWs.g == 0)
+				depthDiff = 99999999;
 	
 			if (depthDiff > 0 && depthDiff < tolerance){
 				firstPassHit = 1;
@@ -147,19 +158,18 @@ void main() {
 			finalLookupFragPositionWs = lookupFragPositionWs;
 		}
 
-		float metallic = texture(gMetallicRoughnessAO, exTexcoord).r;
-		
 		vec2 dCoords = smoothstep(0.2, 0.6, abs(vec2(0.5, 0.5) - texPos.xy));
 		float screenEdgefactor = clamp(1.0 - (dCoords.x + dCoords.y), 0.0, 1.0);
 		
 		float angle = dot(reflectionRay, texture(gNormal,texPos.xy).rgb);
 
-		visibility = ((secondPassHit == 1 || firstPassHit == 1) ? 1 : 0)	// check if any geometry has been hit
+		visibility =((secondPassHit == 1 || firstPassHit == 1) ? 1 : 0)	// check if any geometry has been hit
 					* finalLookupFragPositionWs.w							// discard background reflections
+					* finalLookupPos
 					* fragPos.r == 0 ? 0 : 1								// discard ray reflected from background
 					* (1 - max(angle >= 0 ? 1 : angle , 0))					// discard ray that hit geometry from the inside
 					* (1 - max(dot(-viewDir, reflectionRay), 0))			// if we look at the geometry from behind
-					* (1 - clamp(depthDiff / tolerance * 0.5, 0, 1))		// if we did not hit exactly
+					* (1 - clamp(depthDiff / tolerance, 0, 1))		// if we did not hit exactly
 					* (1 - clamp(length(finalLookupFragPositionView - reflectionRayStartView) / maxRayDistance, 0, 1)) // fade out reflection strength depending on travelled ray distance
 					* (texPos.x < 0 || texPos.x > 1 ? 0 : 1)				// if texture coordinate is outside of texture
 					* (texPos.y < 0 || texPos.y > 1 ? 0 : 1)
@@ -171,7 +181,6 @@ void main() {
 	}
 
 	
-	float roughness = texture(gMetallicRoughnessAO, exTexcoord).g;
 	vec4 baseColor = texture(gShaded, exTexcoord);
 	vec4 reflectionColorBlur = texture(gBlur, finalLookupPos.xy); 
 	vec4 reflectionColor = texture(gShaded, finalLookupPos.xy);

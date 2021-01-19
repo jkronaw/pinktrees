@@ -29,7 +29,7 @@ uniform sampler2D   brdfLUT;
 
 const float PI = 3.14159265359;
 
-uniform int useSsao;
+uniform bool useSsao;
 
 // normal distribution function
 float trowbridgeReitzGGX(vec3 N, vec3 H, float roughness)
@@ -87,7 +87,11 @@ void main()
     float metallic = texture(gMetallicRoughnessAO, exTexcoord).r;
     float roughness = texture(gMetallicRoughnessAO, exTexcoord).g;
     float ao = texture(gMetallicRoughnessAO, exTexcoord).b;
-    ao = ao * (useSsao == 1 ? texture(gSsao, exTexcoord).r : 1);
+
+    if (useSsao)
+    {
+        ao *= texture(gSsao, exTexcoord).r;
+    }
 
     // gamma correct albedo to get into linear space
     albedo = pow(albedo, vec3(2.2));
