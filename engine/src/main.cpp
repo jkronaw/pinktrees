@@ -51,6 +51,7 @@ class MyApp : public App
 	int stepIterations = 400;
 	float tolerance = 0.2f;
 
+	int ambientSamples = 32;
 	float ambientRadius = 0.5f;
 	float ambientBias = 0.025f;
 
@@ -426,6 +427,7 @@ class MyApp : public App
 				ssaoProgram->setUniform("viewPos", translation);
 				ssaoProgram->setUniform("radius", ambientRadius);
 				ssaoProgram->setUniform("bias", ambientBias);
+				ssaoProgram->setUniform("kernelSize", ambientSamples);
 				quad->draw();
 				ssaoProgram->unuse();
 
@@ -631,6 +633,8 @@ class MyApp : public App
 			ImGui::Checkbox("Enable Reflections", &useSsr);
 			ImGui::Checkbox("Enable Ambient Occlusion", &useSsao);
 
+
+			ImGui::SliderInt("SSAO #Samples", &ambientSamples, 1, 64);
 			ImGui::SliderFloat("SSAO Radius", &ambientRadius, 0.1f, 1.0f);
 			ImGui::SliderFloat("SSAO Bias", &ambientBias, 0.01f, 0.05f);
 

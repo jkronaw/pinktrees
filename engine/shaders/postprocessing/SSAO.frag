@@ -21,7 +21,7 @@ uniform vec3 viewPos;
 uniform float radius;
 uniform float bias;
 
-int kernelSize = 64;
+uniform int kernelSize;
 
 void main()
 {   
@@ -82,7 +82,6 @@ void main()
             add = false;
             rejectedSamples++;
         }
-
         
         // add to occlusion if geometry detected
         float rangeCheck = smoothstep(0.0, 1.0, radius / abs(fragPos.z - offsetPosition.z));
