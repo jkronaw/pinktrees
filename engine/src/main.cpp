@@ -250,8 +250,7 @@ class MyApp : public App
 			lightProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
 			lightProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
 			lightProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
-			lightProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
-			lightProgram->setUniform("gSsao", GBuffer::GB_TEXCOORD + 1);
+			lightProgram->setUniform("gSsao", GBuffer::GB_NUMBER_OF_TEXTURES);
 			irradianceMapInfo->updateShader(lightProgram);
 			prefilterMapInfo->updateShader(lightProgram);
 			brdfLUTinfo->updateShader(lightProgram);
@@ -268,7 +267,6 @@ class MyApp : public App
 			dofProgram->setUniform("gAlbedo", GBuffer::GB_ALBEDO);
 			dofProgram->setUniform("gNormal", GBuffer::GB_NORMAL);
 			dofProgram->setUniform("gMetallicRoughnessAO", GBuffer::GB_METALLIC_ROUGHNESS_AO);
-			dofProgram->setUniform("gTexCoord", GBuffer::GB_TEXCOORD);
 			dofProgram->setUniform("gBloom", GBuffer::GB_NUMBER_OF_TEXTURES);
 			dofProgram->unuse();
 

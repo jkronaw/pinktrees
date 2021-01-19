@@ -10,7 +10,6 @@ uniform sampler2D gPosition;
 uniform sampler2D gAlbedo;
 uniform sampler2D gNormal;
 uniform sampler2D gMetallicRoughnessAO;
-uniform sampler2D gTexCoord;
 uniform sampler2D gSsao;
 
 uniform vec2 gScreenSize;

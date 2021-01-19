@@ -49,7 +49,4 @@ void main()
     // normal image
     vec3 normalTemp = useNormalTex ? texture(texNormal, texcoord).rgb * 2.0 - 1.0 : normal; // map into range [-1, 1]
     NormalOut = normalize(exTBN * normalTemp);
-
-    // texcoord image
-    TexcoordOut = vec3(texcoord, 0.0);
 }
