@@ -629,23 +629,26 @@ class MyApp : public App
 			// material properties (only applies to debug objects)
 			ImGui::TextColored(accentColor, "Material Properties");
 			
-			ImGui::SliderInt("Selected material ID", &selectedMaterial, 0, allMaterials.size() - 1);
+			ImGui::SliderInt("Material ID", &selectedMaterial, 0, allMaterials.size() - 1);
+
 			Material* material = allMaterials[selectedMaterial];
 
-			ImGui::Checkbox("Use albedo from texture", &material->useAlbedoMap);
-			if (!material->useAlbedoMap) ImGui::ColorEdit3("Albedo", (float*)&material->albedo);
+			ImGui::Text("Material Name: %s", material->name.c_str());
 
-			ImGui::Checkbox("Use normals from texture", &material->useNormalMap);
-			if (!material->useNormalMap) ImGui::DragFloat3("Normal", (float*)&material->normal, 0.1f, -1.f, 1.f);
+			if (material->albedoMap) ImGui::Checkbox("Use albedo from texture", &material->useAlbedoMap);
+			if (!material->useAlbedoMap || !material->albedoMap) ImGui::ColorEdit3("Albedo", (float*)&material->albedo);
 
-			ImGui::Checkbox("Use metallic from texture", &material->useMetallicMap);
-			if (!material->useMetallicMap) ImGui::SliderFloat("Metallic", &material->metallic, 0.0f, 1.0f);
+			if (material->normalMap) ImGui::Checkbox("Use normals from texture", &material->useNormalMap);
+			if (!material->useNormalMap || !material->normalMap) ImGui::DragFloat3("Normal", (float*)&material->normal, 0.1f, -1.f, 1.f);
 
-			ImGui::Checkbox("Use roughness from texture", &material->useRoughnessMap);
-			if (!material->useRoughnessMap) ImGui::SliderFloat("Roughness", &material->roughness, 0.0f, 1.0f);
+			if (material->metallicMap) ImGui::Checkbox("Use metallic from texture", &material->useMetallicMap);
+			if (!material->useMetallicMap || !material->metallicMap) ImGui::SliderFloat("Metallic", &material->metallic, 0.0f, 1.0f);
 
-			ImGui::Checkbox("Use ambient occlusion from texture", &material->useAoMap);
-			if (!material->useAoMap) ImGui::SliderFloat("AO", &material->ao, 0.0f, 1.0f);
+			if (material->roughnessMap) ImGui::Checkbox("Use roughness from texture", &material->useRoughnessMap);
+			if (!material->useRoughnessMap || !material->roughnessMap) ImGui::SliderFloat("Roughness", &material->roughness, 0.0f, 1.0f);
+
+			if (material->aoMap) ImGui::Checkbox("Use ambient occlusion from texture", &material->useAoMap);
+			if (!material->useAoMap || !material->aoMap) ImGui::SliderFloat("AO", &material->ao, 0.0f, 1.0f);
 
 			// indirect lighting section
 			ImGui::TextColored(accentColor, "Indirect lighting");

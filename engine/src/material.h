@@ -25,6 +25,8 @@ namespace engine
 		bool useRoughnessMap = true;
 		bool useAoMap = true;
 
+		std::string name = "unnamed";
+
 		Material() = default;
 		Material(Texture2D* albedoMap, Texture2D* normalMap, Texture2D* roughnessMap, Texture2D* metallicMap, Texture2D* aoMap);
 		~Material() = default;

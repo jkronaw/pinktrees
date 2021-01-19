@@ -60,6 +60,8 @@ namespace engine
 				}
 			}
 
+			mat->name = material->GetName().C_Str();
+
 			// Load Material values
 			aiColor3D color(0.f, 0.f, 0.f);
 
