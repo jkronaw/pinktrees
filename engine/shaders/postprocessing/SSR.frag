@@ -186,7 +186,7 @@ void main() {
 		// calculate cos of angle between rflection and normal of hit geometry
 		float angle = dot(reflectionRay, texture(gNormal,texPos.xy).rgb);
 
-		visibility =((secondPassHit == 1 || firstPassHit == 1) ? 1 : 0)		// check if any geometry has been hit
+		visibility =((secondPassHit == 1) ? 1 : 0)		// check if any geometry has been hit
 					* finalLookupFragPositionWs.w							// discard background reflections
 					* fragPos.r == 0 ? 0 : 1								// discard ray reflected from background
 					* (1 - max(angle >= 0 ? 1 : angle , 0))					// discard ray that hit geometry from the inside

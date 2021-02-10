@@ -25,7 +25,7 @@ layout (shared) uniform SharedMatrices
 
 // functions to generate pseudo random numbers: Found on http://www.reedbeta.com/blog/quick-and-easy-gpu-random-numbers-in-d3d11/
 
-uint wang_hash(uint n)
+uint wangHash(uint n)
 {
 	n  = (n ^ 61u) ^ (n >> 16u);
 	n *= 9u;
@@ -35,7 +35,7 @@ uint wang_hash(uint n)
 	return n;
 }
 
-uint xor_shift(inout uint state)
+uint xorShift(inout uint state)
 {
 	state ^= (state << 13u);
 	state ^= (state >> 17u);
@@ -44,25 +44,27 @@ uint xor_shift(inout uint state)
 }
 
 // inout to change state after every sample
-float random_float(inout uint state)
+float randomFloat(inout uint state)
 {
-	uint value = xor_shift(state);
+	uint value = xorShift(state);
+
+	//account for float precision 
 	return float(value & 0x00ffffffu) / float(0x01000000u);
 }
 
-vec2 sample_disc(inout uint state)
+vec2 sampleDisc(inout uint seed)
 {
-	float radius = sqrt(random_float(state));
-	float angle  = random_float(state) * 2.0 * 3.141592654;
+	float radius = sqrt(randomFloat(seed));
+	float angle  = randomFloat(seed) * 2.0 * 3.141592654;
 
-	return radius * vec2( cos( angle ), sin( angle ) );
+	return radius * vec2(cos(angle), sin(angle));
 }
 
 // random seed generator
-uint init_rng()
+uint initializeSeed()
 {
-	uint pixelID = uint(gl_FragCoord.x) + 2048u * uint(gl_FragCoord.y);
-	uint seed = wang_hash(pixelID * 32u + uint(23456) % 32u);
+	uint id = uint(gl_FragCoord.x) + 2048u * uint(gl_FragCoord.y);
+	uint seed = wangHash(id);
 	return seed;
 }
 
@@ -77,7 +79,7 @@ void main()
 	// With DOF:
 	if(useDOF){
 
-		uint state = init_rng();
+		uint seed = initializeSeed();
 
 		// retrieve fragment properties
 		vec3 position = texture(gPosition, exTexcoord).rgb;
@@ -87,45 +89,45 @@ void main()
 		float z = (ViewMatrix * vec4(position ,1.0)).z;
 		
 		// calculate difference to focal depth
-		float depth_diff = abs(z - focalDepth);
+		float depthDiff = abs(z - focalDepth);
 
 		// set difference for background framgent manually
 		if(position == vec3(0,0,0) || (normal == vec3(0,0,0))){
-			depth_diff = abs(50 - focalDepth);
+			depthDiff = abs(50 - focalDepth);
 			z = 999999999;
 		}
 
 		// calculate sample radius
-		float disc_radius = depth_diff * 0.00009;
+		float discRadius = depthDiff * 0.00009;
 
-		vec4 color_sum = vec4(0.0);
-		float num_valid = 0;
+		vec4 accumulatedColor = vec4(0.0);
+		float validSamples = 0;
 		
 		for(int i = 0; i < dofSamples; i++){
 			
 			// sample a direction according to radis of confusion
-			vec2 sample_pos = sample_disc(state);
-			sample_pos = sample_pos * disc_radius;
+			vec2 samplePos = sampleDisc(seed);
+			samplePos = samplePos * discRadius;
 
 			// get distance to geometry at sampled coordinate
-			vec3 sample_pos_ws = texture(gPosition, exTexcoord + sample_pos).rgb;
-			float sample_z = (ViewMatrix * vec4(sample_pos_ws, 1.0)).z;
+			vec3 samplePosWs = texture(gPosition, exTexcoord + samplePos).rgb;
+			float samplePosVsZ = (ViewMatrix * vec4(samplePosWs, 1.0)).z;
 
 			// manually set value for background
-			if(sample_pos_ws == vec3(0,0,0)){
-				sample_z = 999999999;
+			if(samplePosWs == vec3(0,0,0)){
+				samplePosVsZ = 999999999;
 			}
 
 			// only accumulate color of fragments that are behind center fragment (+ tolerance)
-			if (z <= sample_z + 100){
-				vec4 sample_color = vec4(texture(gBloom, exTexcoord + sample_pos).rgb , 1.0);
+			if (z <= samplePosVsZ + 100){
+				vec4 sampleColor = vec4(texture(gBloom, exTexcoord + samplePos).rgb , 1.0);
 				
-				color_sum += sample_color;
-				num_valid++;
+				accumulatedColor += sampleColor;
+				validSamples++;
 			}
 		}
 
 		// normalize
-		FragmentColor = color_sum / num_valid;
+		FragmentColor = accumulatedColor / validSamples;
 	}
 }

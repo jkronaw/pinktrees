@@ -24,7 +24,7 @@ namespace engine {
 
 		void setBufferToRead(GB_TEX_TYPE texType);
 
-		GLuint fbo;;
+		GLuint fbo;
 		GLuint texture[GB_NUMBER_OF_TEXTURES];
 		GLuint depthTexture;
 	};
